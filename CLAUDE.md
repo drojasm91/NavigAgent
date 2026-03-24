@@ -14,7 +14,7 @@ NavigAgent is **not** a learning app, a news aggregator, or an RSS reader. It is
 
 **Naming convention — critical:**
 - **User-agents** — configurations created by users that define a topic, type, and cadence. These are the "agents" users interact with in the UI.
-- **System-agents** — the AI pipeline components that do the actual work (Planner, Researcher, Writer, Editor, Relevance Checker). These are internal and never exposed to users by name.
+- **System-agents** — the two AI pipeline steps: Researcher and Writer. Internal only, never exposed to users.
 
 **Current stage:** MVP — private beta for founder and a small group of friends.
 
@@ -24,49 +24,43 @@ NavigAgent is **not** a learning app, a news aggregator, or an RSS reader. It is
 
 Use these terms consistently everywhere — in code, comments, database columns, UI copy, and prompts.
 
-**User-agent** — a configuration created by a user defining a topic, type, tone preferences, and cadence. User-agents generate posts on a schedule. They are not posts. They are not feeds. User-agent names are always AI-generated based on the context provided — users cannot name or rename them. Names should reflect the specific angle of that user-agent, not just the broad topic (e.g. "The Southeast Asia Lens" not "Geopolitics News").
+**User-agent** — a configuration created by a user defining a topic, type, tone preferences, and cadence. Generates posts on a schedule. Not a post. Not a feed. Names are always AI-generated — users cannot name or rename them. Names reflect the specific angle (e.g. "The Southeast Asia Lens" not "Geopolitics News").
 
-**System-agent** — an AI pipeline component that executes a specific task within the orchestrator (e.g. Planner, Researcher, Writer, Editor, Relevance Checker). System-agents are internal infrastructure. Users never see or interact with them by name.
+**System-agent** — one of the two pipeline steps: Researcher or Writer. Internal infrastructure. Users never see these.
 
-**User-agent type** — the category that determines which pipeline a user-agent uses and how its content is displayed. Current types: `news`, `learning`, `recommendation`. Each type has a different pipeline, writing style, and UI behavior.
+**User-agent type** — determines which pipeline runs and how content is displayed. Types: `news`, `learning`, `recommendation`.
 
-**Post** — a single piece of AI-generated content produced by a user-agent. For `news` and `learning` types, a post is a **thread** of sub-posts. For `recommendation` type, a post is a single card.
+**Post** — a single piece of AI-generated content. For `news` and `learning` types: a thread of sub-posts. For `recommendation`: a single card. Every post has a `language` field matching the subscriber's language preference.
 
-**Thread** — a structured sequence of sub-posts belonging to a single post. Applies only to `news` and `learning` user-agent types. The first sub-post is the hook shown in the feed. The rest are revealed when the user taps the post and the bottom sheet opens. Minimum 3 sub-posts, maximum 10 — the Writer system-agent decides based on content complexity.
+**Thread** — a structured sequence of sub-posts. Min 3, max 10 — Writer decides based on complexity. First sub-post is the hook shown in the feed.
 
-**Sub-post** — a single unit within a thread. Maximum 280 characters. Each sub-post must pull the reader to the next. The final sub-post closes the hook and leaves one thread of curiosity open.
+**Sub-post** — a single unit within a thread. Max 280 characters. Each must pull the reader to the next.
 
-**Bottom Sheet** — the UI component that slides up from the bottom of the screen when a user taps a post card. Contains the full thread. User scrolls through sub-posts inside the sheet. The last sub-post of a feed post shows the "Dig In" button. Dismissing returns to the exact position in the feed.
+**Bottom Sheet** — slides up when a post card is tapped. User scrolls through sub-posts. Last sub-post of a feed post shows "Dig In." Dismissing returns to exact feed position.
 
-**Feed** — the main screen. Shows post cards from the user's followed user-agents and community recommendations. Tapping a card opens the bottom sheet. Ordered by user-agent priority and freshness.
+**Feed** — main screen. Post cards from followed user-agents and community recommendations. Tapping opens the bottom sheet.
 
-**Dig In** — the button shown on the last sub-post of a thread in the main feed bottom sheet. Tapping it navigates to the rabbit hole page for that user-agent. Also shown on community posts within a rabbit hole, navigating to that community user-agent's rabbit hole page.
+**Dig In** — button on last sub-post of a thread in the feed. Takes user to the rabbit hole page for that user-agent.
 
-**Rabbit Hole** — a dedicated page filtered to a single user-agent's content. Same UI as the main feed but scoped to one user-agent. Sorted by curriculum order for learning user-agents, newest first (last 14 days by default, "load older posts" at bottom) for news user-agents. Includes a small number of closely related community posts clearly labeled. Posts expand via the same bottom sheet mechanic. The last sub-post of the user-agent's own posts within the rabbit hole has no "Dig In" button. Community posts within the rabbit hole DO have a "Dig In" button.
+**Rabbit Hole** — dedicated page filtered to one user-agent's content. Same UI as feed but scoped. Curriculum order for learning, newest-first (last 14 days) for news.
 
-**Curriculum** — the ordered sequence of posts generated by a learning user-agent. Each post has a `curriculum_position` integer defining its place in the sequence.
+**Curriculum** — ordered sequence of posts for a learning user-agent. Each post has a `curriculum_position`.
 
-**Curriculum Pointer** — a per-user, per-learning-user-agent integer tracking which post the user is currently up to. Advances by 1 each time the user reads a post in passive feed mode or actively in the rabbit hole.
+**Curriculum Pointer** — per-user, per-learning-agent integer tracking current position. Advances by 1 each time a post is read.
 
-**Curriculum Buffer** — the system always generates posts 5 ahead of the furthest curriculum pointer among all subscribers. When a user reaches the end of the buffer, show "You're all caught up — next lesson coming soon."
+**Curriculum Buffer** — always generate 5 posts ahead of the furthest pointer. Show "You're all caught up — next lesson coming soon" at buffer end.
 
-**Passive Mode** — the default feed experience. The feed drips one post per user-agent per cadence cycle. Comfortable, habit-forming, low friction.
+**Community Feed** — posts from other users' public user-agents when user has fewer than 5 unread posts from their own agents.
 
-**Community Feed** — posts surfaced from other users' public user-agents when a user's own feed runs low (fewer than 5 unread posts from their own user-agents). Community posts are visually distinct with a clear label showing the user-agent name and topic.
+**Like Signal** — user engagement action feeding the personalization loop. Types: `like`, `skip`, `read_full`, `asked_question`, `rabbit_hole_entered`.
 
-**Like Signal** — a user engagement action that feeds into the personalization loop. Signal types: `like`, `skip`, `read_full`, `asked_question`, `rabbit_hole_entered`.
+**Personalization Loop** — weekly process reading like signals and updating each user-agent's `prompt_config`.
 
-**Personalization Loop** — the weekly background process (Layer 3) that reads like signals per user per user-agent and updates each user-agent's `prompt_config` to improve future content quality.
+**Pipeline** — two-step sequence per job. Step 1: Research & Plan. Step 2: Write & Self-edit. Learning agents skip Step 1. Every run is completely isolated — no shared state.
 
-**Pipeline** — the sequence of system-agents that execute when a user-agent job is triggered. Each user-agent type has its own pipeline. Every pipeline runs independently — there is no shared research cache or cluster system in MVP.
+**Duplicate Detection** — simple DB query on creation. Checks if similar public user-agent exists and suggests following instead.
 
-**Duplicate Detection** — a simple database query that runs when a user tries to create a new user-agent. Checks if a very similar public user-agent already exists and suggests following it instead. No AI required — pure database query on topic tags and type.
-
-**Relevance Override** — a flag produced by the Relevance Checker system-agent that instructs the Planner to cover a topic even if recently covered, because a breaking event justifies it.
-
-**User-agent Profile Page** — a public page for any user-agent showing its identity, activity dashboard, topic intelligence, most liked posts, and follow options.
-
-**Tier** — the user's subscription level. Currently: `beta` for all MVP users.
+**Multilingual Posts** — language lives on `user_agent_subscriptions`. Same agent serves English to one subscriber and Spanish to another. Writer generates natively — never translates.
 
 ---
 
@@ -76,82 +70,70 @@ Use these terms consistently everywhere — in code, comments, database columns,
 - Next.js 14 (App Router)
 - Tailwind CSS
 - Shadcn/ui for base components
-- Mobile-first layout — narrow columns, large touch targets, no hover-dependent interactions
+- Mobile-first layout — large touch targets, no hover-dependent interactions
 
 **Backend**
-- Supabase for database, auth, and real-time
+- Supabase — database, auth, real-time
 - PostgreSQL via Supabase
-- Supabase Edge Functions for lightweight API logic
 - Row Level Security (RLS) enabled on all tables
 
 **Agentic Infrastructure**
-- Trigger.dev for job scheduling, background jobs, and pipeline orchestration
-- Tavily API for real-time web search inside pipelines (news and recommendation types only)
-- Anthropic Claude API for all AI generation:
-  - `claude-sonnet-4-20250514` for all Writer system-agent steps
-  - `claude-haiku-4-5-20251001` for all Planner, Checker, and Editor steps
+- Trigger.dev — job scheduling, background jobs, pipeline orchestration
+- Perplexity API — real-time web research (news and recommendation types only)
+- Anthropic Claude API:
+  - `claude-sonnet-4-20250514` — all Writer steps
+  - `claude-haiku-4-5-20251001` — all Researcher steps
 
 **Deployment**
-- Vercel for Next.js frontend
-- Supabase cloud for database and auth
-- Trigger.dev cloud for background jobs
+- Vercel — Next.js frontend
+- Supabase cloud — database and auth
+- Trigger.dev cloud — background jobs
 
-**Why this stack:** Next.js + Supabase is the most Claude Code-friendly combination available. Trigger.dev is purpose-built for scheduled multi-step AI workflows. The entire backend transfers cleanly when building the React Native mobile app in the future — only the frontend UI layer needs to be rebuilt.
+**Why Trigger.dev over Vercel Cron:**
+Vercel Cron has a 60-second timeout and no job queue. With many users and agents running simultaneously it would require a full rewrite. Trigger.dev handles proper queuing, retries, and parallel execution from day one. Extra setup cost: 30 minutes. Benefit: never rewrite the scheduling layer.
+
+**Why Perplexity over Tavily:**
+Perplexity does search AND synthesis in one API call — returns a researched brief ready to pass to the Writer. Tavily returns raw results requiring a separate Claude synthesis call. Perplexity simplifies Step 1 and produces higher quality research.
 
 ---
 
 ## 4. App Structure & Screens
 
 **/ — Main Feed**
-The core screen. Infinite scroll of post cards from the user's followed user-agents and community recommendations. Tapping a card opens the bottom sheet with the full thread. Community post cards are visually distinct with user-agent name label and Follow/Unfollow button. Bottom tab navigation. When the user has fewer than 5 unread posts from their own user-agents, community posts from related user-agents are automatically appended.
+Infinite scroll of post cards. Tapping opens bottom sheet. Community posts visually distinct with label and Follow/Unfollow button. When fewer than 5 unread posts from own agents, community posts auto-append.
 
 **Bottom Sheet — Thread Reader**
-Slides up from the bottom when any post card is tapped. Contains all sub-posts in sequence. User scrolls through them inside the sheet. Last sub-post of a feed post shows the **"Dig In"** button. Last sub-post of a user-agent's own post within a rabbit hole shows nothing. Last sub-post of a community post within a rabbit hole shows "Dig In." Dismissing returns to the previous position.
+Slides up on tap. Sub-posts scroll inside sheet. Last sub-post of feed post → "Dig In" button. Last sub-post of own post in rabbit hole → nothing. Last sub-post of community post in rabbit hole → "Dig In." Dismissing returns to previous position.
 
-**/rabbit-hole/[agentId] — Rabbit Hole Page**
-Same UI as the main feed but filtered to one user-agent's content. Persistent user-agent identity bar at the top showing AI-generated name and type badge. Sorting: curriculum order for learning user-agents, newest first (last 14 days default, "load older posts" at bottom) for news user-agents. Includes a small number of closely related community posts with clear visual distinction. Posts expand via the same bottom sheet mechanic.
+**/rabbit-hole/[agentId]**
+Same UI as feed, filtered to one agent. Identity bar at top. Curriculum order for learning, newest-first 14 days for news. Community posts with clear visual distinction.
 
 **/agent/[agentId] — User-agent Profile Page**
-Public profile for any user-agent. Contains:
 
-**Identity Section**
-- AI-generated user-agent name and type badge
-- Topic description (the context used to build this user-agent, in plain language)
-- Creator attribution — "Built by @username"
-- Follow / Unfollow button
-- Follower count and total post count
+Identity: AI name, type badge, topic description, creator attribution, Follow/Unfollow, follower count, post count.
 
-**Activity & Health Dashboard**
-- Posts per day — bar chart, last 30 days
-- Follows per day — line chart, last 30 days
-- Average likes per post
-- Reliability score — percentage of scheduled runs completed successfully, last 30 days
-- Last ran — timestamp of last successful run
-- Next run — timestamp of next scheduled run
-- Average pipeline run time
+Dashboard: posts per day (bar chart), follows per day (line chart), avg likes per post, reliability score, last ran, next run, avg pipeline run time.
 
-**Topic Intelligence**
-- Top topics covered in the last 30 days — displayed as tag chips
+Topic Intelligence: top topics last 30 days as tag chips.
 
-**Most Liked Posts**
-- Top 5 highest-liked posts from this user-agent
-- Short vertical list of post cards, each tappable opening the bottom sheet
-- Conversion section — best content designed to make visitors hit Follow
+Most Liked Posts: top 5 tappable post cards — conversion section.
 
-**/agents — My User-agents**
-User's own user-agent management. Shows all active user-agents with last-run time, post count, engagement stats. Add, pause, delete user-agents.
+**/agents** — manage own user-agents (add, pause, delete)
 
-**/agents/new — Create User-agent**
-Steps: (1) Choose type or browse templates → (2) Add context and preferences → (3) Duplicate check runs — if similar public user-agent exists, show suggestion to follow instead → (4) Set cadence → (5) Preview AI-generated name → (6) Activate.
+**/agents/new** — create flow:
+1. Choose type or template
+2. Add context and preferences
+3. Choose language
+4. Duplicate check runs
+5. Set cadence
+6. Preview AI-generated name
+7. Activate
 
-**/discover — Discover**
-Browse community user-agents by category. Sorted by quality score (reliability + avg likes + follower growth). Never a flat alphabetical list. Shows trending, most followed, recently created. One-tap to follow.
+**/discover** — quality-ranked community agents. Never alphabetical.
 
-**/post/[postId]/ask — Ask a Question**
-Conversation screen. User asks follow-up questions about a specific post. Claude API called with full thread context so answers are calibrated to what the user already knows from that thread.
+**/post/[postId]/ask** — ask follow-up questions with full thread context.
 
-**/settings — Settings**
-User preferences, notification settings, tier info, account management.
+**/settings** — preferences, notifications, tier, account.
 
 ---
 
@@ -163,18 +145,18 @@ User preferences, notification settings, tier info, account management.
 - name
 - avatar_url
 - tier (enum: beta, free, paid) default: beta
-- location (text, optional — used for recommendation user-agents)
+- location (text, optional)
 - created_at
 - last_active_at
 
 **user_agents**
 - id (uuid, pk)
 - owner_id (fk → users.id)
-- name (text — always AI-generated, never user-editable)
+- name (text — AI-generated, never user-editable)
 - type (enum: news, learning, recommendation)
-- description (text — user-provided context and preferences)
-- topic_tags (text[] — used for duplicate detection and community feed matching)
-- prompt_config (jsonb — AI-maintained personalization instructions, updated by personalization loop. Never exposed to frontend.)
+- description (text — user-provided context)
+- topic_tags (text[] — for duplicate detection and community matching)
+- prompt_config (jsonb — personalization instructions, never exposed to frontend)
 - cadence (enum: daily, weekly) default: daily
 - cadence_time (time UTC)
 - is_public (boolean)
@@ -186,23 +168,25 @@ User preferences, notification settings, tier info, account management.
 - id (uuid, pk)
 - user_id (fk → users.id)
 - agent_id (fk → user_agents.id)
-- curriculum_pointer (integer default 0 — only meaningful for learning user-agents)
+- language (text, default: 'en') — language this subscriber receives posts in
+- curriculum_pointer (integer default 0 — learning agents only)
 - subscribed_at
 - UNIQUE(user_id, agent_id)
 
 **posts**
 - id (uuid, pk)
 - agent_id (fk → user_agents.id)
+- language (text) — language this post was written in
 - type (enum: thread, card)
-- curriculum_position (integer, nullable — only for learning user-agent posts)
-- metadata (jsonb — sources used, search queries, topics covered)
-- quality_score (float, nullable — set by Editor system-agent)
+- curriculum_position (integer, nullable — learning agents only)
+- metadata (jsonb — sources, research summary, topics covered)
+- quality_score (float, nullable — set by Writer self-edit)
 - created_at
 
 **sub_posts**
 - id (uuid, pk)
 - post_id (fk → posts.id)
-- position (integer — order within thread, 1-indexed)
+- position (integer, 1-indexed)
 - content (text, max 280 characters)
 - created_at
 
@@ -217,6 +201,7 @@ User preferences, notification settings, tier info, account management.
 **jobs**
 - id (uuid, pk)
 - agent_id (fk → user_agents.id)
+- language (text) — language this job is generating for
 - status (enum: pending, running, completed, failed)
 - triggered_at
 - completed_at
@@ -226,407 +211,327 @@ User preferences, notification settings, tier info, account management.
 
 ## 6. User-agent Catalog
 
-Pre-built templates users can activate with one tap. Context fields are pre-filled and editable. AI generates the name after the user confirms context.
+Pre-built templates. Context fields pre-filled and editable. AI generates name after user confirms.
 
-### Stay Sharp (Professional Edge)
-- Industry news for your field (marketing, finance, design, law, etc.)
-- Startup & funding radar — who raised, who pivoted, who failed
-- Weekly job market pulse in your industry
-- Regulatory & policy changes that affect your work
-- Competitor tracker — what companies in a space are doing
-- Geopolitics daily — power dynamics, alliances, conflicts
-- Macroeconomy pulse — inflation, rates, central bank moves
-- Stock market weekly — major moves and what's driving them
-- Crypto & web3 news — market moves, protocol updates, regulation
-- Technology updates — AI, software, hardware, big tech
+### Stay Sharp
+Industry news · Startup radar · Job market pulse · Regulatory changes · Competitor tracker · Geopolitics daily · Macroeconomy pulse · Stock market weekly · Crypto & web3 · Technology updates
 
-### Get Smarter (Learning & Curiosity)
-- A concept a day — one deep idea from science, philosophy, economics, or psychology
-- History rabbit holes — deep dives into a specific era or civilization
-- Language learning drip — vocabulary, phrases, cultural context for a chosen language
-- How things work — engineering, biology, and systems explained intuitively
-- Philosophy debate of the week — a classic or contemporary argument broken down
-- Science frontiers — what researchers are actually working on right now
-- Travel prep — culture, phrases, and things to know about an upcoming destination
-- "Other side" — steelmans the opposing view on a topic you care about
+### Get Smarter
+Concept a day · History rabbit holes · Language learning drip · How things work · Philosophy debate · Science frontiers · Travel prep · "Other side" steelman
 
-### Live Better (Personal Life)
-- Weekly restaurant picks in your city — rating, vibe, price range, booking number
-- Local events radar — concerts, markets, exhibitions this week near you
-- What to watch this week — new releases across streaming tailored to your taste
-- Music discovery — new releases or deep cuts in genres you like
-- Sports briefing — scores, analysis, and drama in your teams and leagues
-- Personal finance tips calibrated to your life stage
-- Fitness & nutrition briefs tailored to a goal you define
+### Live Better
+Restaurant picks · Local events · What to watch · Music discovery · Sports briefing · Personal finance · Fitness & nutrition
 
-### Think Deeper (Ideas & Worldview)
-- Contrarian takes — well-argued minority opinions on mainstream topics
-- Ethics dilemma of the week — real-world scenarios to think through
-- Geopolitics deep dive — long-form context on a specific region or conflict
+### Think Deeper
+Contrarian takes · Ethics dilemma · Geopolitics deep dive
 
-### Build Things (Maker & Creator)
-- Prompt engineering tips for people using AI tools daily
-- No-code & vibe-coding tricks and platform updates
-- Creator economy news — platforms, monetization, algorithm changes
-- Design inspiration — trends, examples, breakdowns of good design
+### Build Things
+Prompt engineering · No-code tricks · Creator economy · Design inspiration
 
 ---
 
 ## 7. Agentic System Architecture
 
-The heart of NavigAgent. Read this carefully before building any backend feature.
+### Overview
 
-### Architecture Overview
+Three layers, communicate only through Supabase:
 
-Three layers communicate only through Supabase — they never call each other directly:
+- **Layer 1 — Scheduler:** Trigger.dev hourly cron. Creates one job per unique language among subscribers.
+- **Layer 2 — Pipeline:** Two-step Trigger.dev jobs. Completely isolated — no shared state.
+- **Layer 3 — Personalization Loop:** Trigger.dev weekly cron. Updates `prompt_config`.
 
-- **Layer 1 — Scheduler:** Trigger.dev hourly cron. Decides which user-agents need to fire. Creates job records.
-- **Layer 2 — Orchestrator & Pipelines:** Trigger.dev background jobs. Processes each job. Runs the appropriate pipeline of system-agents. Every user-agent runs its own independent pipeline with no shared research cache.
-- **Layer 3 — Personalization Loop:** Trigger.dev weekly cron. Reads like signals. Updates user-agent `prompt_config`s.
-
-**What is NOT in the MVP:**
-- No Cluster Manager
-- No Research Pool or caching layer
-- No fork mechanics
-- Every user-agent always runs its own full pipeline
+**Core scalability principle:** Every pipeline run is a stateless isolated job. Scaling = running more jobs in parallel. Trigger.dev handles this automatically.
 
 ---
 
 ### Layer 1 — Scheduler
 
-Runs every hour via Trigger.dev cron.
+Runs every hour.
 
-For each active user-agent, checks:
-1. Has the user-agent's cadence interval passed since `last_run_at`?
-2. Do any subscribed users have fewer than 5 unread posts from this user-agent?
+For each active user-agent:
+1. Has cadence interval passed since `last_run_at`?
+2. Do any subscribers have fewer than 5 unread posts?
 
-If both conditions are true, creates a `pending` job record in the `jobs` table and triggers the orchestrator.
+If both true → create one job per unique language among subscribers.
 
-**Tier limits (hard caps enforced here):**
-- beta tier: max 10 user-agents per user, daily cadence only
-
----
-
-### Layer 2 — Orchestrator & Pipelines
-
-A Trigger.dev background job. Reads the job, determines user-agent type, runs the appropriate pipeline.
-
-Each pipeline step is an independent stateless function: `(input) => output`. Steps communicate only by passing structured data. If a step fails after 2 retries, mark the job as failed and move on — never block the scheduler.
+**Tier limits:** beta = max 10 user-agents, daily cadence only.
 
 ---
 
-#### Pipeline: News User-agents (5 steps)
+### Layer 2 — Two-Step Pipeline
 
-**Step 1 — Relevance Checker** (system-agent, claude-haiku)
-- Input: user-agent config, last 5 post summaries, today's top headlines for the topic (1 Tavily search)
-- Task: determine if any recently-covered topics have had a breaking development significant enough to override the repetition rule
-- Override criteria: BOTH (a) major breaking development, not just an update AND (b) occurred in the last 24 hours
-- Output: research guidance object — topics to cover, topics to avoid, override flags with reasoning
+Each step is a pure stateless function: `(input) => output`. If a step fails after 2 retries, mark job failed and move on.
 
-**Step 2 — Planner** (system-agent, claude-haiku)
-- Input: user-agent config, `prompt_config` personalization signals, research guidance from Relevance Checker
-- Task: produce a structured research brief — specific questions to answer, angle to take, user framing preferences, topics to avoid
-- Output: research brief (structured JSON: search queries, angle, framing instructions, topics to avoid)
+---
 
-**Step 3 — Researcher** (system-agent, claude-sonnet)
-- Input: research brief from Planner
-- Task: execute 2-3 Tavily searches based on the brief. Synthesize results into a structured JSON with key findings and sources. Always runs — no caching.
-- Output: structured research report with discrete sections per finding
+#### News Pipeline
 
-**Step 4 — Writer** (system-agent, claude-sonnet)
-- Input: research report, user-agent config, `prompt_config` personalization instructions
-- Task: write a thread of 3-10 sub-posts. Writer decides the count based on topic complexity and story arc.
+**Step 1 — Research, Fact-check & Plan** (claude-haiku + Perplexity)
+- Query Perplexity API — receives researched synthesis with citations
+- Check for breaking events overriding repetition rules (major development in last 24h)
+- Check recent posts to avoid repetition
+- Decide angle based on `prompt_config`
+- Output: structured JSON brief (findings, angle, framing, topics to avoid, breaking flag, sources)
+
+**Step 2 — Write & Self-edit** (claude-sonnet)
+- Input: research brief, user-agent config, `prompt_config`, target language
+- Write thread of 3-10 sub-posts
+- Self-review using checklist
+- Output: final sub-posts array + quality score
 
 **Thread format:**
-- Sub-post 1 (Hook): most surprising or counterintuitive angle. Standalone. Creates immediate "wait, what?" reaction. Max 280 chars.
-- Sub-post 2 (Expansion): explains the hook, adds context, ends with unresolved tension. Max 280 chars.
-- Sub-post 3+ (Depth): substantive detail that makes the user feel genuinely informed. One idea per sub-post. Max 280 chars each.
-- Second-to-last (Implication or Twist): flips perspective or reveals consequence. "Here's what nobody talks about." Max 280 chars.
-- Final (Landing): closes the loop on the hook, one clean takeaway, leaves one thread of curiosity open. Max 280 chars.
+- Sub-post 1 (Hook): most surprising angle. Standalone. Max 280 chars.
+- Sub-post 2 (Expansion): explains hook, unresolved tension. Max 280 chars.
+- Sub-post 3+ (Depth): one idea per sub-post. Max 280 chars each.
+- Second-to-last (Twist): flips perspective. Max 280 chars.
+- Final (Landing): closes hook, one takeaway, leaves curiosity open. Max 280 chars.
 
-**Writer voice rules (enforce strictly in every prompt):**
-- Write like the world's clearest thinker on this topic — someone with deep expertise who explains through first principles
-- Use terminology freely but always earn it — explain the concept behind the term in plain language. Never use jargon to sound smart; use it to be precise.
-- The goal is never to sound smart. The goal is to make the reader feel smart.
+**Writer voice rules (enforce in every prompt):**
+- World's clearest thinker — deep expertise, first principles
+- Use terminology freely but always earn it with a plain explanation
+- Goal: make the reader feel smart, not sound smart
 - Lead with the most surprising or counterintuitive thing
 - No bullet points, no headers, no "In this post we will cover"
-- One idea per sub-post, explored with depth and personality
+- One idea per sub-post, depth and personality
 - Opinions welcome. Passive voice forbidden.
 - If it sounds like Wikipedia, rewrite it.
-- Never start a sub-post with "In conclusion" or "To summarize"
-- Stop when the landing is clean — not when all possible things have been said
+- Never start with "In conclusion" or "To summarize"
+- Write natively in target language — never translate
+- Stop when landing is clean
 
-**Step 5 — Editor** (system-agent, claude-haiku)
-- Input: thread draft, research report, recent post history for this user-agent
-- Checklist:
-  - Does sub-post 1 function as a standalone hook that demands the next?
-  - Does each sub-post pull naturally to the next?
-  - Does the final sub-post land cleanly and leave curiosity open?
-  - Is the content actually new vs recent posts (unless Relevance Override)?
-  - Does it match user-agent topic and user preferences?
-  - Does it respect all voice rules?
-- Output: approved (save to Supabase) OR rejected with specific feedback (trigger one Writer retry, then save best attempt regardless)
-
----
-
-#### Pipeline: Learning User-agents (3 steps)
-
-No Researcher step. Claude's own knowledge is the source. No Tavily calls.
-
-**Step 1 — Planner (Curriculum Designer)** (system-agent, claude-haiku)
-- Input: user-agent config, full post history for this user-agent (all previous curriculum posts and their topics), curriculum_pointer positions of all subscribed users
-- Task: curriculum designer role. Determine what comes next in the logical learning progression. Do not repeat covered topics. Build knowledge progressively. Stay ahead of the most advanced subscriber by the curriculum buffer (5 posts ahead).
-- Output: curriculum brief — specific sub-topic to cover next, how it builds on previous posts, assumed knowledge level, `curriculum_position` integer for this post
-
-**Step 2 — Writer** (system-agent, claude-sonnet)
-- Input: curriculum brief, user-agent config, `prompt_config` personalization instructions
-- Task: write a thread of 3-10 sub-posts following the same thread format as news
-- Additional voice rules for learning:
-  - User should feel like they learned something fascinating, not like they completed a lesson
-  - Never use educational framing ("today we will learn", "by the end of this post you will know")
-  - The hook should be the most counterintuitive or surprising fact about the topic
-  - Depth sub-posts should contain the "insider knowledge" that makes the user feel smart
-  - Experience should feel like discovering something, not studying something
-- Output: array of 3-10 sub-post strings + `curriculum_position` integer
-
-**Step 3 — Editor** (system-agent, claude-haiku)
-- Same checklist as news Editor plus: does this post build logically on previous curriculum posts? Is the assumed knowledge level correct?
+**Self-edit checklist:**
+- Sub-post 1 demands the next?
+- Each sub-post pulls to the next?
+- Final sub-post lands cleanly?
+- Content is new vs recent posts?
+- Matches topic and user preferences?
+- Respects all voice rules?
+- Written natively in target language?
 
 ---
 
-#### Pipeline: Recommendation User-agents (4 steps)
+#### Learning Pipeline (Step 2 only — no Perplexity)
 
-**Step 1 — Planner** (system-agent, claude-haiku)
-- Input: user-agent config (includes user location and preferences), recent recommendation history
-- Task: define specific search criteria — what type of recommendation, filters, what makes it relevant this week, what to avoid repeating
-- Output: search brief
+**Step 2 — Write & Self-edit** (claude-sonnet)
+- Input: user-agent config, full post history, curriculum pointers of all subscribers, `prompt_config`, target language
+- Acts as curriculum designer + writer:
+  - Determine next logical step in learning progression
+  - Do not repeat covered topics
+  - Build knowledge progressively
+  - Stay 5 posts ahead of most advanced subscriber
+  - Write thread natively in target language
+  - Self-review with same checklist
 
-**Step 2 — Researcher** (system-agent, claude-sonnet)
-- Input: search brief
-- Task: execute 2-3 Tavily searches with location context, filter by quality and relevance. Always runs — no caching.
-- Output: top 1-3 options with supporting details (ratings, address, booking info, relevant context)
+Additional voice rules:
+- User should feel they discovered something, not completed a lesson
+- Never use educational framing
+- Hook = most counterintuitive fact about the topic
 
-**Step 3 — Writer** (system-agent, claude-sonnet)
-- Input: research results, user-agent config
-- Task: write a single recommendation card (not a thread). Punchy, opinionated, conversational. Includes: name, one-line hook, why it's worth it, practical info (price range, booking number or link, best time to go). Max 400 characters total.
-- Output: single card string
-
-**Step 4 — Editor** (system-agent, claude-haiku)
-- Checks: is the recommendation genuinely good? Is practical info present and accurate? Is the tone right?
+Output: sub-posts array + `curriculum_position` + quality score
 
 ---
 
-### Duplicate Detection on User-agent Creation
+#### Recommendation Pipeline
 
-When a user finishes entering context for a new user-agent, before activation:
-1. Extract topic tags from their description (simple keyword extraction)
-2. Query `user_agents` table for public user-agents with matching `topic_tags` and same `type`
-3. If a strong match exists, surface it: "A user-agent called [Name] already covers this — want to follow it instead?"
-4. User can follow the existing one or proceed with creating their own
-5. No AI required — pure database query
+**Step 1 — Research & Plan** (claude-haiku + Perplexity)
+- Query Perplexity with location and criteria
+- Avoid recent repeats
+- Output: top 1-3 options with details
+
+**Step 2 — Write & Self-edit** (claude-sonnet)
+- Single recommendation card. Max 400 chars.
+- Name, one-line hook, why it's worth it, practical info
+- Written natively in target language
+
+---
+
+### Multilingual Generation
+
+Scheduler creates one job per unique language among subscribers. Pipeline receives target language. Writer generates natively. Posts stored with `language` field. Subscribers served posts in their subscription language.
+
+**Rule:** Never translate. Always generate natively.
 
 ---
 
 ### Layer 3 — Personalization Loop
 
-Runs once per week per user via Trigger.dev cron.
+Weekly per user per user-agent:
+1. Read like signals from past 4 weeks
+2. Identify engagement patterns
+3. Generate short instruction update (e.g. "User prefers geopolitical framing over economic data")
+4. Merge into `prompt_config`
 
-For each user, for each of their user-agents:
-1. Read all like signals from the past 4 weeks (like, skip, read_full, asked_question, rabbit_hole_entered)
-2. Identify patterns — which topics/angles get high engagement, which get skipped
-3. Generate a short natural language instruction update (e.g. "User prefers geopolitical framing over economic data. Increase focus on power dynamics. De-emphasize statistics.")
-4. Merge new instructions into the user-agent's `prompt_config` in Supabase
-5. Updated `prompt_config` is automatically picked up by the Writer on the next pipeline run
-
-The personalization loop never changes the user-agent's topic or type — only the framing, angle, depth, and style within that topic.
-
+Never changes topic or type — only framing, angle, depth, style.
 Model: claude-haiku
 
 ---
 
 ### Community Feed Logic
 
-When a user has fewer than 5 unread posts from their own user-agents:
-1. Query `user_agents` for public user-agents with matching `topic_tags`
-2. Filter to user-agents with at least 10 posts and `quality_score` > 0.7
-3. Order by total engagement (likes) on recent posts
-4. Serve posts from these user-agents, labeled "From the community — [User-agent Name]"
-5. After a user engages with a community post, show a subtle "Follow this user-agent?" prompt
+When fewer than 5 unread posts from own agents:
+1. Query public agents with matching `topic_tags`
+2. Filter: 10+ posts, quality_score > 0.7
+3. Order by recent engagement
+4. Label "From the community — [Name]"
+5. After engagement → "Follow this user-agent?" with language selector
 
 ---
 
-### Discover Page Quality Ranking
+### Discover Page
 
-The discover page never shows a flat alphabetical list. Always ranked by a quality score combining: reliability score + average likes per post + follower growth rate over last 30 days.
+Always ranked by: reliability score + avg likes + follower growth (last 30 days). Never alphabetical.
+
+---
+
+### Duplicate Detection
+
+On user-agent creation:
+1. Extract topic tags
+2. Query matching public agents (same type + overlapping tags)
+3. If strong match → suggest following instead
+4. User chooses to follow existing or create new
 
 ---
 
 ## 8. UX & Design Principles
 
-**The north star:** NavigAgent should feel like the best social media feed you've ever used — except you come away smarter. Never like a learning app. Never like a news website.
-
-1. **Feed first.** Every screen makes it easy to return to the feed in one tap. The feed is the product.
-
-2. **Mobile-first always.** Design every component as if used one-handed on a phone while commuting. No hover states. Large tap targets. Generous padding.
-
-3. **Invisible intelligence.** The AI feels like magic, not machinery. Users never see prompts, model names, pipeline steps, or AI error states. If generation fails, show nothing rather than an error.
-
-4. **Expert voice, not educational voice.** Posts read like they were written by the world's clearest thinker on that topic — genuine mastery, first principles thinking, terminology used precisely and always explained. The reader should feel smart, not talked down to and not talked past.
-
-5. **Social media tone, not textbook tone.** The experience should feel like the best version of early Twitter. Punchy, opinionated, high-signal. Never like a lesson.
-
-6. **Threads feel like Twitter, not articles.** The bottom sheet has a clear scroll-through mechanic. Sub-posts are short, punchy, and self-contained. Each makes you want the next.
-
-7. **Progress is subtle.** The curriculum pointer label ("Lesson 12 of 34") exists for learning user-agents but never dominates. Muted color, small size. Reference, not task tracker.
-
-8. **"Dig In" is always the same action.** Tapping "Dig In" always means: take me to this user-agent's dedicated rabbit hole page. Consistent, predictable, learnable.
-
-9. **Community content is labeled but not othered.** Community posts blend naturally into the feed with a small, clear label.
-
-10. **Empty states are opportunities.** Empty feed = invitation to create a user-agent or explore the community. Never a dead end.
-
-11. **User-agent names are AI-generated and final.** Never show a name input field. The name appears as a preview before activation.
-
-12. **Discover is ranked, not listed.** Always sorts by quality. Never alphabetical, never chronological by creation date.
+1. **Feed first.** Return to feed in one tap from anywhere.
+2. **Mobile-first.** No hover states. Large tap targets.
+3. **Invisible intelligence.** No prompts, model names, or errors visible to users.
+4. **Expert voice.** First principles, terminology earned with plain explanation. Reader feels smart.
+5. **Social media tone.** Punchy, opinionated. Never a lesson.
+6. **Threads like Twitter.** Short punchy sub-posts. Each demands the next.
+7. **Progress is subtle.** Curriculum label exists but never dominates.
+8. **"Dig In" is consistent.** Always means: go to this agent's rabbit hole page.
+9. **Community content is labeled.** Blends naturally with a small clear label.
+10. **Empty states are opportunities.** Never a dead end.
+11. **Names are AI-generated and final.** Never show a name input field.
+12. **Discover is ranked.** Always quality-ranked. Never alphabetical.
+13. **Language is a subscription choice.** Selected when following. Default = browser language.
 
 ---
 
 ## 9. MVP Scope
 
-### In Scope for MVP
-- User authentication (email/password via Supabase Auth)
-- User-agent creation and management (news, learning, recommendation types)
-- Full independent pipeline for all three types (no shared caching)
-- Duplicate detection on user-agent creation (simple DB query)
+### In Scope
+- User auth (email/password via Supabase)
+- User-agent creation and management (all 3 types)
+- Two-step pipeline for all types
+- Multilingual generation (language on subscription)
+- Duplicate detection on creation
 - Bottom sheet thread reader
-- "Dig In" button and rabbit hole page
-- Rabbit hole: curriculum order for learning, newest-first 14 days for news
+- "Dig In" and rabbit hole page
 - Like signals (like and skip only)
-- Community feed fallback (fewer than 5 unread posts)
-- Discover page with quality-ranked community user-agents
+- Community feed fallback
+- Discover page with quality ranking
 - User-agent profile page with dashboard
-- Ask a question feature (per post)
+- Ask a question feature
 - Scheduler (hourly), Personalization Loop (weekly)
-- Pre-built user-agent templates (at least 5 per category)
-- Beta tier limits (10 user-agents max, daily cadence)
-- Basic in-app notification when new posts are ready
+- Pre-built templates (5+ per category)
+- Beta tier limits (10 agents, daily cadence)
+- Basic notification when new posts ready
 
-### Explicitly Out of Scope for MVP
-- Cluster Manager and Research Pool — add in v2 when cost optimization is needed
-- Fork / "Build one like this" mechanics
-- Mobile app (React Native) — web only
-- X/Twitter recap user-agent type
+### Out of Scope for MVP
+- Cluster Manager and Research Pool
+- Fork / "Build one like this"
+- Mobile app (React Native)
+- X/Twitter recap agent type
 - Audio/podcast format
-- Onboarding quiz for learning user-agent entry point (start everyone at post 1)
-- Paid tier or subscription billing
-- Multiple cadence options beyond daily
-- User-to-user following or social graph
-- Sharing posts to external social media
+- Learning onboarding quiz
+- Paid tier / billing
+- Multiple cadence options
+- User-to-user social graph
+- External social sharing
 
 ---
 
 ## 10. Coding Rules & Conventions
 
 **General**
-- Always write TypeScript, never plain JavaScript
-- Use async/await, never .then() chains
-- Named exports, not default exports for components
-- All environment variables in `.env.local` and documented in `.env.example`
+- Always TypeScript, never plain JavaScript
+- async/await only, never .then()
+- Named exports, not default exports
+- All env vars in `.env.local`, documented in `.env.example`
+- Never paste secret keys into any chat — add manually to `.env.local`
+- Never commit `.env.local` — must be in `.gitignore`
 
-**Naming in code — follow the spec precisely:**
-- Database tables use `user_agents` (snake_case)
-- Code variables use `userAgent` / `userAgents` (camelCase)
-- Pipeline components use their system-agent name: `planner`, `researcher`, `writer`, `editor`, `relevanceChecker`
-- Never use the word "agent" alone in code — always qualify: `userAgent`, or a specific system-agent name
+**Naming:**
+- DB tables: `user_agents` (snake_case)
+- Code vars: `userAgent` (camelCase)
+- Pipeline steps: `researcher`, `writer`
+- Never use "agent" alone — always qualify
+
+**Scalability principles — non-negotiable from day one:**
+- Every pipeline step is a pure function: `(input) => output`
+- Every pipeline run is completely isolated — zero shared state
+- No hardcoded values — everything via environment variables
+- All DB queries through `/lib/supabase` helpers, never inline
+- All prompts are exported constants in `/lib/prompts` — never inline
+- Jobs are idempotent — running twice = same result, not duplicates
+- Language always passed explicitly — never assumed
 
 **File structure**
 ```
 /app                           Next.js App Router pages
 /components
-  /ui                          Base shadcn components (do not modify)
+  /ui                          Shadcn base (do not modify)
   /feed                        Feed and post card components
   /thread                      Bottom sheet thread reader
   /rabbit-hole                 Rabbit hole page components
-  /agent-profile               User-agent profile page components
-  /agents                      User-agent management components
+  /agent-profile               User-agent profile page
+  /agents                      User-agent management
 /lib
   /supabase                    Supabase client and helpers
   /trigger                     Trigger.dev job definitions
   /pipelines
     /orchestrator.ts            Routes jobs to correct pipeline
-    /steps                      One file per system-agent step
-      /relevance-checker.ts
-      /planner-news.ts
-      /planner-learning.ts
-      /planner-recommendation.ts
-      /researcher.ts
-      /writer-news.ts
-      /writer-learning.ts
-      /writer-recommendation.ts
-      /editor.ts
+    /steps
+      /researcher.ts            Step 1 — Research & Plan
+      /writer-news.ts           Step 2 — Write (news)
+      /writer-learning.ts       Step 2 — Write (learning)
+      /writer-recommendation.ts Step 2 — Write (recommendation)
     /personalization-loop.ts    Layer 3
-  /prompts                     All Claude prompts as exported constants
+  /prompts                     All Claude prompts as constants
   /types                       Shared TypeScript types
 /hooks                         Custom React hooks
 ```
 
-**Database**
-- All database queries go through `/lib/supabase` helpers, never inline in components
-- Always use RLS — users can only read their own data and public user-agents
-- Never expose `prompt_config` to the frontend — internal only
+**Models:** `claude-sonnet-4-20250514` for Writer. `claude-haiku-4-5-20251001` for Researcher.
 
-**AI / Pipelines**
-- All Claude prompts live in `/lib/prompts` as exported constants — never inline prompts in pipeline code
-- Every pipeline step is a pure function: `(input) => output` — no side effects except the final database save step
-- Log every pipeline run to the `jobs` table with status, timing, and errors
-- Use `claude-sonnet-4-20250514` for Writer and Researcher steps only
-- Use `claude-haiku-4-5-20251001` for all Planner, Checker, and Editor steps
-- If a step fails after 2 retries, mark job as failed and move on — never block the scheduler
+**Testing:** Tests for every pipeline step, scheduler logic, duplicate detection, and edge cases (empty history, first run, curriculum buffer end, multilingual jobs, breaking override). Run `npm test` before every commit.
 
-**Testing**
-- Write tests for every pipeline step function
-- Write tests for scheduler logic
-- Write tests for duplicate detection logic
-- Test edge cases: empty post history, first run of a new user-agent, user at end of curriculum buffer, relevance override triggered
-- Run tests before every commit: `npm test`
+**Git:** Commit after every working feature. Format: `[area] description`. Never commit broken code.
 
-**Git**
-- Commit after every working feature
-- Commit message format: `[area] description` e.g. `[pipeline] add Relevance Checker step for news user-agents`
-- Never commit broken code to main
-
-**Error handling**
-- Pipeline failures are silent to the user — log to `jobs` table, do not surface in feed
-- If generation fails for a user-agent in a cycle, simply show no new post for that cycle
-- Never show raw error messages in the UI
+**Errors:** Pipeline failures logged to `jobs` table only — never shown to users.
 
 ---
 
 ## 11. Current Build State
 
-**Status:** Not started — this bible is the foundation document before any code is written.
+**Completed:**
+- ✅ Step 1 — Next.js 14 with Tailwind, Shadcn/ui, TypeScript
+- ✅ Step 2 — Supabase connected, all tables migrated
+- ⏳ Step 3 — Trigger.dev setup in progress
 
-**Next steps in order:**
-1. Initialize Next.js project with Tailwind and Shadcn
-2. Set up Supabase — run migrations for all tables from Section 5
-3. Set up Trigger.dev — connect to Supabase
-4. Build Layer 1 — Scheduler
-5. Build the news user-agent pipeline — all 5 steps
-6. Build the learning user-agent pipeline — all 3 steps
-7. Build the recommendation user-agent pipeline — all 4 steps
+**Remaining steps:**
+3. Finish Trigger.dev setup
+4. Build Layer 1 — Scheduler (one job per agent per language)
+5. Build news pipeline — researcher.ts + writer-news.ts
+6. Build learning pipeline — writer-learning.ts
+7. Build recommendation pipeline — writer-recommendation.ts
 8. Build Layer 3 — Personalization Loop
-9. Build the main feed UI — post cards, bottom sheet thread reader
-10. Build the rabbit hole page
-11. Build user-agent creation flow with duplicate detection
+9. Build main feed UI — post cards, bottom sheet
+10. Build rabbit hole page
+11. Build user-agent creation flow (language selection + duplicate detection)
 12. Build user-agent profile page with dashboard
-13. Build discover page with quality ranking
-14. Build community feed fallback logic
+13. Build discover page
+14. Build community feed fallback
 15. Build ask-a-question feature
-16. End-to-end testing with real user-agents
-17. Deploy to Vercel + Supabase cloud
+16. End-to-end testing
+17. Deploy to Vercel + add all environment variables
 
 **Update this section every time a step is completed.**
 
 ---
 
-*Last updated: Simplified MVP pass — removed Cluster Manager, Research Pool, and fork mechanics. Every user-agent now runs its own independent pipeline. Duplicate detection added as a simple DB query on creation. Claude Code must re-read this file at the start of every new session.*
+*Last updated: Two-step pipeline (Researcher + Writer), Perplexity instead of Tavily, Trigger.dev for scalability, multilingual architecture (language on subscriptions and posts), scalability principles in coding rules. Claude Code must re-read this file at the start of every new session.*
