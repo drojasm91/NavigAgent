@@ -10,7 +10,7 @@ interface OrchestratorInput {
   supabase: SupabaseClient
 }
 
-export async function runOrchestrator({ jobId, agentId, supabase }: OrchestratorInput) {
+export async function runOrchestrator({ agentId, supabase }: OrchestratorInput) {
   // Fetch user-agent to determine type
   const { data: userAgent, error } = await supabase
     .from('user_agents')
