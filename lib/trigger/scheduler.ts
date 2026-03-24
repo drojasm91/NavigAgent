@@ -19,7 +19,7 @@ export const schedulerTask = schedules.task({
       .select('id, owner_id, cadence, last_run_at')
       .eq('is_active', true)
 
-    if (error) {
+    if (error || !userAgents) {
       logger.error('Scheduler: failed to fetch user-agents', { error })
       return
     }

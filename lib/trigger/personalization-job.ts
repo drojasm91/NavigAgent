@@ -17,12 +17,12 @@ export const personalizationJob = schedules.task({
       .from('user_agent_subscriptions')
       .select('user_id')
 
-    if (error) {
+    if (error || !users) {
       logger.error('Personalization: failed to fetch users', { error })
       return
     }
 
-    const uniqueUserIds = [...new Set(users.map((u) => u.user_id))]
+    const uniqueUserIds = Array.from(new Set(users.map((u) => u.user_id)))
     logger.log(`Personalization: processing ${uniqueUserIds.length} users`)
 
     for (const userId of uniqueUserIds) {
