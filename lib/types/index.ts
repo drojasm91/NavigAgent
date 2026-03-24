@@ -8,3 +8,5 @@ export type {
   JobStatus,
   Json,
 } from './database'
+
+export type { FeedPost, FeedSubPost, FeedAgent } from './feed'
