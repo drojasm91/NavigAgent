@@ -47,6 +47,7 @@ export interface Database {
           created_at?: string
           last_active_at?: string | null
         }
+        Relationships: []
       }
       user_agents: {
         Row: {
@@ -94,6 +95,7 @@ export interface Database {
           last_run_at?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       user_agent_subscriptions: {
         Row: {
@@ -117,6 +119,7 @@ export interface Database {
           curriculum_pointer?: number
           subscribed_at?: string
         }
+        Relationships: []
       }
       posts: {
         Row: {
@@ -146,6 +149,7 @@ export interface Database {
           quality_score?: number | null
           created_at?: string
         }
+        Relationships: []
       }
       sub_posts: {
         Row: {
@@ -169,6 +173,7 @@ export interface Database {
           content?: string
           created_at?: string
         }
+        Relationships: []
       }
       likes: {
         Row: {
@@ -192,6 +197,7 @@ export interface Database {
           signal_type?: SignalType
           created_at?: string
         }
+        Relationships: []
       }
       jobs: {
         Row: {
@@ -218,7 +224,20 @@ export interface Database {
           completed_at?: string | null
           error?: string | null
         }
+        Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
