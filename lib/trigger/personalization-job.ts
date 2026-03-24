@@ -22,7 +22,7 @@ export const personalizationJob = schedules.task({
       return
     }
 
-    const uniqueUserIds = Array.from(new Set(users.map((u) => u.user_id)))
+    const uniqueUserIds = Array.from(new Set(users.map((u: { user_id: string }) => u.user_id)))
     logger.log(`Personalization: processing ${uniqueUserIds.length} users`)
 
     for (const userId of uniqueUserIds) {
