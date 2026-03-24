@@ -1,7 +1,7 @@
 import { defineConfig } from '@trigger.dev/sdk/v3'
 
 export default defineConfig({
-  project: process.env.TRIGGER_PROJECT_ID!,
+  project: 'prj_0a4tI2AoFl3kbZkC4amErbqelWJM',
   runtime: 'node',
   logLevel: 'log',
   // 5 minutes max — enough for the longest pipeline run (Researcher + Writer + Editor)
