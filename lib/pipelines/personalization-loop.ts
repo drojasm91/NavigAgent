@@ -7,7 +7,8 @@ interface PersonalizationLoopInput {
   supabase: SupabaseClient
 }
 
-export async function runPersonalizationLoop({ userId: _userId, supabase: _supabase }: PersonalizationLoopInput): Promise<void> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function runPersonalizationLoop(input: PersonalizationLoopInput): Promise<void> {
   // TODO: Implement Layer 3 — Personalization Loop
   // 1. Read like signals from past 4 weeks
   // 2. Identify engagement patterns
