@@ -1,12 +1,13 @@
 // Layer 3 — Personalization Loop (weekly cron)
 // Reads like signals per user per user-agent, updates prompt_config.
-// TODO: implement full logic once @anthropic-ai/sdk is added as a dependency
+// TODO: implement full AI-powered logic once @anthropic-ai/sdk is added as a dependency
 
 import { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/lib/types/database'
 
 interface PersonalizationInput {
   userId: string
-  supabase: SupabaseClient
+  supabase: SupabaseClient<Database>
 }
 
 export async function runPersonalizationLoop({ userId, supabase }: PersonalizationInput) {
@@ -20,9 +21,7 @@ export async function runPersonalizationLoop({ userId, supabase }: Personalizati
     return
   }
 
-  const subs = subscriptions as { agent_id: string }[]
-
-  for (const sub of subs) {
+  for (const sub of subscriptions) {
     // Read like signals from the past 4 weeks
     const fourWeeksAgo = new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString()
 
@@ -31,7 +30,7 @@ export async function runPersonalizationLoop({ userId, supabase }: Personalizati
       .select('id')
       .eq('agent_id', sub.agent_id)
 
-    const postIds = (postRows as { id: string }[] | null)?.map((p) => p.id) ?? []
+    const postIds = postRows?.map((p) => p.id) ?? []
 
     const { data: signals } = await supabase
       .from('likes')
@@ -55,22 +54,19 @@ export async function runPersonalizationLoop({ userId, supabase }: Personalizati
       continue
     }
 
-    const typedSignals = signals as { signal_type: string; post_id: string }[]
-    const typedAgent = userAgent as { prompt_config: Record<string, unknown> | null; description: string; type: string }
-
     // Summarize signal patterns
     const signalSummary = {
-      likes: typedSignals.filter((s) => s.signal_type === 'like').length,
-      skips: typedSignals.filter((s) => s.signal_type === 'skip').length,
-      readFull: typedSignals.filter((s) => s.signal_type === 'read_full').length,
-      askedQuestion: typedSignals.filter((s) => s.signal_type === 'asked_question').length,
-      rabbitHoleEntered: typedSignals.filter((s) => s.signal_type === 'rabbit_hole_entered').length,
-      total: typedSignals.length,
+      likes: signals.filter((s) => s.signal_type === 'like').length,
+      skips: signals.filter((s) => s.signal_type === 'skip').length,
+      readFull: signals.filter((s) => s.signal_type === 'read_full').length,
+      askedQuestion: signals.filter((s) => s.signal_type === 'asked_question').length,
+      rabbitHoleEntered: signals.filter((s) => s.signal_type === 'rabbit_hole_entered').length,
+      total: signals.length,
     }
 
     // Merge signal summary into prompt_config as a placeholder
     // Full AI-powered personalization will be added when @anthropic-ai/sdk is installed
-    const currentConfig = typedAgent.prompt_config ?? {}
+    const currentConfig = (userAgent.prompt_config as Record<string, unknown>) ?? {}
     const updatedConfig = {
       ...currentConfig,
       signal_summary: signalSummary,

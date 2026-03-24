@@ -24,10 +24,9 @@ export const schedulerTask = schedules.task({
       return
     }
 
-    const agents = userAgents as { id: string; owner_id: string; cadence: string; last_run_at: string | null }[]
-    logger.log(`Scheduler: checking ${agents.length} active user-agents`)
+    logger.log(`Scheduler: checking ${userAgents.length} active user-agents`)
 
-    for (const userAgent of agents) {
+    for (const userAgent of userAgents) {
       if (!isDue(userAgent.cadence, userAgent.last_run_at, now)) continue
 
       // Check if any subscriber has fewer than 5 unread posts
@@ -77,8 +76,6 @@ async function checkLowInventory(supabase: ReturnType<typeof createServiceClient
 
   if (!subscriptions || subscriptions.length === 0) return false
 
-  const subs = subscriptions as { user_id: string; curriculum_pointer: number | null }[]
-
   // Count total posts for this agent
   const { count: totalPosts } = await supabase
     .from('posts')
@@ -88,7 +85,7 @@ async function checkLowInventory(supabase: ReturnType<typeof createServiceClient
   if (!totalPosts) return true // No posts at all — definitely needs to run
 
   // Check if any subscriber has fewer than 5 unread posts
-  for (const sub of subs) {
+  for (const sub of subscriptions) {
     const unread = totalPosts - (sub.curriculum_pointer ?? 0)
     if (unread < 5) return true
   }

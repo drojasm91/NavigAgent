@@ -3,11 +3,12 @@
 // TODO: implement full pipeline routing once system-agent steps are built
 
 import { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/lib/types/database'
 
 interface OrchestratorInput {
   jobId: string
   agentId: string
-  supabase: SupabaseClient
+  supabase: SupabaseClient<Database>
 }
 
 export async function runOrchestrator({ agentId, supabase }: OrchestratorInput) {
@@ -22,9 +23,7 @@ export async function runOrchestrator({ agentId, supabase }: OrchestratorInput) 
     throw new Error(`Orchestrator: user-agent ${agentId} not found`)
   }
 
-  const agentType = (userAgent as { type: string }).type
-
-  switch (agentType) {
+  switch (userAgent.type) {
     case 'news':
       // TODO: run news pipeline (relevance-checker → planner → researcher → writer → editor)
       break
@@ -35,7 +34,7 @@ export async function runOrchestrator({ agentId, supabase }: OrchestratorInput) 
       // TODO: run recommendation pipeline (planner → researcher → writer → editor)
       break
     default:
-      throw new Error(`Orchestrator: unknown user-agent type "${agentType}"`)
+      throw new Error(`Orchestrator: unknown user-agent type "${userAgent.type}"`)
   }
 
   // Update last_run_at
