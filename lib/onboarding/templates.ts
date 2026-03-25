@@ -123,6 +123,40 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
   },
 ]
 
+export interface TopicOption {
+  id: string
+  vibeId: string
+  label: string
+}
+
+export const TOPICS: TopicOption[] = [
+  // Stay informed
+  { id: 'geopolitics', vibeId: 'stay_informed', label: 'Geopolitics' },
+  { id: 'crypto', vibeId: 'stay_informed', label: 'Crypto' },
+  { id: 'ai', vibeId: 'stay_informed', label: 'AI' },
+  { id: 'sports', vibeId: 'stay_informed', label: 'Sports' },
+  { id: 'markets', vibeId: 'stay_informed', label: 'Markets' },
+  { id: 'tech', vibeId: 'stay_informed', label: 'Tech' },
+  // Learn new things
+  { id: 'history', vibeId: 'learn', label: 'History' },
+  { id: 'science', vibeId: 'learn', label: 'Science' },
+  { id: 'engineering', vibeId: 'learn', label: 'Engineering' },
+  { id: 'vibe-coding', vibeId: 'learn', label: 'Vibe coding' },
+  // Get recommendations
+  { id: 'restaurants', vibeId: 'live_better', label: 'Restaurants' },
+  { id: 'movies-tv', vibeId: 'live_better', label: 'Movies & TV' },
+  { id: 'events', vibeId: 'live_better', label: 'Events' },
+  { id: 'music', vibeId: 'live_better', label: 'Music' },
+  // Get deep insights
+  { id: 'books', vibeId: 'think_deeper', label: 'Books' },
+  { id: 'philosophy', vibeId: 'think_deeper', label: 'Philosophy' },
+  { id: 'great-thinkers', vibeId: 'think_deeper', label: 'Great thinkers' },
+]
+
+export function getTopicsForVibes(selectedVibeIds: string[]): TopicOption[] {
+  return TOPICS.filter((t) => selectedVibeIds.includes(t.vibeId))
+}
+
 export function getTemplatesForVibes(selectedVibeIds: string[]): AgentTemplate[] {
   const templates: AgentTemplate[] = []
   for (const vibeId of selectedVibeIds) {

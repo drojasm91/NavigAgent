@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getTemplatesForVibes } from '@/lib/onboarding/templates'
 import { completeOnboarding } from '@/app/(onboarding)/onboarding/actions'
 import { VibeStep } from './vibe-step'
-import { AgentStep } from './agent-step'
+import { TopicStep } from './topic-step'
 
 function StepDots({ current }: { current: 1 | 2 }) {
   return (
@@ -28,14 +27,9 @@ export function OnboardingFlow() {
   const router = useRouter()
   const [step, setStep] = useState<1 | 2>(1)
   const [selectedVibes, setSelectedVibes] = useState<Set<string>>(new Set())
-  const [selectedTemplateIds, setSelectedTemplateIds] = useState<Set<string>>(new Set())
+  const [selectedTopics, setSelectedTopics] = useState<Set<string>>(new Set())
   const [freeText, setFreeText] = useState('')
   const [submitting, setSubmitting] = useState(false)
-
-  const templates = useMemo(
-    () => getTemplatesForVibes(Array.from(selectedVibes)),
-    [selectedVibes]
-  )
 
   function handleToggleVibe(vibeId: string) {
     setSelectedVibes((prev) => {
@@ -50,18 +44,16 @@ export function OnboardingFlow() {
   }
 
   function handleContinue() {
-    const matchedTemplates = getTemplatesForVibes(Array.from(selectedVibes))
-    setSelectedTemplateIds(new Set(matchedTemplates.map((t) => t.id)))
     setStep(2)
   }
 
-  function handleToggleTemplate(templateId: string) {
-    setSelectedTemplateIds((prev) => {
+  function handleToggleTopic(topicId: string) {
+    setSelectedTopics((prev) => {
       const next = new Set(prev)
-      if (next.has(templateId)) {
-        next.delete(templateId)
+      if (next.has(topicId)) {
+        next.delete(topicId)
       } else {
-        next.add(templateId)
+        next.add(topicId)
       }
       return next
     })
@@ -70,7 +62,9 @@ export function OnboardingFlow() {
   async function handleGetStarted() {
     if (submitting) return
     setSubmitting(true)
-    // TODO: create agents + subscriptions + seed posts for selectedTemplateIds
+    // TODO: auto-follow matching agents + auto-create agents for topics without pre-built ones
+    // Selected topics: Array.from(selectedTopics)
+    // Free text: freeText
     await completeOnboarding()
     router.push('/')
   }
@@ -102,10 +96,10 @@ export function OnboardingFlow() {
           onFreeTextChange={setFreeText}
         />
       ) : (
-        <AgentStep
-          templates={templates}
-          selectedIds={selectedTemplateIds}
-          onToggleTemplate={handleToggleTemplate}
+        <TopicStep
+          selectedVibes={selectedVibes}
+          selectedTopics={selectedTopics}
+          onToggleTopic={handleToggleTopic}
           onGetStarted={handleGetStarted}
           onSkip={handleSkip}
           onBack={handleBack}
