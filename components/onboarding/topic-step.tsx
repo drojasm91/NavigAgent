@@ -24,6 +24,7 @@ interface TopicStepProps {
   pendingOptions: ClassifyOption[] | null
   onPickOption: (option: ClassifyOption) => void
   onOtherOption: () => void
+  scrollToVibeId: string | null
 }
 
 export function TopicStep({
@@ -43,10 +44,12 @@ export function TopicStep({
   pendingOptions,
   onPickOption,
   onOtherOption,
+  scrollToVibeId,
 }: TopicStepProps) {
   const canStart = selectedTopics.size > 0 && !submitting
   const vibesWithTopics = VIBES.filter((v) => selectedVibes.has(v.id))
   const pickerRef = useRef<HTMLDivElement>(null)
+  const vibeSectionRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
   // Auto-scroll to disambiguation picker when it appears
   useEffect(() => {
@@ -54,6 +57,16 @@ export function TopicStep({
       pickerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }, [pendingOptions])
+
+  // Auto-scroll to the vibe section where a topic was just added
+  useEffect(() => {
+    if (scrollToVibeId) {
+      const el = vibeSectionRefs.current.get(scrollToVibeId)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+  }, [scrollToVibeId])
 
   return (
     <>
@@ -79,7 +92,7 @@ export function TopicStep({
           {vibesWithTopics.map((vibe) => {
             const vibeTopics = TOPICS.filter((t) => t.vibeId === vibe.id)
             return (
-              <div key={vibe.id}>
+              <div key={vibe.id} ref={(el) => { if (el) vibeSectionRefs.current.set(vibe.id, el) }}>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg">{vibe.emoji}</span>
                   <span className="text-sm font-semibold">{vibe.label}</span>

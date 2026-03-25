@@ -41,6 +41,7 @@ export function OnboardingFlow() {
   const [classifying, setClassifying] = useState(false)
   const [pendingOptions, setPendingOptions] = useState<ClassifyOption[] | null>(null)
   const [pendingText, setPendingText] = useState('')
+  const [scrollToVibeId, setScrollToVibeId] = useState<string | null>(null)
 
   function handleToggleVibe(vibeId: string) {
     setSelectedVibes((prev) => {
@@ -106,6 +107,10 @@ export function OnboardingFlow() {
 
     setCustomTopics(nextCustom)
     setSelectedTopics(nextSelected)
+
+    // Trigger scroll to the vibe section — clear first to re-trigger if same vibe
+    setScrollToVibeId(null)
+    requestAnimationFrame(() => setScrollToVibeId(vibeId))
   }
 
   async function handleAddInterest(text: string) {
@@ -203,6 +208,7 @@ export function OnboardingFlow() {
           pendingOptions={pendingOptions}
           onPickOption={handlePickOption}
           onOtherOption={handleOtherOption}
+          scrollToVibeId={scrollToVibeId}
         />
       )}
     </div>
