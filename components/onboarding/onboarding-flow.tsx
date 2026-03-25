@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { getTemplatesForVibes } from '@/lib/onboarding/templates'
+import { completeOnboarding } from '@/app/(onboarding)/onboarding/actions'
 import { VibeStep } from './vibe-step'
 import { AgentStep } from './agent-step'
 
@@ -11,6 +12,7 @@ export function OnboardingFlow() {
   const [step, setStep] = useState<1 | 2>(1)
   const [selectedVibes, setSelectedVibes] = useState<Set<string>>(new Set())
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<Set<string>>(new Set())
+  const [submitting, setSubmitting] = useState(false)
 
   const templates = useMemo(
     () => getTemplatesForVibes(Array.from(selectedVibes)),
@@ -47,13 +49,18 @@ export function OnboardingFlow() {
     })
   }
 
-  function handleGetStarted() {
-    // TODO: wire up DB writes (create agents + subscriptions + seed posts)
+  async function handleGetStarted() {
+    if (submitting) return
+    setSubmitting(true)
+    // TODO: create agents + subscriptions + seed posts for selectedTemplateIds
+    await completeOnboarding()
     router.push('/')
   }
 
-  function handleSkip() {
-    // TODO: wire up onboarding_completed = true
+  async function handleSkip() {
+    if (submitting) return
+    setSubmitting(true)
+    await completeOnboarding()
     router.push('/')
   }
 
@@ -79,6 +86,7 @@ export function OnboardingFlow() {
       onGetStarted={handleGetStarted}
       onSkip={handleSkip}
       onBack={handleBack}
+      submitting={submitting}
     />
   )
 }

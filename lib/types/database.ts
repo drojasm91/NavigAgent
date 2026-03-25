@@ -26,6 +26,7 @@ export interface Database {
           location: string | null
           created_at: string
           last_active_at: string | null
+          onboarding_completed: boolean
         }
         Insert: {
           id?: string
@@ -36,6 +37,7 @@ export interface Database {
           location?: string | null
           created_at?: string
           last_active_at?: string | null
+          onboarding_completed?: boolean
         }
         Update: {
           id?: string
@@ -46,6 +48,7 @@ export interface Database {
           location?: string | null
           created_at?: string
           last_active_at?: string | null
+          onboarding_completed?: boolean
         }
         Relationships: []
       }

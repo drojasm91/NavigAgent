@@ -10,6 +10,7 @@ interface AgentStepProps {
   onGetStarted: () => void
   onSkip: () => void
   onBack: () => void
+  submitting?: boolean
 }
 
 export function AgentStep({
@@ -19,8 +20,9 @@ export function AgentStep({
   onGetStarted,
   onSkip,
   onBack,
+  submitting = false,
 }: AgentStepProps) {
-  const canStart = selectedIds.size > 0
+  const canStart = selectedIds.size > 0 && !submitting
 
   return (
     <div className="flex min-h-screen flex-col px-6 py-12">
@@ -63,10 +65,10 @@ export function AgentStep({
           onClick={onGetStarted}
           disabled={!canStart}
           className={`w-full rounded-full bg-primary py-4 text-base font-semibold text-primary-foreground transition-all disabled:opacity-40 ${
-            canStart ? 'animate-pulse' : ''
+            canStart && !submitting ? 'animate-pulse' : ''
           }`}
         >
-          Get started
+          {submitting ? 'Setting up...' : 'Get started'}
         </button>
 
         <button

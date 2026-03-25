@@ -37,20 +37,54 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
+    const pathname = request.nextUrl.pathname
+
     if (
       !user &&
-      !request.nextUrl.pathname.startsWith('/login') &&
-      !request.nextUrl.pathname.startsWith('/auth/callback')
+      !pathname.startsWith('/login') &&
+      !pathname.startsWith('/auth/callback')
     ) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)
     }
 
-    if (user && request.nextUrl.pathname.startsWith('/login')) {
+    if (user && pathname.startsWith('/login')) {
       const url = request.nextUrl.clone()
       url.pathname = '/'
       return NextResponse.redirect(url)
+    }
+
+    // Onboarding redirect: skip for login, callback, and onboarding itself
+    if (
+      user &&
+      !pathname.startsWith('/login') &&
+      !pathname.startsWith('/auth/callback') &&
+      !pathname.startsWith('/onboarding')
+    ) {
+      const onboardingDone = request.cookies.get('onboarding_done')?.value
+
+      if (onboardingDone !== 'true') {
+        const { data } = await supabase
+          .from('users')
+          .select('onboarding_completed')
+          .eq('id', user.id)
+          .single()
+
+        if (data && !data.onboarding_completed) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/onboarding'
+          return NextResponse.redirect(url)
+        }
+
+        // User has completed onboarding — set cookie to avoid future DB queries
+        if (data?.onboarding_completed) {
+          supabaseResponse.cookies.set('onboarding_done', 'true', {
+            path: '/',
+            maxAge: 60 * 60 * 24 * 365,
+          })
+        }
+      }
     }
   } catch {
     if (!request.nextUrl.pathname.startsWith('/login')) {
