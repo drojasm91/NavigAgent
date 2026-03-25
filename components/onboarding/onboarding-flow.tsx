@@ -7,6 +7,23 @@ import { completeOnboarding } from '@/app/(onboarding)/onboarding/actions'
 import { VibeStep } from './vibe-step'
 import { AgentStep } from './agent-step'
 
+function StepDots({ current }: { current: 1 | 2 }) {
+  return (
+    <div className="flex items-center justify-center gap-2">
+      <div
+        className={`h-1.5 rounded-full transition-all duration-300 ${
+          current === 1 ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/30'
+        }`}
+      />
+      <div
+        className={`h-1.5 rounded-full transition-all duration-300 ${
+          current === 2 ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/30'
+        }`}
+      />
+    </div>
+  )
+}
+
 export function OnboardingFlow() {
   const router = useRouter()
   const [step, setStep] = useState<1 | 2>(1)
@@ -68,25 +85,30 @@ export function OnboardingFlow() {
     setStep(1)
   }
 
-  if (step === 1) {
-    return (
-      <VibeStep
-        selectedVibes={selectedVibes}
-        onToggleVibe={handleToggleVibe}
-        onContinue={handleContinue}
-      />
-    )
-  }
-
   return (
-    <AgentStep
-      templates={templates}
-      selectedIds={selectedTemplateIds}
-      onToggleTemplate={handleToggleTemplate}
-      onGetStarted={handleGetStarted}
-      onSkip={handleSkip}
-      onBack={handleBack}
-      submitting={submitting}
-    />
+    <div className="flex min-h-screen flex-col">
+      {/* Step indicator */}
+      <div className="px-4 pt-6">
+        <StepDots current={step} />
+      </div>
+
+      {step === 1 ? (
+        <VibeStep
+          selectedVibes={selectedVibes}
+          onToggleVibe={handleToggleVibe}
+          onContinue={handleContinue}
+        />
+      ) : (
+        <AgentStep
+          templates={templates}
+          selectedIds={selectedTemplateIds}
+          onToggleTemplate={handleToggleTemplate}
+          onGetStarted={handleGetStarted}
+          onSkip={handleSkip}
+          onBack={handleBack}
+          submitting={submitting}
+        />
+      )}
+    </div>
   )
 }

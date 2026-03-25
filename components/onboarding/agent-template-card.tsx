@@ -17,35 +17,37 @@ export function AgentTemplateCard({ template, selected, onToggle, index }: Agent
       type="button"
       onClick={onToggle}
       className={cn(
-        'w-full rounded-2xl border p-4 text-left transition-all duration-200',
-        'active:scale-[0.97] animate-in fade-in slide-in-from-bottom-4',
+        'w-full rounded-xl border p-4 text-left transition-all duration-200',
+        'active:scale-[0.97] animate-in fade-in slide-in-from-bottom-3',
         selected
-          ? 'border-primary bg-primary/5'
+          ? 'border-primary bg-primary/5 shadow-sm'
           : 'border-border bg-card'
       )}
-      style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'both' }}
+      style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'both' }}
     >
       <div className="flex items-start gap-3">
-        <span className="text-2xl mt-0.5">{template.emoji}</span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-lg">
+          {template.emoji}
+        </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-sm truncate">{template.name}</span>
             <TypeBadge type={template.type} />
           </div>
-          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
             {template.description}
           </p>
         </div>
         <div
           className={cn(
-            'mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+            'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
             selected
               ? 'border-primary bg-primary'
-              : 'border-muted-foreground/30 bg-transparent'
+              : 'border-muted-foreground/30'
           )}
         >
           {selected && (
-            <svg className="h-3.5 w-3.5 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <svg className="h-3 w-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           )}
