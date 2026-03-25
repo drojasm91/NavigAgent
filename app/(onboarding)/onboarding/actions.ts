@@ -11,10 +11,18 @@ interface OnboardingData {
   freeText: string
 }
 
+export interface ClassifyOption {
+  label: string
+  vibeId: string
+  suggestedTopics: string[]
+}
+
 interface ClassifyResult {
   vibeId: string | null
   label: string | null
   suggestedTopics: string[]
+  ambiguous?: boolean
+  options?: ClassifyOption[]
   error?: boolean
 }
 
@@ -36,6 +44,25 @@ export async function classifyInterest(text: string): Promise<ClassifyResult> {
     const cleaned = raw.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim()
     const parsed = JSON.parse(cleaned)
 
+    // Handle ambiguous response
+    if (parsed.ambiguous && Array.isArray(parsed.options)) {
+      const options: ClassifyOption[] = parsed.options
+        .filter((o: Record<string, unknown>) => typeof o.label === 'string' && VALID_VIBES.includes(o.vibeId as string))
+        .map((o: Record<string, unknown>) => ({
+          label: o.label as string,
+          vibeId: o.vibeId as string,
+          suggestedTopics: Array.isArray(o.suggestedTopics)
+            ? (o.suggestedTopics as unknown[]).filter((t): t is string => typeof t === 'string').slice(0, 3)
+            : [],
+        }))
+        .slice(0, 3)
+
+      if (options.length >= 2) {
+        return { vibeId: null, label: null, suggestedTopics: [], ambiguous: true, options }
+      }
+    }
+
+    // Handle direct (unambiguous) response
     const vibeId = VALID_VIBES.includes(parsed.vibeId) ? parsed.vibeId : 'stay_informed'
     const label = typeof parsed.label === 'string' ? parsed.label : null
     const suggestedTopics = Array.isArray(parsed.suggestedTopics)

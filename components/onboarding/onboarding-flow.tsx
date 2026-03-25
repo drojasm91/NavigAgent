@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { completeOnboarding, classifyInterest } from '@/app/(onboarding)/onboarding/actions'
+import type { ClassifyOption } from '@/app/(onboarding)/onboarding/actions'
 import { TOPICS } from '@/lib/onboarding/templates'
 import { VibeStep } from './vibe-step'
 import { TopicStep } from './topic-step'
@@ -38,6 +39,7 @@ export function OnboardingFlow() {
   const [submitting, setSubmitting] = useState(false)
   const [customTopics, setCustomTopics] = useState<Map<string, CustomTopic>>(new Map())
   const [classifying, setClassifying] = useState(false)
+  const [pendingOptions, setPendingOptions] = useState<ClassifyOption[] | null>(null)
 
   function handleToggleVibe(vibeId: string) {
     setSelectedVibes((prev) => {
@@ -67,17 +69,8 @@ export function OnboardingFlow() {
     })
   }
 
-  async function handleAddInterest(text: string) {
-    const trimmed = text.trim()
-    if (!trimmed || classifying) return
-    setClassifying(true)
-
-    const result = await classifyInterest(trimmed)
-
-    const firstVibe = Array.from(selectedVibes)[0]
-    const vibeId = result.vibeId ?? (firstVibe || 'stay_informed')
-    const cleanLabel = result.label ?? trimmed
-    const topicId = `custom:${cleanLabel.toLowerCase().replace(/\s+/g, '-')}`
+  function applyClassification(label: string, vibeId: string, suggestedTopics: string[]) {
+    const topicId = `custom:${label.toLowerCase().replace(/\s+/g, '-')}`
 
     // Auto-add the vibe if not selected
     if (!selectedVibes.has(vibeId)) {
@@ -88,15 +81,15 @@ export function OnboardingFlow() {
       })
     }
 
-    // Add typed text as custom topic with AI-cleaned label
+    // Add as custom topic with clean label
     const nextCustom = new Map(customTopics)
-    nextCustom.set(topicId, { label: cleanLabel, vibeId })
+    nextCustom.set(topicId, { label, vibeId })
 
     // Add suggestions — match predefined topics if possible, otherwise create custom
     const nextSelected = new Set(selectedTopics)
     nextSelected.add(topicId)
 
-    for (const suggestion of result.suggestedTopics) {
+    for (const suggestion of suggestedTopics) {
       const predefined = TOPICS.find(
         (t) => t.label.toLowerCase() === suggestion.toLowerCase() && t.vibeId === vibeId,
       )
@@ -107,14 +100,42 @@ export function OnboardingFlow() {
         if (!nextCustom.has(suggestionId)) {
           nextCustom.set(suggestionId, { label: suggestion, vibeId })
         }
-        // Suggestions are NOT auto-selected — user picks them
       }
     }
 
     setCustomTopics(nextCustom)
     setSelectedTopics(nextSelected)
+  }
+
+  async function handleAddInterest(text: string) {
+    const trimmed = text.trim()
+    if (!trimmed || classifying) return
+    setClassifying(true)
+    setPendingOptions(null)
+
+    const result = await classifyInterest(trimmed)
+
+    // If ambiguous, show options picker
+    if (result.ambiguous && result.options && result.options.length >= 2) {
+      setPendingOptions(result.options)
+      setFreeText('')
+      setClassifying(false)
+      return
+    }
+
+    // Direct classification
+    const firstVibe = Array.from(selectedVibes)[0]
+    const vibeId = result.vibeId ?? (firstVibe || 'stay_informed')
+    const cleanLabel = result.label ?? trimmed
+
+    applyClassification(cleanLabel, vibeId, result.suggestedTopics)
     setFreeText('')
     setClassifying(false)
+  }
+
+  function handlePickOption(option: ClassifyOption) {
+    applyClassification(option.label, option.vibeId, option.suggestedTopics)
+    setPendingOptions(null)
   }
 
   async function handleGetStarted() {
@@ -168,6 +189,8 @@ export function OnboardingFlow() {
           customTopics={customTopics}
           classifying={classifying}
           onAddInterest={handleAddInterest}
+          pendingOptions={pendingOptions}
+          onPickOption={handlePickOption}
         />
       )}
     </div>

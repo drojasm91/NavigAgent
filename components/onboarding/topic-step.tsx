@@ -4,6 +4,7 @@ import { ChevronLeft, Plus, Loader2 } from 'lucide-react'
 import { VIBES, TOPICS } from '@/lib/onboarding/templates'
 import { TopicChip } from './topic-chip'
 import type { CustomTopic } from './onboarding-flow'
+import type { ClassifyOption } from '@/app/(onboarding)/onboarding/actions'
 
 interface TopicStepProps {
   selectedVibes: Set<string>
@@ -18,6 +19,8 @@ interface TopicStepProps {
   customTopics: Map<string, CustomTopic>
   classifying: boolean
   onAddInterest: (text: string) => void
+  pendingOptions: ClassifyOption[] | null
+  onPickOption: (option: ClassifyOption) => void
 }
 
 export function TopicStep({
@@ -33,6 +36,8 @@ export function TopicStep({
   customTopics,
   classifying,
   onAddInterest,
+  pendingOptions,
+  onPickOption,
 }: TopicStepProps) {
   const canStart = selectedTopics.size > 0 && !submitting
   const vibesWithTopics = VIBES.filter((v) => selectedVibes.has(v.id))
@@ -125,6 +130,25 @@ export function TopicStep({
               )}
             </button>
           </div>
+
+          {/* Disambiguation picker */}
+          {pendingOptions && (
+            <div className="mt-3 rounded-xl border border-border bg-card p-3">
+              <p className="text-xs text-muted-foreground mb-2">What did you mean?</p>
+              <div className="flex flex-wrap gap-2">
+                {pendingOptions.map((option) => (
+                  <button
+                    key={`${option.vibeId}-${option.label}`}
+                    type="button"
+                    onClick={() => onPickOption(option)}
+                    className="rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium transition-all active:scale-95 active:bg-primary active:text-primary-foreground"
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
