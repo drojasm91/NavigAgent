@@ -61,8 +61,8 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
   }
 
   return (
+    <div ref={cardRef}>
     <Card
-      ref={cardRef}
       className={cn(
         'cursor-pointer',
         post.is_community && 'border-dashed'
@@ -176,5 +176,6 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
         </div>
       )}
     </Card>
+    </div>
   )
 }
