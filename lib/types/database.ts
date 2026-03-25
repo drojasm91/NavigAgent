@@ -26,6 +26,10 @@ export interface Database {
           location: string | null
           created_at: string
           last_active_at: string | null
+          onboarding_completed: boolean
+          vibes: string[]
+          topics: string[]
+          free_text: string
         }
         Insert: {
           id?: string
@@ -36,6 +40,10 @@ export interface Database {
           location?: string | null
           created_at?: string
           last_active_at?: string | null
+          onboarding_completed?: boolean
+          vibes?: string[]
+          topics?: string[]
+          free_text?: string
         }
         Update: {
           id?: string
@@ -46,6 +54,10 @@ export interface Database {
           location?: string | null
           created_at?: string
           last_active_at?: string | null
+          onboarding_completed?: boolean
+          vibes?: string[]
+          topics?: string[]
+          free_text?: string
         }
         Relationships: []
       }

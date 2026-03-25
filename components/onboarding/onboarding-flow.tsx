@@ -1,0 +1,216 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { completeOnboarding, classifyInterest } from '@/app/(onboarding)/onboarding/actions'
+import type { ClassifyOption } from '@/app/(onboarding)/onboarding/actions'
+import { TOPICS } from '@/lib/onboarding/templates'
+import { VibeStep } from './vibe-step'
+import { TopicStep } from './topic-step'
+
+export interface CustomTopic {
+  label: string
+  vibeId: string
+}
+
+function StepDots({ current }: { current: 1 | 2 }) {
+  return (
+    <div className="flex items-center justify-center gap-2">
+      <div
+        className={`h-1.5 rounded-full transition-all duration-300 ${
+          current === 1 ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/30'
+        }`}
+      />
+      <div
+        className={`h-1.5 rounded-full transition-all duration-300 ${
+          current === 2 ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/30'
+        }`}
+      />
+    </div>
+  )
+}
+
+export function OnboardingFlow() {
+  const router = useRouter()
+  const [step, setStep] = useState<1 | 2>(1)
+  const [selectedVibes, setSelectedVibes] = useState<Set<string>>(new Set())
+  const [selectedTopics, setSelectedTopics] = useState<Set<string>>(new Set())
+  const [freeText, setFreeText] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [customTopics, setCustomTopics] = useState<Map<string, CustomTopic>>(new Map())
+  const [classifying, setClassifying] = useState(false)
+  const [pendingOptions, setPendingOptions] = useState<ClassifyOption[] | null>(null)
+  const [pendingText, setPendingText] = useState('')
+  const [scrollToVibeId, setScrollToVibeId] = useState<string | null>(null)
+
+  function handleToggleVibe(vibeId: string) {
+    setSelectedVibes((prev) => {
+      const next = new Set(prev)
+      if (next.has(vibeId)) {
+        next.delete(vibeId)
+      } else {
+        next.add(vibeId)
+      }
+      return next
+    })
+  }
+
+  function handleContinue() {
+    setStep(2)
+  }
+
+  function handleToggleTopic(topicId: string) {
+    setSelectedTopics((prev) => {
+      const next = new Set(prev)
+      if (next.has(topicId)) {
+        next.delete(topicId)
+      } else {
+        next.add(topicId)
+      }
+      return next
+    })
+  }
+
+  function applyClassification(label: string, vibeId: string, suggestedTopics: string[]) {
+    const topicId = `custom:${label.toLowerCase().replace(/\s+/g, '-')}`
+
+    // Auto-add the vibe if not selected
+    if (!selectedVibes.has(vibeId)) {
+      setSelectedVibes((prev) => {
+        const next = new Set(Array.from(prev))
+        next.add(vibeId)
+        return next
+      })
+    }
+
+    // Add as custom topic with clean label
+    const nextCustom = new Map(customTopics)
+    nextCustom.set(topicId, { label, vibeId })
+
+    // Add suggestions — match predefined topics if possible, otherwise create custom
+    const nextSelected = new Set(selectedTopics)
+    nextSelected.add(topicId)
+
+    for (const suggestion of suggestedTopics) {
+      const predefined = TOPICS.find(
+        (t) => t.label.toLowerCase() === suggestion.toLowerCase() && t.vibeId === vibeId,
+      )
+      if (predefined) {
+        nextSelected.add(predefined.id)
+      } else {
+        const suggestionId = `custom:${suggestion.toLowerCase().replace(/\s+/g, '-')}`
+        if (!nextCustom.has(suggestionId)) {
+          nextCustom.set(suggestionId, { label: suggestion, vibeId })
+        }
+      }
+    }
+
+    setCustomTopics(nextCustom)
+    setSelectedTopics(nextSelected)
+
+    // Trigger scroll to the vibe section — clear first to re-trigger if same vibe
+    setScrollToVibeId(null)
+    requestAnimationFrame(() => setScrollToVibeId(vibeId))
+  }
+
+  async function handleAddInterest(text: string) {
+    const trimmed = text.trim()
+    if (!trimmed || classifying) return
+    setClassifying(true)
+    setPendingOptions(null)
+    setPendingText(trimmed)
+
+    const result = await classifyInterest(trimmed)
+
+    // If ambiguous, show options picker
+    if (result.ambiguous && result.options && result.options.length >= 2) {
+      setPendingOptions(result.options)
+      setFreeText('')
+      setClassifying(false)
+      return
+    }
+
+    // Direct classification
+    const firstVibe = Array.from(selectedVibes)[0]
+    const vibeId = result.vibeId ?? (firstVibe || 'stay_informed')
+    const cleanLabel = result.label ?? trimmed
+
+    applyClassification(cleanLabel, vibeId, result.suggestedTopics)
+    setFreeText('')
+    setPendingText('')
+    setClassifying(false)
+  }
+
+  function handlePickOption(option: ClassifyOption) {
+    applyClassification(option.label, option.vibeId, option.suggestedTopics)
+    setPendingOptions(null)
+    setPendingText('')
+  }
+
+  function handleOtherOption() {
+    setFreeText(pendingText + ' ')
+    setPendingOptions(null)
+    setPendingText('')
+  }
+
+  async function handleGetStarted() {
+    if (submitting) return
+    setSubmitting(true)
+    await completeOnboarding({
+      vibes: Array.from(selectedVibes),
+      topics: Array.from(selectedTopics),
+      freeText: JSON.stringify({
+        customTopics: Object.fromEntries(customTopics),
+      }),
+    })
+    router.push('/')
+  }
+
+  async function handleSkip() {
+    if (submitting) return
+    setSubmitting(true)
+    await completeOnboarding()
+    router.push('/')
+  }
+
+  function handleBack() {
+    setStep(1)
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      {/* Step indicator */}
+      <div className="px-4 pt-6">
+        <StepDots current={step} />
+      </div>
+
+      {step === 1 ? (
+        <VibeStep
+          selectedVibes={selectedVibes}
+          onToggleVibe={handleToggleVibe}
+          onContinue={handleContinue}
+        />
+      ) : (
+        <TopicStep
+          selectedVibes={selectedVibes}
+          selectedTopics={selectedTopics}
+          onToggleTopic={handleToggleTopic}
+          onGetStarted={handleGetStarted}
+          onSkip={handleSkip}
+          onBack={handleBack}
+          submitting={submitting}
+          freeText={freeText}
+          onFreeTextChange={setFreeText}
+          customTopics={customTopics}
+          classifying={classifying}
+          classifyingText={pendingText}
+          onAddInterest={handleAddInterest}
+          pendingOptions={pendingOptions}
+          onPickOption={handlePickOption}
+          onOtherOption={handleOtherOption}
+          scrollToVibeId={scrollToVibeId}
+        />
+      )}
+    </div>
+  )
+}
