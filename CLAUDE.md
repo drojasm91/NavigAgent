@@ -40,9 +40,9 @@ Use these terms consistently everywhere — in code, comments, database columns,
 
 **Feed** — main screen. Post cards from followed user-agents and community recommendations. Tapping opens the bottom sheet.
 
-**Dig In** — button on last sub-post of a thread in the feed. Takes user to the rabbit hole page for that user-agent.
+**Dig In** — button on last sub-post of a thread in the feed. Takes user to the agent profile page with the Posts tab open (`/agent/[agentId]?tab=posts`).
 
-**Rabbit Hole** — dedicated page filtered to one user-agent's content. Same UI as feed but scoped. Curriculum order for learning, newest-first (last 14 days) for news.
+**Rabbit Hole** — the experience of diving deep into one agent's content. Not a standalone page — it's the Posts tab on the agent profile page. Curriculum order for learning, newest-first (last 14 days) for news. May include recommended posts from similar agents.
 
 **Curriculum** — ordered sequence of posts for a learning user-agent. Each post has a `curriculum_position`.
 
@@ -103,20 +103,22 @@ Perplexity does search AND synthesis in one API call — returns a researched br
 Infinite scroll of post cards. Tapping opens bottom sheet. Community posts visually distinct with label and Follow/Unfollow button. When fewer than 5 unread posts from own agents, community posts auto-append.
 
 **Bottom Sheet — Thread Reader**
-Slides up on tap. Sub-posts scroll inside sheet. Last sub-post of feed post → "Dig In" button. Last sub-post of own post in rabbit hole → nothing. Last sub-post of community post in rabbit hole → "Dig In." Dismissing returns to previous position.
+Slides up on card body tap. Sub-posts scroll inside sheet. Last sub-post of feed post → "Dig In" button. Last sub-post when on agent's Posts tab → no Dig In (already there). Dismissing returns to previous position.
 
-**/rabbit-hole/[agentId]**
-Same UI as feed, filtered to one agent. Identity bar at top. Curriculum order for learning, newest-first 14 days for news. Community posts with clear visual distinction.
+**Post Card — Three Tap Zones**
+- Avatar + agent name (top left) → agent profile page (Info tab). Press feedback: opacity dim.
+- ArrowUpRight icon (top right, next to timestamp) → agent profile page (Posts tab). Press feedback: background accent. Hidden when viewing that agent's own Posts tab.
+- Card body + footer → opens bottom sheet thread reader. Press feedback: scale animation.
 
-**/agent/[agentId] — User-agent Profile Page**
+**/agent/[agentId] — Unified Agent Profile Page**
 
-Identity: AI name, type badge, topic description, creator attribution, Follow/Unfollow, follower count, post count.
+Two tabs: **Info** and **Posts**. URL param `?tab=posts` controls active tab. Default = Info.
 
-Dashboard: posts per day (bar chart), follows per day (line chart), avg likes per post, reliability score, last ran, next run, avg pipeline run time.
+Header (compact, 2 rows): back button + avatar + name + type badge + Follow button (row 1). Topic tags + stats (row 2).
 
-Topic Intelligence: top topics last 30 days as tag chips.
+**Info tab:** Agent description, stats grid (total posts, avg quality, type, cadence), top posts by quality score.
 
-Most Liked Posts: top 5 tappable post cards — conversion section.
+**Posts tab (the rabbit hole):** Same UI as feed but scoped to one agent. Reuses FeedList + PostCard. Curriculum order for learning, newest-first for news. "Dig In" and ArrowUpRight hidden for current agent's posts. May include recommended posts from similar agents in the future.
 
 **/agents** — manage own user-agents (add, pause, delete)
 
@@ -402,7 +404,7 @@ On user-agent creation:
 5. **Social media tone.** Punchy, opinionated. Never a lesson.
 6. **Threads like Twitter.** Short punchy sub-posts. Each demands the next.
 7. **Progress is subtle.** Curriculum label exists but never dominates.
-8. **"Dig In" is consistent.** Always means: go to this agent's rabbit hole page.
+8. **"Dig In" is consistent.** Always means: go to this agent's Posts tab on their profile page.
 9. **Community content is labeled.** Blends naturally with a small clear label.
 10. **Empty states are opportunities.** Never a dead end.
 11. **Names are AI-generated and final.** Never show a name input field.
@@ -420,11 +422,11 @@ On user-agent creation:
 - Multilingual generation (language on subscription)
 - Duplicate detection on creation
 - Bottom sheet thread reader
-- "Dig In" and rabbit hole page
+- "Dig In" navigating to agent profile Posts tab
 - Like signals (like and skip only)
 - Community feed fallback
 - Discover page with quality ranking
-- User-agent profile page with dashboard
+- Unified agent profile page with Info + Posts tabs
 - Ask a question feature
 - Scheduler (hourly), Personalization Loop (weekly)
 - Pre-built templates (5+ per category)
@@ -477,8 +479,8 @@ On user-agent creation:
   /ui                          Shadcn base (do not modify)
   /feed                        Feed and post card components
   /thread                      Bottom sheet thread reader
-  /rabbit-hole                 Rabbit hole page components
-  /agent-profile               User-agent profile page
+  /agent-profile               Unified agent profile page (Info + Posts tabs)
+  /navigation                  Bottom tab bar, page header
   /agents                      User-agent management
 /lib
   /supabase                    Supabase client and helpers
@@ -512,6 +514,8 @@ On user-agent creation:
 - ✅ Step 1 — Next.js 14 with Tailwind, Shadcn/ui, TypeScript
 - ✅ Step 2 — Supabase connected, all tables migrated
 - ⏳ Step 3 — Trigger.dev setup in progress
+- ✅ Step 9 — Main feed UI (post cards with 3 tap zones, bottom sheet thread reader, bottom tab nav, dummy data)
+- ✅ Step 10+12 — Unified agent profile page with Info + Posts tabs (replaces standalone rabbit hole + separate profile page)
 
 **Remaining steps:**
 3. Finish Trigger.dev setup
@@ -520,10 +524,7 @@ On user-agent creation:
 6. Build learning pipeline — writer-learning.ts
 7. Build recommendation pipeline — writer-recommendation.ts
 8. Build Layer 3 — Personalization Loop
-9. Build main feed UI — post cards, bottom sheet
-10. Build rabbit hole page
 11. Build user-agent creation flow (language selection + duplicate detection)
-12. Build user-agent profile page with dashboard
 13. Build discover page
 14. Build community feed fallback
 15. Build ask-a-question feature
@@ -534,4 +535,4 @@ On user-agent creation:
 
 ---
 
-*Last updated: Two-step pipeline (Researcher + Writer), Perplexity instead of Tavily, Trigger.dev for scalability, multilingual architecture (language on subscriptions and posts), scalability principles in coding rules. Claude Code must re-read this file at the start of every new session.*
+*Last updated: Unified agent profile page replaces standalone rabbit hole. PostCard has 3 distinct tap zones. "Dig In" navigates to /agent/[agentId]?tab=posts. Tabs are Info (description + stats) and Posts (the rabbit hole). Claude Code must re-read this file at the start of every new session.*
