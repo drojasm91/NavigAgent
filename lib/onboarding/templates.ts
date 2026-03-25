@@ -22,7 +22,7 @@ export const VIBES: VibeOption[] = [
     id: 'stay_informed',
     emoji: '\u{1F4E1}',
     label: 'Stay informed',
-    description: 'News, markets, industry trends',
+    description: 'News, markets, industry trends, sports',
   },
   {
     id: 'learn',
