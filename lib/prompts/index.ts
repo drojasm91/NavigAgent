@@ -16,7 +16,18 @@ Rules:
 - Keep all topic labels short (1-3 words), properly capitalized
 - Respond with ONLY valid JSON, no other text
 
-AMBIGUITY CHECK: If the input could reasonably mean different things across 2+ categories (e.g. "Dune" could be the movie, the book, or the sci-fi universe; "Python" could be the programming language or the snake), return the ambiguous format. If the meaning is clear (e.g. "Formula 1", "Japanese cooking", "blockchain"), return the direct format.
+AMBIGUITY CHECK — return the ambiguous format if EITHER applies:
+
+1. Topic ambiguity: The input itself could mean different things (e.g. "Dune" = the movie, the book, or the sci-fi universe; "Python" = programming language or the snake).
+
+2. Intent ambiguity: The topic is clear, but the user could reasonably want it in different categories. Ask yourself: "Could someone want to stay informed about this AND learn about this AND get recommendations about this?" If yes for 2+ categories, it's ambiguous.
+   Examples:
+   - "US Politics" → "US Politics News" (stay_informed) vs "How US Politics Works" (learn)
+   - "Cooking" → "Learn to Cook" (learn) vs "Restaurant Picks" (live_better)
+   - "Psychology" → "Psychology Research" (learn) vs "Psychology Insights" (think_deeper)
+   - "Wine" → "Wine Recommendations" (live_better) vs "Learn About Wine" (learn)
+
+Only return the direct format when the intent is genuinely clear — e.g. "Formula 1" (clearly news/stay_informed), "Japanese cooking recipes" (clearly learn), "blockchain" (clearly stay_informed).
 
 Direct format (unambiguous):
 {"vibeId":"<category>","label":"<clean label>","suggestedTopics":["<topic1>","<topic2>","<topic3>"]}
