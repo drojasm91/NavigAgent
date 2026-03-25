@@ -1,5 +1,3 @@
-import { Separator } from '@/components/ui/separator'
-
 interface SubPostItemProps {
   content: string
   position: number
@@ -7,14 +5,20 @@ interface SubPostItemProps {
   isLast: boolean
 }
 
-export function SubPostItem({ content, position, total, isLast }: SubPostItemProps) {
+export function SubPostItem({ content, position, isLast }: SubPostItemProps) {
   return (
-    <div className="py-4">
-      <p className="text-[15px] leading-relaxed">{content}</p>
-      <span className="text-[11px] text-muted-foreground mt-2 block">
-        {position}/{total}
-      </span>
-      {!isLast && <Separator className="mt-4" />}
+    <div className="relative">
+      {!isLast && (
+        <div className="absolute left-3 top-8 bottom-0 w-px bg-border" />
+      )}
+      <div className="flex gap-3">
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground mt-0.5">
+          {position}
+        </div>
+        <p className="text-[15px] leading-relaxed text-foreground pb-2">
+          {content}
+        </p>
+      </div>
     </div>
   )
 }

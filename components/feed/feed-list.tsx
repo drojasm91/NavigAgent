@@ -13,6 +13,7 @@ interface FeedListProps {
   hasMore: boolean
   onLoadMore: () => void
   onPostTap: (post: FeedPost) => void
+  currentAgentId?: string
 }
 
 function PostSkeleton() {
@@ -35,6 +36,7 @@ export function FeedList({
   hasMore,
   onLoadMore,
   onPostTap,
+  currentAgentId,
 }: FeedListProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
 
@@ -79,6 +81,7 @@ export function FeedList({
           key={post.id}
           post={post}
           onTap={() => onPostTap(post)}
+          currentAgentId={currentAgentId}
         />
       ))}
 

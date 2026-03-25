@@ -5,15 +5,12 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerFooter,
 } from '@/components/ui/drawer'
-import { Button } from '@/components/ui/button'
 import { TypeBadge } from '@/components/feed/type-badge'
 import { SubPostItem } from './sub-post-item'
-import { DigInButton } from './dig-in-button'
-import { Heart, X } from 'lucide-react'
+import { X, Heart, ArrowRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import type { FeedPost, SignalType } from '@/lib/types'
-import { cn } from '@/lib/utils'
 
 interface ThreadDrawerProps {
   post: FeedPost | null
@@ -21,85 +18,91 @@ interface ThreadDrawerProps {
   onOpenChange: (open: boolean) => void
   signals: Record<string, SignalType>
   onSignal: (postId: string, signalType: SignalType) => void
+  hideDigIn?: boolean
+}
+
+function AgentAvatar({ name }: { name: string }) {
+  const initial = name.charAt(0).toUpperCase()
+  return (
+    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
+      {initial}
+    </div>
+  )
 }
 
 export function ThreadDrawer({
   post,
   open,
   onOpenChange,
-  signals,
-  onSignal,
+  hideDigIn = false,
 }: ThreadDrawerProps) {
+  const router = useRouter()
+
   if (!post) return null
 
   const agent = post.user_agents
   const subPosts = [...post.sub_posts].sort((a, b) => a.position - b.position)
-  const currentSignal = signals[post.id]
+  const likeCount = Math.floor((post.quality_score ?? 0.8) * 50)
+
+  function handleDigIn() {
+    onOpenChange(false)
+    router.push(`/agent/${post!.agent_id}?tab=posts`)
+  }
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <div className="flex items-center gap-2">
-            <DrawerTitle className="text-base">{agent.name}</DrawerTitle>
-            <TypeBadge type={agent.type} />
+          <div className="flex items-center gap-3">
+            <AgentAvatar name={agent.name} />
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <DrawerTitle className="text-base">{agent.name}</DrawerTitle>
+              <TypeBadge type={agent.type} />
+            </div>
+            <button
+              onClick={() => onOpenChange(false)}
+              className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-accent"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
           {post.is_community && (
-            <span className="text-[11px] text-muted-foreground">
+            <span className="text-[11px] text-muted-foreground mt-1 block">
               From the community
             </span>
           )}
         </DrawerHeader>
 
-        <div className="overflow-y-auto px-4 flex-1 min-h-0">
-          {subPosts.map((sp, i) => (
-            <SubPostItem
-              key={sp.id}
-              content={sp.content}
-              position={sp.position}
-              total={subPosts.length}
-              isLast={i === subPosts.length - 1}
-            />
-          ))}
-
-          {!post.is_community && post.type === 'thread' && (
-            <DigInButton agentId={post.agent_id} />
-          )}
-        </div>
-
-        <DrawerFooter>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              size="lg"
-              className={cn(
-                'flex-1',
-                currentSignal === 'like' && 'bg-red-50 border-red-200 text-red-600 dark:bg-red-950 dark:border-red-800'
-              )}
-              onClick={() => onSignal(post.id, 'like')}
-            >
-              <Heart
-                className={cn(
-                  'size-5 mr-1.5',
-                  currentSignal === 'like' && 'fill-current'
-                )}
+        <div className="overflow-y-auto px-5 flex-1 min-h-0 pb-6">
+          <div className="space-y-4">
+            {subPosts.map((sp, i) => (
+              <SubPostItem
+                key={sp.id}
+                content={sp.content}
+                position={sp.position}
+                total={subPosts.length}
+                isLast={i === subPosts.length - 1}
               />
-              Like
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className={cn(
-                'flex-1',
-                currentSignal === 'skip' && 'bg-muted'
-              )}
-              onClick={() => onSignal(post.id, 'skip')}
-            >
-              <X className="size-5 mr-1.5" />
-              Skip
-            </Button>
+            ))}
           </div>
-        </DrawerFooter>
+
+          {/* Bottom actions */}
+          <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+            <button className="flex items-center gap-1.5 text-muted-foreground active:text-foreground transition-colors">
+              <Heart className="size-5" />
+              <span className="text-sm">{likeCount}</span>
+            </button>
+            {!hideDigIn && !post.is_community && post.type === 'thread' && (
+              <button
+                onClick={handleDigIn}
+                className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground active:opacity-80 transition-opacity"
+              >
+                Dig In
+                <ArrowRight className="size-4" />
+              </button>
+            )}
+          </div>
+        </div>
       </DrawerContent>
     </Drawer>
   )

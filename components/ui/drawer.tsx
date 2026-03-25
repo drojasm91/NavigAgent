@@ -53,12 +53,12 @@ function DrawerContent({
       <DrawerPrimitive.Content
         data-slot="drawer-content"
         className={cn(
-          "bg-background fixed inset-x-0 bottom-0 z-50 mt-24 flex max-h-[85vh] flex-col rounded-t-2xl border-t",
+          "bg-background fixed inset-x-0 bottom-0 z-50 mx-auto mt-24 flex max-h-[85vh] max-w-lg flex-col rounded-t-2xl border-t",
           className
         )}
         {...props}
       >
-        <div className="bg-muted mx-auto mt-4 h-1.5 w-12 shrink-0 rounded-full" />
+        <div className="bg-muted-foreground/30 mx-auto mt-3 h-1 w-10 shrink-0 rounded-full" />
         {children}
       </DrawerPrimitive.Content>
     </DrawerPortal>
