@@ -7,11 +7,9 @@ interface VibeStepProps {
   selectedVibes: Set<string>
   onToggleVibe: (vibeId: string) => void
   onContinue: () => void
-  freeText: string
-  onFreeTextChange: (value: string) => void
 }
 
-export function VibeStep({ selectedVibes, onToggleVibe, onContinue, freeText, onFreeTextChange }: VibeStepProps) {
+export function VibeStep({ selectedVibes, onToggleVibe, onContinue }: VibeStepProps) {
   const agentCount = countAgentsForVibes(Array.from(selectedVibes))
   const canContinue = selectedVibes.size > 0
 
@@ -37,20 +35,6 @@ export function VibeStep({ selectedVibes, onToggleVibe, onContinue, freeText, on
           ))}
         </div>
 
-        {/* Free text input */}
-        <div className="mt-6">
-          <label htmlFor="free-text" className="text-sm font-medium">
-            Anything else you&apos;re into?
-          </label>
-          <input
-            id="free-text"
-            type="text"
-            value={freeText}
-            onChange={(e) => onFreeTextChange(e.target.value)}
-            placeholder="e.g. Formula 1, Japanese cooking, startup fundraising..."
-            className="mt-2 w-full rounded-xl border border-border bg-card px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
-          />
-        </div>
       </div>
 
       {/* Sticky bottom CTA */}

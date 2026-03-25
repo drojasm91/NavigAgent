@@ -92,8 +92,6 @@ export function OnboardingFlow() {
           selectedVibes={selectedVibes}
           onToggleVibe={handleToggleVibe}
           onContinue={handleContinue}
-          freeText={freeText}
-          onFreeTextChange={setFreeText}
         />
       ) : (
         <TopicStep
@@ -104,6 +102,8 @@ export function OnboardingFlow() {
           onSkip={handleSkip}
           onBack={handleBack}
           submitting={submitting}
+          freeText={freeText}
+          onFreeTextChange={setFreeText}
         />
       )}
     </div>

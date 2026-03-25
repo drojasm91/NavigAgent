@@ -12,6 +12,8 @@ interface TopicStepProps {
   onSkip: () => void
   onBack: () => void
   submitting?: boolean
+  freeText: string
+  onFreeTextChange: (value: string) => void
 }
 
 export function TopicStep({
@@ -22,6 +24,8 @@ export function TopicStep({
   onSkip,
   onBack,
   submitting = false,
+  freeText,
+  onFreeTextChange,
 }: TopicStepProps) {
   const canStart = selectedTopics.size > 0 && !submitting
   const vibesWithTopics = VIBES.filter((v) => selectedVibes.has(v.id))
@@ -68,6 +72,21 @@ export function TopicStep({
               </div>
             )
           })}
+        </div>
+
+        {/* Free text input */}
+        <div className="mt-8">
+          <label htmlFor="free-text" className="text-sm font-medium">
+            Anything else you&apos;re into?
+          </label>
+          <input
+            id="free-text"
+            type="text"
+            value={freeText}
+            onChange={(e) => onFreeTextChange(e.target.value)}
+            placeholder="e.g. Formula 1, Japanese cooking, startup fundraising..."
+            className="mt-2 w-full rounded-xl border border-border bg-card px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+          />
         </div>
       </div>
 
