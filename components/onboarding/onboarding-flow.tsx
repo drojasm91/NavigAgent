@@ -113,13 +113,13 @@ export function OnboardingFlow() {
     if (!trimmed || classifying) return
     setClassifying(true)
     setPendingOptions(null)
+    setPendingText(trimmed)
 
     const result = await classifyInterest(trimmed)
 
     // If ambiguous, show options picker
     if (result.ambiguous && result.options && result.options.length >= 2) {
       setPendingOptions(result.options)
-      setPendingText(trimmed)
       setFreeText('')
       setClassifying(false)
       return
@@ -132,6 +132,7 @@ export function OnboardingFlow() {
 
     applyClassification(cleanLabel, vibeId, result.suggestedTopics)
     setFreeText('')
+    setPendingText('')
     setClassifying(false)
   }
 
@@ -197,6 +198,7 @@ export function OnboardingFlow() {
           onFreeTextChange={setFreeText}
           customTopics={customTopics}
           classifying={classifying}
+          classifyingText={pendingText}
           onAddInterest={handleAddInterest}
           pendingOptions={pendingOptions}
           onPickOption={handlePickOption}

@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef, useEffect } from 'react'
 import { ChevronLeft, Plus, Loader2 } from 'lucide-react'
 import { VIBES, TOPICS } from '@/lib/onboarding/templates'
 import { TopicChip } from './topic-chip'
@@ -18,6 +19,7 @@ interface TopicStepProps {
   onFreeTextChange: (value: string) => void
   customTopics: Map<string, CustomTopic>
   classifying: boolean
+  classifyingText: string
   onAddInterest: (text: string) => void
   pendingOptions: ClassifyOption[] | null
   onPickOption: (option: ClassifyOption) => void
@@ -36,6 +38,7 @@ export function TopicStep({
   onFreeTextChange,
   customTopics,
   classifying,
+  classifyingText,
   onAddInterest,
   pendingOptions,
   onPickOption,
@@ -43,6 +46,14 @@ export function TopicStep({
 }: TopicStepProps) {
   const canStart = selectedTopics.size > 0 && !submitting
   const vibesWithTopics = VIBES.filter((v) => selectedVibes.has(v.id))
+  const pickerRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to disambiguation picker when it appears
+  useEffect(() => {
+    if (pendingOptions && pickerRef.current) {
+      pickerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [pendingOptions])
 
   return (
     <>
@@ -133,9 +144,17 @@ export function TopicStep({
             </button>
           </div>
 
+          {/* Thinking indicator */}
+          {classifying && classifyingText && (
+            <p className="mt-2.5 flex items-center gap-1.5 text-xs text-muted-foreground animate-pulse">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Thinking about {classifyingText}...
+            </p>
+          )}
+
           {/* Disambiguation picker */}
           {pendingOptions && (
-            <div className="mt-3 rounded-xl border border-border bg-card p-3">
+            <div ref={pickerRef} className="mt-3 rounded-xl border border-border bg-card p-3">
               <p className="text-xs text-muted-foreground mb-2">What did you mean?</p>
               <div className="flex flex-wrap gap-2">
                 {pendingOptions.map((option) => (
