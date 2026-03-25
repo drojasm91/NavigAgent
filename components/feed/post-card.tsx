@@ -20,10 +20,8 @@ function timeAgo(dateStr: string): string {
 function AgentAvatar({ name }: { name: string }) {
   const initial = name.charAt(0).toUpperCase()
   return (
-    <div className="size-10 rounded-full bg-neutral-800 dark:bg-neutral-200 flex items-center justify-center shrink-0">
-      <span className="text-sm font-semibold text-white dark:text-neutral-800">
-        {initial}
-      </span>
+    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
+      {initial}
     </div>
   )
 }

@@ -23,10 +23,8 @@ interface ThreadDrawerProps {
 function AgentAvatar({ name }: { name: string }) {
   const initial = name.charAt(0).toUpperCase()
   return (
-    <div className="size-10 rounded-full bg-neutral-800 dark:bg-neutral-200 flex items-center justify-center shrink-0">
-      <span className="text-sm font-semibold text-white dark:text-neutral-800">
-        {initial}
-      </span>
+    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
+      {initial}
     </div>
   )
 }
@@ -61,9 +59,9 @@ export function ThreadDrawer({
             </div>
             <button
               onClick={() => onOpenChange(false)}
-              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors p-1"
+              className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-accent"
             >
-              <X className="size-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
           {post.is_community && (
