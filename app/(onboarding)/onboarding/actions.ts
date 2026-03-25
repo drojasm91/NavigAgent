@@ -33,8 +33,8 @@ export async function classifyInterest(text: string): Promise<ClassifyResult> {
     const client = new Anthropic()
 
     const message = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 150,
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 200,
       system: CLASSIFY_INTEREST_PROMPT,
       messages: [{ role: 'user', content: text }],
     })
