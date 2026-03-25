@@ -22,13 +22,13 @@ export const VIBES: VibeOption[] = [
     id: 'stay_informed',
     emoji: '\u{1F4E1}',
     label: 'Stay informed',
-    description: 'News, markets, industry trends, AI, crypto, sports',
+    description: 'News, markets, industry trends, AI, crypto, sports, geopolitics',
   },
   {
     id: 'learn',
     emoji: '\u{1F9E0}',
     label: 'Learn new things',
-    description: 'History, science, vibe coding, book insights, how things work',
+    description: 'History, science, vibe coding, how things work',
   },
   {
     id: 'live_better',
@@ -38,9 +38,9 @@ export const VIBES: VibeOption[] = [
   },
   {
     id: 'think_deeper',
-    emoji: '\u{1F50D}',
-    label: 'Think deeper',
-    description: 'Contrarian takes, philosophy, geopolitics',
+    emoji: '\u{1F4A1}',
+    label: 'Get deep insights',
+    description: 'Books, philosophy, great minds',
   },
 ]
 
@@ -102,24 +102,24 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     type: 'recommendation',
     topicTags: ['movies', 'streaming', 'entertainment'],
   },
-  // Think deeper
+  // Get deep insights
   {
-    id: 'contrarian-wire',
+    id: 'book-shelf',
     vibeId: 'think_deeper',
-    emoji: '\u{1F504}',
-    name: 'The Contrarian Wire',
-    description: 'The strongest argument against what everyone believes. Updated daily.',
-    type: 'news',
-    topicTags: ['contrarian', 'economics', 'analysis'],
+    emoji: '\u{1F4DA}',
+    name: 'The Book Shelf',
+    description: 'One book worth reading, why it matters, and the key ideas — delivered as a thread.',
+    type: 'learning',
+    topicTags: ['books', 'ideas', 'reading'],
   },
   {
-    id: 'ethics-lab',
+    id: 'great-minds',
     vibeId: 'think_deeper',
-    emoji: '\u2696\uFE0F',
-    name: 'The Ethics Lab',
-    description: 'Real dilemmas with no easy answers. Think before you pick a side.',
-    type: 'news',
-    topicTags: ['ethics', 'philosophy', 'society'],
+    emoji: '\u{1F9D0}',
+    name: 'Great Minds Daily',
+    description: 'One thinker, one idea, one shift in how you see the world.',
+    type: 'learning',
+    topicTags: ['philosophy', 'thinkers', 'ideas'],
   },
 ]
 
