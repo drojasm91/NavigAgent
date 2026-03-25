@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TypeBadge } from './type-badge'
 import type { FeedPost } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Heart, Layers, List } from 'lucide-react'
+import { Heart, Layers, ArrowUpRight } from 'lucide-react'
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -76,7 +76,7 @@ export function PostCard({ post, onTap, currentAgentId }: PostCardProps) {
               href={`/agent/${agent.id}?tab=posts`}
               className="rounded-full p-1 text-muted-foreground active:bg-accent transition-colors"
             >
-              <Layers className="h-3.5 w-3.5" />
+              <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           )}
         </div>
@@ -94,8 +94,8 @@ export function PostCard({ post, onTap, currentAgentId }: PostCardProps) {
           </span>
           {isThread && (
             <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <List className="size-3.5" />
               1/{postCount}
+              <Layers className="size-3.5" />
             </span>
           )}
         </CardFooter>
