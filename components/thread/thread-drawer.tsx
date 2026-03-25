@@ -8,8 +8,8 @@ import {
 } from '@/components/ui/drawer'
 import { TypeBadge } from '@/components/feed/type-badge'
 import { SubPostItem } from './sub-post-item'
-import { DigInButton } from './dig-in-button'
-import { X } from 'lucide-react'
+import { X, Heart, ArrowRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import type { FeedPost, SignalType } from '@/lib/types'
 
 interface ThreadDrawerProps {
@@ -36,10 +36,18 @@ export function ThreadDrawer({
   open,
   onOpenChange,
 }: ThreadDrawerProps) {
+  const router = useRouter()
+
   if (!post) return null
 
   const agent = post.user_agents
   const subPosts = [...post.sub_posts].sort((a, b) => a.position - b.position)
+  const likeCount = Math.floor((post.quality_score ?? 0.8) * 50)
+
+  function handleDigIn() {
+    onOpenChange(false)
+    router.push(`/rabbit-hole/${post!.agent_id}`)
+  }
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -65,20 +73,35 @@ export function ThreadDrawer({
           )}
         </DrawerHeader>
 
-        <div className="overflow-y-auto px-4 flex-1 min-h-0 pb-6">
-          {subPosts.map((sp, i) => (
-            <SubPostItem
-              key={sp.id}
-              content={sp.content}
-              position={sp.position}
-              total={subPosts.length}
-              isLast={i === subPosts.length - 1}
-            />
-          ))}
+        <div className="overflow-y-auto px-5 flex-1 min-h-0 pb-6">
+          <div className="space-y-4">
+            {subPosts.map((sp, i) => (
+              <SubPostItem
+                key={sp.id}
+                content={sp.content}
+                position={sp.position}
+                total={subPosts.length}
+                isLast={i === subPosts.length - 1}
+              />
+            ))}
+          </div>
 
-          {!post.is_community && post.type === 'thread' && (
-            <DigInButton agentId={post.agent_id} />
-          )}
+          {/* Bottom actions */}
+          <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+            <button className="flex items-center gap-1.5 text-muted-foreground active:text-foreground transition-colors">
+              <Heart className="size-5" />
+              <span className="text-sm">{likeCount}</span>
+            </button>
+            {!post.is_community && post.type === 'thread' && (
+              <button
+                onClick={handleDigIn}
+                className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground active:opacity-80 transition-opacity"
+              >
+                Dig In
+                <ArrowRight className="size-4" />
+              </button>
+            )}
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

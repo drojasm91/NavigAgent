@@ -7,16 +7,18 @@ interface SubPostItemProps {
 
 export function SubPostItem({ content, position, isLast }: SubPostItemProps) {
   return (
-    <div className="flex gap-4 py-4">
-      <div className="relative flex flex-col items-center w-6 shrink-0">
-        <span className="text-lg font-medium text-muted-foreground/50 leading-none pt-0.5">
+    <div className="relative">
+      {!isLast && (
+        <div className="absolute left-3 top-8 bottom-0 w-px bg-border" />
+      )}
+      <div className="flex gap-3">
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground mt-0.5">
           {position}
-        </span>
-        {!isLast && (
-          <div className="w-px bg-border flex-1 mt-2" />
-        )}
+        </div>
+        <p className="text-[15px] leading-relaxed text-foreground pb-2">
+          {content}
+        </p>
       </div>
-      <p className="text-[15px] leading-relaxed flex-1">{content}</p>
     </div>
   )
 }
