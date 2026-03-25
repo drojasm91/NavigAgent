@@ -19,6 +19,13 @@ export function AgentDashboardTab({ agent, posts }: AgentDashboardTabProps) {
 
   return (
     <div className="space-y-4 pt-4">
+      {/* Description */}
+      {agent.description && (
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {agent.description}
+        </p>
+      )}
+
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3">
         <Card>

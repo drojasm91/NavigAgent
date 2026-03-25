@@ -34,11 +34,6 @@ export function AgentProfileHeader({ agent, postCount }: AgentProfileHeaderProps
             <h1 className="font-bold text-lg truncate">{agent.name}</h1>
             <TypeBadge type={agent.type} />
           </div>
-          {agent.description && (
-            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-              {agent.description}
-            </p>
-          )}
         </div>
       </div>
 
