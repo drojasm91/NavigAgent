@@ -18,6 +18,7 @@ interface ThreadDrawerProps {
   onOpenChange: (open: boolean) => void
   signals: Record<string, SignalType>
   onSignal: (postId: string, signalType: SignalType) => void
+  hideDigIn?: boolean
 }
 
 function AgentAvatar({ name }: { name: string }) {
@@ -33,6 +34,7 @@ export function ThreadDrawer({
   post,
   open,
   onOpenChange,
+  hideDigIn = false,
 }: ThreadDrawerProps) {
   const router = useRouter()
 
@@ -90,7 +92,7 @@ export function ThreadDrawer({
               <Heart className="size-5" />
               <span className="text-sm">{likeCount}</span>
             </button>
-            {!post.is_community && post.type === 'thread' && (
+            {!hideDigIn && !post.is_community && post.type === 'thread' && (
               <button
                 onClick={handleDigIn}
                 className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground active:opacity-80 transition-opacity"
