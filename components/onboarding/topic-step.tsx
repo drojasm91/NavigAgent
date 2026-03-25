@@ -1,8 +1,9 @@
 'use client'
 
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Plus, Loader2 } from 'lucide-react'
 import { VIBES, TOPICS } from '@/lib/onboarding/templates'
 import { TopicChip } from './topic-chip'
+import type { CustomTopic } from './onboarding-flow'
 
 interface TopicStepProps {
   selectedVibes: Set<string>
@@ -14,6 +15,9 @@ interface TopicStepProps {
   submitting?: boolean
   freeText: string
   onFreeTextChange: (value: string) => void
+  customTopics: Map<string, CustomTopic>
+  classifying: boolean
+  onAddInterest: (text: string) => void
 }
 
 export function TopicStep({
@@ -26,6 +30,9 @@ export function TopicStep({
   submitting = false,
   freeText,
   onFreeTextChange,
+  customTopics,
+  classifying,
+  onAddInterest,
 }: TopicStepProps) {
   const canStart = selectedTopics.size > 0 && !submitting
   const vibesWithTopics = VIBES.filter((v) => selectedVibes.has(v.id))
@@ -68,25 +75,56 @@ export function TopicStep({
                       onToggle={() => onToggleTopic(topic.id)}
                     />
                   ))}
+                  {Array.from(customTopics.entries())
+                    .filter(([, meta]) => meta.vibeId === vibe.id)
+                    .map(([id, meta]) => (
+                      <TopicChip
+                        key={id}
+                        label={meta.label}
+                        selected={selectedTopics.has(id)}
+                        onToggle={() => onToggleTopic(id)}
+                      />
+                    ))}
                 </div>
               </div>
             )
           })}
         </div>
 
-        {/* Free text input */}
+        {/* Add interest input */}
         <div className="mt-8">
           <label htmlFor="free-text" className="text-sm font-medium">
             Anything else you&apos;re into?
           </label>
-          <input
-            id="free-text"
-            type="text"
-            value={freeText}
-            onChange={(e) => onFreeTextChange(e.target.value)}
-            placeholder="e.g. Formula 1, Japanese cooking, startup fundraising..."
-            className="mt-2 w-full rounded-xl border border-border bg-card px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
-          />
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              id="free-text"
+              type="text"
+              value={freeText}
+              onChange={(e) => onFreeTextChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  onAddInterest(freeText)
+                }
+              }}
+              disabled={classifying}
+              placeholder="e.g. Formula 1, Japanese cooking..."
+              className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors disabled:opacity-50"
+            />
+            <button
+              type="button"
+              onClick={() => onAddInterest(freeText)}
+              disabled={!freeText.trim() || classifying}
+              className="shrink-0 rounded-xl bg-primary p-3 text-primary-foreground transition-all disabled:opacity-30 active:scale-95"
+            >
+              {classifying ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
