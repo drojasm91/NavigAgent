@@ -40,6 +40,7 @@ export function OnboardingFlow() {
   const [customTopics, setCustomTopics] = useState<Map<string, CustomTopic>>(new Map())
   const [classifying, setClassifying] = useState(false)
   const [pendingOptions, setPendingOptions] = useState<ClassifyOption[] | null>(null)
+  const [pendingText, setPendingText] = useState('')
 
   function handleToggleVibe(vibeId: string) {
     setSelectedVibes((prev) => {
@@ -118,6 +119,7 @@ export function OnboardingFlow() {
     // If ambiguous, show options picker
     if (result.ambiguous && result.options && result.options.length >= 2) {
       setPendingOptions(result.options)
+      setPendingText(trimmed)
       setFreeText('')
       setClassifying(false)
       return
@@ -136,6 +138,13 @@ export function OnboardingFlow() {
   function handlePickOption(option: ClassifyOption) {
     applyClassification(option.label, option.vibeId, option.suggestedTopics)
     setPendingOptions(null)
+    setPendingText('')
+  }
+
+  function handleOtherOption() {
+    setFreeText(pendingText + ' ')
+    setPendingOptions(null)
+    setPendingText('')
   }
 
   async function handleGetStarted() {
@@ -191,6 +200,7 @@ export function OnboardingFlow() {
           onAddInterest={handleAddInterest}
           pendingOptions={pendingOptions}
           onPickOption={handlePickOption}
+          onOtherOption={handleOtherOption}
         />
       )}
     </div>

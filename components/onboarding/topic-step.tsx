@@ -21,6 +21,7 @@ interface TopicStepProps {
   onAddInterest: (text: string) => void
   pendingOptions: ClassifyOption[] | null
   onPickOption: (option: ClassifyOption) => void
+  onOtherOption: () => void
 }
 
 export function TopicStep({
@@ -38,6 +39,7 @@ export function TopicStep({
   onAddInterest,
   pendingOptions,
   onPickOption,
+  onOtherOption,
 }: TopicStepProps) {
   const canStart = selectedTopics.size > 0 && !submitting
   const vibesWithTopics = VIBES.filter((v) => selectedVibes.has(v.id))
@@ -146,6 +148,13 @@ export function TopicStep({
                     {option.label}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={onOtherOption}
+                  className="rounded-full border border-dashed border-muted-foreground/40 px-3 py-1.5 text-sm text-muted-foreground transition-all active:scale-95"
+                >
+                  Other
+                </button>
               </div>
             </div>
           )}
