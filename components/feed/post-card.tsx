@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TypeBadge } from './type-badge'
 import type { FeedPost } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Heart, Layers, ArrowUpRight } from 'lucide-react'
+import { Heart, Layers, Bot } from 'lucide-react'
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -76,7 +76,7 @@ export function PostCard({ post, onTap, currentAgentId }: PostCardProps) {
               href={`/agent/${agent.id}?tab=posts`}
               className="rounded-full p-1 text-muted-foreground active:bg-accent transition-colors"
             >
-              <ArrowUpRight className="h-3.5 w-3.5" />
+              <Bot className="h-3.5 w-3.5" />
             </Link>
           )}
         </div>
