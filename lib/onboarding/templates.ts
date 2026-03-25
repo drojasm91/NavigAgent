@@ -28,19 +28,19 @@ export const VIBES: VibeOption[] = [
     id: 'learn',
     emoji: '\u{1F9E0}',
     label: 'Learn new things',
-    description: 'History, science, vibe coding, how things work',
+    description: 'History, science, vibe coding, book insights, how things work',
   },
   {
     id: 'live_better',
     emoji: '\u2728',
-    label: 'Live better',
+    label: 'Get recommendations',
     description: 'Restaurants, events, what to watch',
   },
   {
     id: 'think_deeper',
     emoji: '\u{1F50D}',
     label: 'Think deeper',
-    description: 'Contrarian takes, ethics, geopolitics',
+    description: 'Contrarian takes, philosophy, geopolitics',
   },
 ]
 

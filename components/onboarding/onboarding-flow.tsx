@@ -29,6 +29,7 @@ export function OnboardingFlow() {
   const [step, setStep] = useState<1 | 2>(1)
   const [selectedVibes, setSelectedVibes] = useState<Set<string>>(new Set())
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<Set<string>>(new Set())
+  const [freeText, setFreeText] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   const templates = useMemo(
@@ -97,6 +98,8 @@ export function OnboardingFlow() {
           selectedVibes={selectedVibes}
           onToggleVibe={handleToggleVibe}
           onContinue={handleContinue}
+          freeText={freeText}
+          onFreeTextChange={setFreeText}
         />
       ) : (
         <AgentStep
