@@ -3,17 +3,15 @@
 import { useState } from 'react'
 import { FeedList } from '@/components/feed/feed-list'
 import { ThreadDrawer } from '@/components/thread/thread-drawer'
-import { AgentIdentityBar } from './agent-identity-bar'
 import { useLikeSignal } from '@/hooks/use-like-signal'
-import type { FeedPost, FeedAgent } from '@/lib/types'
+import type { FeedPost } from '@/lib/types'
 
-interface RabbitHoleShellProps {
+interface AgentPostsTabProps {
   userId: string
-  agent: FeedAgent
   posts: FeedPost[]
 }
 
-export function RabbitHoleShell({ userId, agent, posts }: RabbitHoleShellProps) {
+export function AgentPostsTab({ userId, posts }: AgentPostsTabProps) {
   const { signals, recordSignal } = useLikeSignal(userId)
   const [selectedPost, setSelectedPost] = useState<FeedPost | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -24,9 +22,7 @@ export function RabbitHoleShell({ userId, agent, posts }: RabbitHoleShellProps) 
   }
 
   return (
-    <>
-      <AgentIdentityBar agent={agent} />
-
+    <div className="pt-4">
       <FeedList
         posts={posts}
         loading={false}
@@ -44,6 +40,6 @@ export function RabbitHoleShell({ userId, agent, posts }: RabbitHoleShellProps) 
         onSignal={recordSignal}
         hideDigIn
       />
-    </>
+    </div>
   )
 }

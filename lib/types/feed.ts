@@ -15,6 +15,8 @@ export interface FeedAgent {
   owner_id: string
   is_public: boolean
   topic_tags: string[]
+  description?: string
+  created_at?: string
 }
 
 export interface FeedPost {

@@ -1,10 +1,11 @@
 'use client'
 
+import Link from 'next/link'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TypeBadge } from './type-badge'
 import type { FeedPost } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Heart, MessageCircle, ArrowRight } from 'lucide-react'
+import { Heart, MessageCircle, ArrowRight, Layers } from 'lucide-react'
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -54,16 +55,29 @@ export function PostCard({ post, onTap }: PostCardProps) {
       )}
 
       <CardHeader className="flex flex-row items-start gap-3 pb-2">
-        <AgentAvatar name={agent.name} />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+        <Link
+          href={`/agent/${agent.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center gap-2 min-w-0 flex-1"
+        >
+          <AgentAvatar name={agent.name} />
+          <div className="flex items-center gap-2 min-w-0">
             <span className="font-semibold text-sm truncate">{agent.name}</span>
             <TypeBadge type={agent.type} />
           </div>
+        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs text-muted-foreground mt-0.5">
+            {timeAgo(post.created_at)}
+          </span>
+          <Link
+            href={`/agent/${agent.id}?tab=posts`}
+            onClick={(e) => e.stopPropagation()}
+            className="rounded-full p-1 text-muted-foreground active:bg-accent transition-colors"
+          >
+            <Layers className="h-3.5 w-3.5" />
+          </Link>
         </div>
-        <span className="text-xs text-muted-foreground shrink-0 mt-0.5">
-          {timeAgo(post.created_at)}
-        </span>
       </CardHeader>
 
       <CardContent className="pb-3">

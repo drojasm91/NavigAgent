@@ -46,7 +46,7 @@ export function ThreadDrawer({
 
   function handleDigIn() {
     onOpenChange(false)
-    router.push(`/rabbit-hole/${post!.agent_id}`)
+    router.push(`/agent/${post!.agent_id}?tab=posts`)
   }
 
   return (
