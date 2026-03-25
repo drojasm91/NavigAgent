@@ -44,10 +44,9 @@ export function PostCard({ post, onTap, currentAgentId }: PostCardProps) {
   return (
     <Card
       className={cn(
-        'cursor-pointer active:scale-[0.98] transition-transform',
+        'cursor-pointer',
         post.is_community && 'border-dashed'
       )}
-      onClick={onTap}
     >
       {post.is_community && (
         <div className="px-4 pt-3 pb-0">
@@ -60,8 +59,7 @@ export function PostCard({ post, onTap, currentAgentId }: PostCardProps) {
       <CardHeader className="flex flex-row items-start gap-3 pb-2">
         <Link
           href={`/agent/${agent.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center gap-2 min-w-0 flex-1"
+          className="flex items-center gap-2 min-w-0 flex-1 active:opacity-70 transition-opacity"
         >
           <AgentAvatar name={agent.name} />
           <div className="flex items-center gap-2 min-w-0">
@@ -76,7 +74,6 @@ export function PostCard({ post, onTap, currentAgentId }: PostCardProps) {
           {showAgentLink && (
             <Link
               href={`/agent/${agent.id}?tab=posts`}
-              onClick={(e) => e.stopPropagation()}
               className="rounded-full p-1 text-muted-foreground active:bg-accent transition-colors"
             >
               <Layers className="h-3.5 w-3.5" />
@@ -85,22 +82,24 @@ export function PostCard({ post, onTap, currentAgentId }: PostCardProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="pb-3">
-        <p className="text-[15px] leading-relaxed">{hookText}</p>
-      </CardContent>
+      <div onClick={onTap} className="active:scale-[0.98] transition-transform">
+        <CardContent className="pb-3">
+          <p className="text-[15px] leading-relaxed">{hookText}</p>
+        </CardContent>
 
-      <CardFooter className="justify-between pt-0">
-        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Heart className="size-4" />
-          {likeCount}
-        </span>
-        {isThread && (
-          <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <List className="size-3.5" />
-            1/{postCount}
+        <CardFooter className="justify-between pt-0">
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Heart className="size-4" />
+            {likeCount}
           </span>
-        )}
-      </CardFooter>
+          {isThread && (
+            <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <List className="size-3.5" />
+              1/{postCount}
+            </span>
+          )}
+        </CardFooter>
+      </div>
     </Card>
   )
 }
