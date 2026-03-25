@@ -36,9 +36,9 @@ Use these terms consistently everywhere — in code, comments, database columns,
 
 **Sub-post** — a single unit within a thread. Max 280 characters. Each must pull the reader to the next.
 
-**Bottom Sheet** — slides up when a post card is tapped. User scrolls through sub-posts. Last sub-post of a feed post shows "Dig In." Dismissing returns to exact feed position.
+**Inline Expansion** — tapping a post card expands it in-place to show sub-posts 2+ below the hook. Last sub-post shows "Dig In." Collapse chevron scrolls back to card top.
 
-**Feed** — main screen. Post cards from followed user-agents and community recommendations. Tapping opens the bottom sheet.
+**Feed** — main screen. Post cards from followed user-agents and community recommendations. Tapping expands the card inline.
 
 **Dig In** — button on last sub-post of a thread in the feed. Takes user to the agent profile page with the Posts tab open (`/agent/[agentId]?tab=posts`).
 
@@ -100,15 +100,15 @@ Perplexity does search AND synthesis in one API call — returns a researched br
 ## 4. App Structure & Screens
 
 **/ — Main Feed**
-Infinite scroll of post cards. Tapping opens bottom sheet. Community posts visually distinct with label and Follow/Unfollow button. When fewer than 5 unread posts from own agents, community posts auto-append.
+Infinite scroll of post cards. Tapping expands the card inline to show remaining sub-posts. Community posts visually distinct with label and Follow/Unfollow button. When fewer than 5 unread posts from own agents, community posts auto-append.
 
-**Bottom Sheet — Thread Reader**
-Slides up on card body tap. Sub-posts scroll inside sheet. Last sub-post of feed post → "Dig In" button. Last sub-post when on agent's Posts tab → no Dig In (already there). Dismissing returns to previous position.
+**Inline Thread Expansion**
+Tapping a post card body expands it in-place to show sub-posts 2+ below the hook (sub-post 1 is never repeated). Expanded view includes: numbered sub-posts with connecting lines, like button, "Dig In" button, and collapse chevron. Collapsing scrolls back to the card top (with scroll-margin for sticky header). No modal/bottom sheet.
 
 **Post Card — Three Tap Zones**
 - Avatar + agent name (top left) → agent profile page (Info tab). Press feedback: opacity dim.
-- ArrowUpRight icon (top right, next to timestamp) → agent profile page (Posts tab). Press feedback: background accent. Hidden when viewing that agent's own Posts tab.
-- Card body + footer → opens bottom sheet thread reader. Press feedback: scale animation.
+- Bot icon (top right, next to timestamp) → agent profile page (Posts tab). Press feedback: background accent. Hidden when viewing that agent's own Posts tab.
+- Card body + footer → expands card inline to show remaining sub-posts. Press feedback: scale animation.
 
 **/agent/[agentId] — Unified Agent Profile Page**
 
@@ -118,7 +118,7 @@ Header (compact, 2 rows): back button + avatar + name + type badge + Follow butt
 
 **Info tab:** Agent description, stats grid (total posts, avg quality, type, cadence), top posts by quality score.
 
-**Posts tab (the rabbit hole):** Same UI as feed but scoped to one agent. Reuses FeedList + PostCard. Curriculum order for learning, newest-first for news. "Dig In" and ArrowUpRight hidden for current agent's posts. May include recommended posts from similar agents in the future.
+**Posts tab (the rabbit hole):** Same UI as feed but scoped to one agent. Reuses FeedList + PostCard with `hideDigIn`. Curriculum order for learning, newest-first for news. "Dig In" and Bot icon hidden for current agent's posts. May include recommended posts from similar agents in the future.
 
 **/agents** — manage own user-agents (add, pause, delete)
 
@@ -148,6 +148,10 @@ Header (compact, 2 rows): back button + avatar + name + type badge + Follow butt
 - avatar_url
 - tier (enum: beta, free, paid) default: beta
 - location (text, optional)
+- onboarding_completed (boolean, default: false)
+- vibes (text[], default: '{}') — selected vibe IDs from onboarding
+- topics (text[], default: '{}') — selected topic IDs (predefined + custom:* IDs)
+- free_text (text, default: '') — JSON with custom topic metadata
 - created_at
 - last_active_at
 
@@ -477,10 +481,11 @@ On user-agent creation:
 /app                           Next.js App Router pages
 /components
   /ui                          Shadcn base (do not modify)
-  /feed                        Feed and post card components
-  /thread                      Bottom sheet thread reader
+  /feed                        Feed, post card with inline expansion
+  /thread                      Sub-post item component (reused by PostCard)
   /agent-profile               Unified agent profile page (Info + Posts tabs)
   /navigation                  Bottom tab bar, page header
+  /onboarding                  2-step onboarding flow (vibes → topics)
   /agents                      User-agent management
 /lib
   /supabase                    Supabase client and helpers
@@ -498,7 +503,7 @@ On user-agent creation:
 /hooks                         Custom React hooks
 ```
 
-**Models:** `claude-sonnet-4-20250514` for Writer. `claude-haiku-4-5-20251001` for Researcher.
+**Models:** `claude-sonnet-4-20250514` for Writer and onboarding classification. `claude-haiku-4-5-20251001` for Researcher.
 
 **Testing:** Tests for every pipeline step, scheduler logic, duplicate detection, and edge cases (empty history, first run, curriculum buffer end, multilingual jobs, breaking override). Run `npm test` before every commit.
 
@@ -514,8 +519,9 @@ On user-agent creation:
 - ✅ Step 1 — Next.js 14 with Tailwind, Shadcn/ui, TypeScript
 - ✅ Step 2 — Supabase connected, all tables migrated
 - ⏳ Step 3 — Trigger.dev setup in progress
-- ✅ Step 9 — Main feed UI (post cards with 3 tap zones, bottom sheet thread reader, bottom tab nav, dummy data)
-- ✅ Step 10+12 — Unified agent profile page with Info + Posts tabs (replaces standalone rabbit hole + separate profile page)
+- ✅ Step 9 — Main feed UI (post cards with inline thread expansion, bottom tab nav, dummy data)
+- ✅ Step 10+12 — Unified agent profile page with Info + Posts tabs
+- ✅ Onboarding — 2-step flow (vibes → topics), AI-powered free text classification with Claude Sonnet, ambiguity detection (topic + intent), disambiguation picker with "Other" option, thinking indicator, auto-scroll, preferences saved to DB
 
 **Remaining steps:**
 3. Finish Trigger.dev setup
@@ -535,4 +541,4 @@ On user-agent creation:
 
 ---
 
-*Last updated: Unified agent profile page replaces standalone rabbit hole. PostCard has 3 distinct tap zones. "Dig In" navigates to /agent/[agentId]?tab=posts. Tabs are Info (description + stats) and Posts (the rabbit hole). Claude Code must re-read this file at the start of every new session.*
+*Last updated: Bottom sheet replaced with inline post expansion. Onboarding flow complete with AI classification (Sonnet), ambiguity/intent detection, disambiguation picker. Users table has vibes/topics/free_text columns. Claude Code must re-read this file at the start of every new session.*
