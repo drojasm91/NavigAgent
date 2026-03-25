@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
@@ -39,6 +39,7 @@ interface PostCardProps {
 export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardProps) {
   const router = useRouter()
   const [expanded, setExpanded] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   const agent = post.user_agents
   const hookText = post.sub_posts?.[0]?.content ?? ''
@@ -61,6 +62,7 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
 
   return (
     <Card
+      ref={cardRef}
       className={cn(
         'cursor-pointer',
         post.is_community && 'border-dashed'
@@ -160,6 +162,9 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
                 onClick={(e) => {
                   e.stopPropagation()
                   setExpanded(false)
+                  requestAnimationFrame(() => {
+                    cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  })
                 }}
                 className="rounded-full p-2 text-muted-foreground active:bg-accent transition-colors"
               >
