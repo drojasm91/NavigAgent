@@ -61,7 +61,7 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
   }
 
   return (
-    <div ref={cardRef}>
+    <div ref={cardRef} className="scroll-mt-16">
     <Card
       className={cn(
         'cursor-pointer',
