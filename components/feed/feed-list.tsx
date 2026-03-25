@@ -12,8 +12,8 @@ interface FeedListProps {
   loadingMore: boolean
   hasMore: boolean
   onLoadMore: () => void
-  onPostTap: (post: FeedPost) => void
   currentAgentId?: string
+  hideDigIn?: boolean
 }
 
 function PostSkeleton() {
@@ -35,8 +35,8 @@ export function FeedList({
   loadingMore,
   hasMore,
   onLoadMore,
-  onPostTap,
   currentAgentId,
+  hideDigIn = false,
 }: FeedListProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
 
@@ -80,8 +80,8 @@ export function FeedList({
         <PostCard
           key={post.id}
           post={post}
-          onTap={() => onPostTap(post)}
           currentAgentId={currentAgentId}
+          hideDigIn={hideDigIn}
         />
       ))}
 
