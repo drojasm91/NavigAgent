@@ -5,15 +5,12 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerFooter,
 } from '@/components/ui/drawer'
-import { Button } from '@/components/ui/button'
 import { TypeBadge } from '@/components/feed/type-badge'
 import { SubPostItem } from './sub-post-item'
 import { DigInButton } from './dig-in-button'
-import { Heart, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import type { FeedPost, SignalType } from '@/lib/types'
-import { cn } from '@/lib/utils'
 
 interface ThreadDrawerProps {
   post: FeedPost | null
@@ -23,35 +20,52 @@ interface ThreadDrawerProps {
   onSignal: (postId: string, signalType: SignalType) => void
 }
 
+function AgentAvatar({ name }: { name: string }) {
+  const initial = name.charAt(0).toUpperCase()
+  return (
+    <div className="size-10 rounded-full bg-neutral-800 dark:bg-neutral-200 flex items-center justify-center shrink-0">
+      <span className="text-sm font-semibold text-white dark:text-neutral-800">
+        {initial}
+      </span>
+    </div>
+  )
+}
+
 export function ThreadDrawer({
   post,
   open,
   onOpenChange,
-  signals,
-  onSignal,
 }: ThreadDrawerProps) {
   if (!post) return null
 
   const agent = post.user_agents
   const subPosts = [...post.sub_posts].sort((a, b) => a.position - b.position)
-  const currentSignal = signals[post.id]
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <div className="flex items-center gap-2">
-            <DrawerTitle className="text-base">{agent.name}</DrawerTitle>
-            <TypeBadge type={agent.type} />
+          <div className="flex items-center gap-3">
+            <AgentAvatar name={agent.name} />
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <DrawerTitle className="text-base">{agent.name}</DrawerTitle>
+              <TypeBadge type={agent.type} />
+            </div>
+            <button
+              onClick={() => onOpenChange(false)}
+              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors p-1"
+            >
+              <X className="size-5" />
+            </button>
           </div>
           {post.is_community && (
-            <span className="text-[11px] text-muted-foreground">
+            <span className="text-[11px] text-muted-foreground mt-1 block">
               From the community
             </span>
           )}
         </DrawerHeader>
 
-        <div className="overflow-y-auto px-4 flex-1 min-h-0">
+        <div className="overflow-y-auto px-4 flex-1 min-h-0 pb-6">
           {subPosts.map((sp, i) => (
             <SubPostItem
               key={sp.id}
@@ -66,40 +80,6 @@ export function ThreadDrawer({
             <DigInButton agentId={post.agent_id} />
           )}
         </div>
-
-        <DrawerFooter>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              size="lg"
-              className={cn(
-                'flex-1',
-                currentSignal === 'like' && 'bg-red-50 border-red-200 text-red-600 dark:bg-red-950 dark:border-red-800'
-              )}
-              onClick={() => onSignal(post.id, 'like')}
-            >
-              <Heart
-                className={cn(
-                  'size-5 mr-1.5',
-                  currentSignal === 'like' && 'fill-current'
-                )}
-              />
-              Like
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className={cn(
-                'flex-1',
-                currentSignal === 'skip' && 'bg-muted'
-              )}
-              onClick={() => onSignal(post.id, 'skip')}
-            >
-              <X className="size-5 mr-1.5" />
-              Skip
-            </Button>
-          </div>
-        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   )

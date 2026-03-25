@@ -7,14 +7,16 @@ interface SubPostItemProps {
   isLast: boolean
 }
 
-export function SubPostItem({ content, position, total, isLast }: SubPostItemProps) {
+export function SubPostItem({ content, position, isLast }: SubPostItemProps) {
   return (
-    <div className="py-4">
-      <p className="text-[15px] leading-relaxed">{content}</p>
-      <span className="text-[11px] text-muted-foreground mt-2 block">
-        {position}/{total}
-      </span>
-      {!isLast && <Separator className="mt-4" />}
-    </div>
+    <>
+      <div className="flex gap-4 py-4">
+        <span className="text-lg font-medium text-muted-foreground/50 w-6 shrink-0 pt-0.5 text-right">
+          {position}
+        </span>
+        <p className="text-[15px] leading-relaxed flex-1">{content}</p>
+      </div>
+      {!isLast && <Separator />}
+    </>
   )
 }

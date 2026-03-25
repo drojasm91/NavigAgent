@@ -12,7 +12,7 @@ const typeConfig: Record<UserAgentType, { label: string; className: string }> = 
     className: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800',
   },
   recommendation: {
-    label: 'Picks',
+    label: 'recommendation',
     className: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800',
   },
 }
