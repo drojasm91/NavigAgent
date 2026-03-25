@@ -22,13 +22,13 @@ export const VIBES: VibeOption[] = [
     id: 'stay_informed',
     emoji: '\u{1F4E1}',
     label: 'Stay informed',
-    description: 'News, markets, industry trends, sports',
+    description: 'News, markets, industry trends, AI, crypto, sports',
   },
   {
     id: 'learn',
     emoji: '\u{1F9E0}',
     label: 'Learn new things',
-    description: 'History, science, how things work',
+    description: 'History, science, vibe coding, how things work',
   },
   {
     id: 'live_better',
@@ -41,12 +41,6 @@ export const VIBES: VibeOption[] = [
     emoji: '\u{1F50D}',
     label: 'Think deeper',
     description: 'Contrarian takes, ethics, geopolitics',
-  },
-  {
-    id: 'build',
-    emoji: '\u{1F6E0}',
-    label: 'Build stuff',
-    description: 'Prompts, no-code, creator economy',
   },
 ]
 
@@ -126,25 +120,6 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     description: 'Real dilemmas with no easy answers. Think before you pick a side.',
     type: 'news',
     topicTags: ['ethics', 'philosophy', 'society'],
-  },
-  // Build stuff
-  {
-    id: 'prompt-craft',
-    vibeId: 'build',
-    emoji: '\u{1F4AC}',
-    name: 'Prompt Craft',
-    description: 'One prompt technique per day that makes AI do what you actually want.',
-    type: 'learning',
-    topicTags: ['prompt-engineering', 'ai', 'tools'],
-  },
-  {
-    id: 'no-code-builder',
-    vibeId: 'build',
-    emoji: '\u{1F9E9}',
-    name: 'No-Code Builder',
-    description: 'Ship real products without writing code. New trick every day.',
-    type: 'learning',
-    topicTags: ['no-code', 'tools', 'automation'],
   },
 ]
 
