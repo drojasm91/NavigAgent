@@ -62,10 +62,11 @@ export function OnboardingFlow() {
   async function handleGetStarted() {
     if (submitting) return
     setSubmitting(true)
-    // TODO: auto-follow matching agents + auto-create agents for topics without pre-built ones
-    // Selected topics: Array.from(selectedTopics)
-    // Free text: freeText
-    await completeOnboarding()
+    await completeOnboarding({
+      vibes: Array.from(selectedVibes),
+      topics: Array.from(selectedTopics),
+      freeText,
+    })
     router.push('/')
   }
 

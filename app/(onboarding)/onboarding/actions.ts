@@ -3,7 +3,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 
-export async function completeOnboarding() {
+interface OnboardingData {
+  vibes: string[]
+  topics: string[]
+  freeText: string
+}
+
+export async function completeOnboarding(data?: OnboardingData) {
   const supabase = createClient()
 
   const {
@@ -16,7 +22,12 @@ export async function completeOnboarding() {
 
   const { error } = await supabase
     .from('users')
-    .update({ onboarding_completed: true })
+    .update({
+      onboarding_completed: true,
+      vibes: data?.vibes ?? [],
+      topics: data?.topics ?? [],
+      free_text: data?.freeText ?? '',
+    })
     .eq('id', user.id)
 
   if (error) {
