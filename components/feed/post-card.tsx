@@ -161,8 +161,12 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  setTimeout(() => setExpanded(false), 300)
+                  const cardTop = cardRef.current?.getBoundingClientRect().top ?? 0
+                  const scrollTarget = window.scrollY + cardTop - 16
+                  setExpanded(false)
+                  requestAnimationFrame(() => {
+                    window.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' })
+                  })
                 }}
                 className="rounded-full p-2 text-muted-foreground active:bg-accent transition-colors"
               >
