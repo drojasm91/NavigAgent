@@ -161,10 +161,8 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  setExpanded(false)
-                  requestAnimationFrame(() => {
-                    cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  })
+                  cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  setTimeout(() => setExpanded(false), 300)
                 }}
                 className="rounded-full p-2 text-muted-foreground active:bg-accent transition-colors"
               >
