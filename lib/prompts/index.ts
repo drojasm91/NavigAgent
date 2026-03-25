@@ -12,9 +12,10 @@ Categories:
 
 Rules:
 - Pick the single best category
+- Return a clean, properly capitalized label for the user's input (e.g. "formula 1" → "Formula 1", "japanese cooking" → "Japanese Cooking", "AI" → "AI")
 - Suggested topics should be related but distinct from the input
-- Keep topic labels short (1-3 words)
+- Keep all topic labels short (1-3 words), properly capitalized
 - Respond with ONLY valid JSON, no other text
 
 Response format:
-{"vibeId":"<category>","suggestedTopics":["<topic1>","<topic2>","<topic3>"]}`
+{"vibeId":"<category>","label":"<clean capitalized label>","suggestedTopics":["<topic1>","<topic2>","<topic3>"]}`

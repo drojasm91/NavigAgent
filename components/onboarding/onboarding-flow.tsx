@@ -76,7 +76,8 @@ export function OnboardingFlow() {
 
     const firstVibe = Array.from(selectedVibes)[0]
     const vibeId = result.vibeId ?? (firstVibe || 'stay_informed')
-    const topicId = `custom:${trimmed.toLowerCase().replace(/\s+/g, '-')}`
+    const cleanLabel = result.label ?? trimmed
+    const topicId = `custom:${cleanLabel.toLowerCase().replace(/\s+/g, '-')}`
 
     // Auto-add the vibe if not selected
     if (!selectedVibes.has(vibeId)) {
@@ -87,9 +88,9 @@ export function OnboardingFlow() {
       })
     }
 
-    // Add typed text as custom topic
+    // Add typed text as custom topic with AI-cleaned label
     const nextCustom = new Map(customTopics)
-    nextCustom.set(topicId, { label: trimmed, vibeId })
+    nextCustom.set(topicId, { label: cleanLabel, vibeId })
 
     // Add suggestions — match predefined topics if possible, otherwise create custom
     const nextSelected = new Set(selectedTopics)

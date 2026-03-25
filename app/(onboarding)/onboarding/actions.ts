@@ -13,6 +13,7 @@ interface OnboardingData {
 
 interface ClassifyResult {
   vibeId: string | null
+  label: string | null
   suggestedTopics: string[]
   error?: boolean
 }
@@ -36,13 +37,14 @@ export async function classifyInterest(text: string): Promise<ClassifyResult> {
     const parsed = JSON.parse(cleaned)
 
     const vibeId = VALID_VIBES.includes(parsed.vibeId) ? parsed.vibeId : 'stay_informed'
+    const label = typeof parsed.label === 'string' ? parsed.label : null
     const suggestedTopics = Array.isArray(parsed.suggestedTopics)
       ? parsed.suggestedTopics.filter((t: unknown) => typeof t === 'string').slice(0, 3)
       : []
 
-    return { vibeId, suggestedTopics }
+    return { vibeId, label, suggestedTopics }
   } catch {
-    return { vibeId: null, suggestedTopics: [], error: true }
+    return { vibeId: null, label: null, suggestedTopics: [], error: true }
   }
 }
 
