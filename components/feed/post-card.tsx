@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TypeBadge } from './type-badge'
 import type { FeedPost } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Heart, MessageCircle, ArrowRight, Layers } from 'lucide-react'
+import { Heart, Layers, List } from 'lucide-react'
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -30,13 +30,16 @@ function AgentAvatar({ name }: { name: string }) {
 interface PostCardProps {
   post: FeedPost
   onTap: () => void
+  currentAgentId?: string
 }
 
-export function PostCard({ post, onTap }: PostCardProps) {
+export function PostCard({ post, onTap, currentAgentId }: PostCardProps) {
   const agent = post.user_agents
   const hookText = post.sub_posts?.[0]?.content ?? ''
   const likeCount = Math.floor((post.quality_score ?? 0.8) * 50)
   const postCount = post.sub_posts.length
+  const isThread = post.type === 'thread' && postCount > 1
+  const showAgentLink = !currentAgentId || post.agent_id !== currentAgentId
 
   return (
     <Card
@@ -70,13 +73,15 @@ export function PostCard({ post, onTap }: PostCardProps) {
           <span className="text-xs text-muted-foreground mt-0.5">
             {timeAgo(post.created_at)}
           </span>
-          <Link
-            href={`/agent/${agent.id}?tab=posts`}
-            onClick={(e) => e.stopPropagation()}
-            className="rounded-full p-1 text-muted-foreground active:bg-accent transition-colors"
-          >
-            <Layers className="h-3.5 w-3.5" />
-          </Link>
+          {showAgentLink && (
+            <Link
+              href={`/agent/${agent.id}?tab=posts`}
+              onClick={(e) => e.stopPropagation()}
+              className="rounded-full p-1 text-muted-foreground active:bg-accent transition-colors"
+            >
+              <Layers className="h-3.5 w-3.5" />
+            </Link>
+          )}
         </div>
       </CardHeader>
 
@@ -85,20 +90,16 @@ export function PostCard({ post, onTap }: PostCardProps) {
       </CardContent>
 
       <CardFooter className="justify-between pt-0">
-        <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Heart className="size-4" />
-            {likeCount}
-          </span>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <MessageCircle className="size-4" />
-            {postCount} posts
-          </span>
-        </div>
-        <span className="flex items-center gap-1 text-xs font-medium text-foreground">
-          Read thread
-          <ArrowRight className="size-3.5" />
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Heart className="size-4" />
+          {likeCount}
         </span>
+        {isThread && (
+          <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <List className="size-3.5" />
+            1/{postCount}
+          </span>
+        )}
       </CardFooter>
     </Card>
   )

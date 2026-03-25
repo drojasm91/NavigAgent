@@ -8,10 +8,11 @@ import type { FeedPost } from '@/lib/types'
 
 interface AgentPostsTabProps {
   userId: string
+  agentId: string
   posts: FeedPost[]
 }
 
-export function AgentPostsTab({ userId, posts }: AgentPostsTabProps) {
+export function AgentPostsTab({ userId, agentId, posts }: AgentPostsTabProps) {
   const { signals, recordSignal } = useLikeSignal(userId)
   const [selectedPost, setSelectedPost] = useState<FeedPost | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -30,6 +31,7 @@ export function AgentPostsTab({ userId, posts }: AgentPostsTabProps) {
         hasMore={false}
         onLoadMore={() => {}}
         onPostTap={handlePostTap}
+        currentAgentId={agentId}
       />
 
       <ThreadDrawer

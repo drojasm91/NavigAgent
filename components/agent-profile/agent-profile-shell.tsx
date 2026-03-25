@@ -44,7 +44,7 @@ export function AgentProfileShell({ userId, agent, posts }: AgentProfileShellPro
           <AgentDashboardTab agent={agent} posts={posts} />
         </TabsContent>
         <TabsContent value="posts">
-          <AgentPostsTab userId={userId} posts={posts} />
+          <AgentPostsTab userId={userId} agentId={agent.id} posts={posts} />
         </TabsContent>
       </Tabs>
     </>
