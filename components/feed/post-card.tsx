@@ -161,12 +161,11 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  const cardTop = cardRef.current?.getBoundingClientRect().top ?? 0
-                  const scrollTarget = window.scrollY + cardTop - 16
                   setExpanded(false)
-                  requestAnimationFrame(() => {
-                    window.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' })
-                  })
+                  // Wait for React to re-render (collapse), then scroll to card
+                  setTimeout(() => {
+                    cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                  }, 50)
                 }}
                 className="rounded-full p-2 text-muted-foreground active:bg-accent transition-colors"
               >
