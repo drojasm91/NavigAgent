@@ -672,7 +672,14 @@ export function CreateAgentFlow() {
               onClick={handleGenerateSample}
               className="w-full rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground transition-all active:scale-[0.98]"
             >
-              Continue
+              Show me a sample post
+            </button>
+            <button
+              type="button"
+              onClick={handleBack}
+              className="w-full py-3 text-xs text-muted-foreground active:opacity-70"
+            >
+              Go back and tweak
             </button>
           </div>
         </div>
