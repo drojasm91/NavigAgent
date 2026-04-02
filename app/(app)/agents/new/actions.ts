@@ -2,9 +2,15 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
-import { createAgentWithSubscription } from '@/lib/supabase/queries/agents'
+import { createAgentWithPosts } from '@/lib/supabase/queries/agents'
 import { AGENT_FOLLOWUP_PROMPT, AGENT_NAME_PROMPT } from '@/lib/prompts'
+import { runNewsResearcher } from '@/lib/pipelines/steps/researcher'
+import { runNewsWriter } from '@/lib/pipelines/steps/writer-news'
 import type { UserAgentType } from '@/lib/types'
+import type { WriterOutput, WriterSubPost } from '@/lib/pipelines/types'
+
+// Re-export for the UI component
+export type { WriterOutput, WriterSubPost }
 
 export interface FollowUpQuestion {
   question: string
@@ -25,6 +31,11 @@ interface AgentPreview {
 
 interface CreateAgentResult {
   agentId?: string
+  error?: string
+}
+
+interface SamplePostResult {
+  post?: WriterOutput
   error?: string
 }
 
@@ -114,11 +125,71 @@ export async function generateAgentPreview(
   }
 }
 
-export async function createAgent(
+export async function generateSamplePost(
   type: UserAgentType,
   name: string,
   description: string,
   topicTags: string[]
+): Promise<SamplePostResult> {
+  try {
+    // Build researcher input — no history during creation
+    const researcherInput = {
+      agentName: name,
+      agentDescription: description,
+      agentType: type,
+      topicTags,
+      promptConfig: {},
+      recentPostHooks: [],
+    }
+
+    // Run researcher
+    let research = await runNewsResearcher(researcherInput)
+
+    // If researcher skips, retry with broader query
+    if (research.skip) {
+      const broadInput = {
+        ...researcherInput,
+        agentDescription: `${description}. Find ANY recent development or interesting angle on this topic.`,
+      }
+      research = await runNewsResearcher(broadInput)
+    }
+
+    // If still skipping, use a fallback brief
+    if (research.skip || !research.data) {
+      research = {
+        skip: false,
+        data: {
+          brief: `Write an engaging overview of the current state of ${description}. Focus on the most interesting recent developments in ${topicTags.join(', ')}.`,
+          angle: 'Current state overview with the most surprising recent development',
+          sources: [],
+          topicsToAvoid: [],
+          isBreaking: false,
+        },
+      }
+    }
+
+    // Run writer
+    const writerOutput = await runNewsWriter({
+      agentName: name,
+      agentDescription: description,
+      agentType: type,
+      topicTags,
+      promptConfig: {},
+      researchBrief: research.data!,
+    })
+
+    return { post: writerOutput }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Failed to generate sample post' }
+  }
+}
+
+export async function createAgentWithSamples(
+  type: UserAgentType,
+  name: string,
+  description: string,
+  topicTags: string[],
+  samplePosts: WriterOutput[]
 ): Promise<CreateAgentResult> {
   const supabase = createClient()
 
@@ -131,12 +202,35 @@ export async function createAgent(
   }
 
   try {
-    const agentId = await createAgentWithSubscription(supabase, user.id, {
+    const agentId = await createAgentWithPosts(supabase, user.id, {
       name,
       type,
       description,
       topicTags,
-    })
+    }, samplePosts)
+
+    // Trigger background jobs to fill up to 3 posts
+    const remaining = Math.max(0, 3 - samplePosts.length)
+    if (remaining > 0) {
+      // Create pending jobs and trigger pipeline
+      for (let i = 0; i < remaining; i++) {
+        const { data: job } = await supabase
+          .from('jobs')
+          .insert({ agent_id: agentId, status: 'pending' })
+          .select('id')
+          .single()
+
+        if (job) {
+          // Dynamically import to avoid bundling Trigger.dev in client
+          try {
+            const { pipelineJob } = await import('@/lib/trigger/pipeline-job')
+            await pipelineJob.trigger({ jobId: job.id, agentId })
+          } catch {
+            // Trigger.dev may not be available in dev — jobs stay pending for scheduler
+          }
+        }
+      }
+    }
 
     return { agentId }
   } catch (err) {

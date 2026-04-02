@@ -4,12 +4,15 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, Loader2, Newspaper, GraduationCap, MapPin, Sparkles, Plus } from 'lucide-react'
 import { TopicChip } from '@/components/onboarding/topic-chip'
+import { SubPostItem } from '@/components/thread/sub-post-item'
 import {
   generateFollowUpQuestions,
   generateAgentPreview,
-  createAgent,
+  generateSamplePost,
+  createAgentWithSamples,
 } from '@/app/(app)/agents/new/actions'
 import type { FollowUpQuestion } from '@/app/(app)/agents/new/actions'
+import type { WriterOutput } from '@/lib/pipelines/types'
 import type { UserAgentType } from '@/lib/types'
 
 const AGENT_TYPES = [
@@ -48,9 +51,12 @@ export function CreateAgentFlow() {
   const [loadingQuestions, setLoadingQuestions] = useState(false)
   const [preview, setPreview] = useState<{ name: string; description: string; topicTags: string[] } | null>(null)
   const [loadingPreview, setLoadingPreview] = useState(false)
+  const [samplePosts, setSamplePosts] = useState<WriterOutput[]>([])
+  const [loadingSample, setLoadingSample] = useState(false)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const questionsRef = useRef<HTMLDivElement>(null)
+  const samplesEndRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll when questions load
   useEffect(() => {
@@ -58,6 +64,13 @@ export function CreateAgentFlow() {
       questionsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [followUpQuestions])
+
+  // Auto-scroll to bottom when new sample arrives
+  useEffect(() => {
+    if (samplePosts.length > 0 && samplesEndRef.current) {
+      samplesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
+  }, [samplePosts])
 
   function handleSelectType(type: UserAgentType) {
     setSelectedType(type)
@@ -67,6 +80,7 @@ export function CreateAgentFlow() {
     setFollowUpAnswers({})
     setCustomAnswers({})
     setPreview(null)
+    setSamplePosts([])
     setStep(2)
   }
 
@@ -76,6 +90,7 @@ export function CreateAgentFlow() {
     setFollowUpAnswers({})
     setCustomAnswers({})
     setPreview(null)
+    setSamplePosts([])
     setLoadingQuestions(true)
     setStep(3)
 
@@ -83,7 +98,6 @@ export function CreateAgentFlow() {
     setLoadingQuestions(false)
 
     if (result.error || result.questions.length === 0) {
-      // If AI fails, skip to preview with just type + topic
       await handleGeneratePreview(topic, {})
       return
     }
@@ -145,16 +159,74 @@ export function CreateAgentFlow() {
     setPreview(result)
   }
 
-  async function handleCreate() {
+  async function handleGenerateSample() {
     if (!preview || !selectedType) return
-    setCreating(true)
+    setLoadingSample(true)
     setError(null)
+    setStep(5)
 
-    const result = await createAgent(
+    const result = await generateSamplePost(
       selectedType,
       preview.name,
       preview.description,
       preview.topicTags
+    )
+
+    setLoadingSample(false)
+
+    if (result.error || !result.post) {
+      setError(result.error ?? 'Failed to generate sample post. Please try again.')
+      return
+    }
+
+    setSamplePosts((prev) => [...prev, result.post!])
+  }
+
+  async function handleShowMeAnother() {
+    if (!preview || !selectedType) return
+    setLoadingSample(true)
+    setError(null)
+
+    const result = await generateSamplePost(
+      selectedType,
+      preview.name,
+      preview.description,
+      preview.topicTags
+    )
+
+    setLoadingSample(false)
+
+    if (result.error || !result.post) {
+      setError(result.error ?? 'Failed to generate another sample.')
+      return
+    }
+
+    setSamplePosts((prev) => [...prev, result.post!])
+  }
+
+  function handleTweakPreferences() {
+    // Erase all samples, go back to Step 3
+    setSamplePosts([])
+    setPreview(null)
+    setError(null)
+    if (followUpQuestions.length > 0) {
+      setStep(3)
+    } else {
+      setStep(2)
+    }
+  }
+
+  async function handleActivate() {
+    if (!preview || !selectedType || samplePosts.length === 0) return
+    setCreating(true)
+    setError(null)
+
+    const result = await createAgentWithSamples(
+      selectedType,
+      preview.name,
+      preview.description,
+      preview.topicTags,
+      samplePosts
     )
 
     if (result.error) {
@@ -168,7 +240,10 @@ export function CreateAgentFlow() {
 
   function handleBack() {
     setError(null)
-    if (step === 4) {
+    if (step === 5) {
+      setSamplePosts([])
+      setStep(4)
+    } else if (step === 4) {
       if (followUpQuestions.length > 0) {
         setStep(3)
         setPreview(null)
@@ -189,7 +264,6 @@ export function CreateAgentFlow() {
   }
 
   const typeConfig = AGENT_TYPES.find((t) => t.type === selectedType)
-
   const hasAnswers = Object.values(followUpAnswers).some((s: Set<string>) => s.size > 0)
 
   return (
@@ -326,7 +400,6 @@ export function CreateAgentFlow() {
                         />
                       ))}
                     </div>
-                    {/* Write your own for this question */}
                     <div className="mt-3 flex items-center gap-2">
                       <input
                         type="text"
@@ -352,7 +425,6 @@ export function CreateAgentFlow() {
                         <Plus className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                    {/* Show custom selections as chips */}
                     {followUpAnswers[fq.question] && (
                       <div className="flex flex-wrap gap-2 mt-2">
                         {Array.from(followUpAnswers[fq.question])
@@ -374,7 +446,7 @@ export function CreateAgentFlow() {
           </>
         )}
 
-        {/* Step 4: Preview */}
+        {/* Step 4: Name preview */}
         {step === 4 && (
           <>
             <h1 className="text-2xl font-bold tracking-tight">
@@ -425,17 +497,111 @@ export function CreateAgentFlow() {
             )}
           </>
         )}
+
+        {/* Step 5: Sample posts */}
+        {step === 5 && (
+          <>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Here&apos;s a preview
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1.5 mb-6">
+              This is the kind of content your agent will create.
+            </p>
+
+            {/* Compact agent card */}
+            {preview && (
+              <div className="flex items-center gap-3 mb-6">
+                <div className="shrink-0 rounded-full bg-primary/10 p-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">{preview.name}</p>
+                  <p className="text-[11px] text-muted-foreground capitalize">{selectedType} agent</p>
+                </div>
+              </div>
+            )}
+
+            {/* Sample posts list */}
+            <div className="space-y-6">
+              {samplePosts.map((sample, sampleIndex) => (
+                <div
+                  key={sampleIndex}
+                  className="rounded-2xl border border-border bg-card p-4"
+                >
+                  {samplePosts.length > 1 && (
+                    <p className="text-[11px] text-muted-foreground font-medium mb-3">
+                      Sample {sampleIndex + 1}
+                    </p>
+                  )}
+                  <div className="space-y-0">
+                    {sample.subPosts.map((sp) => (
+                      <SubPostItem
+                        key={sp.position}
+                        content={sp.content}
+                        position={sp.position}
+                        total={sample.subPosts.length}
+                        isLast={sp.position === sample.subPosts.length}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {/* Loading skeleton for new sample */}
+              {loadingSample && (
+                <div className="rounded-2xl border border-border bg-card p-4">
+                  {samplePosts.length > 0 && (
+                    <p className="text-[11px] text-muted-foreground font-medium mb-3">
+                      Sample {samplePosts.length + 1}
+                    </p>
+                  )}
+                  <div className="space-y-4 animate-pulse">
+                    <div className="flex gap-3">
+                      <div className="h-6 w-6 rounded-full bg-muted shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-muted rounded w-full" />
+                        <div className="h-4 bg-muted rounded w-4/5" />
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="h-6 w-6 rounded-full bg-muted shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-muted rounded w-full" />
+                        <div className="h-4 bg-muted rounded w-3/5" />
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="h-6 w-6 rounded-full bg-muted shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-muted rounded w-full" />
+                        <div className="h-4 bg-muted rounded w-2/3" />
+                      </div>
+                    </div>
+                  </div>
+                  <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground animate-pulse">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Researching and writing...
+                  </p>
+                </div>
+              )}
+
+              <div ref={samplesEndRef} />
+            </div>
+
+            {error && (
+              <p className="mt-4 text-sm text-red-500">{error}</p>
+            )}
+          </>
+        )}
       </div>
 
-      {/* Sticky bottom CTA */}
+      {/* Sticky bottom CTAs */}
       {step === 3 && !loadingQuestions && followUpQuestions.length > 0 && (
         <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40">
           <div className="mx-auto max-w-lg border-t bg-background/80 backdrop-blur-sm px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <button
               type="button"
-              onClick={() =>
-                handleGeneratePreview(selectedTopic!, followUpAnswers)
-              }
+              onClick={() => handleGeneratePreview(selectedTopic!, followUpAnswers)}
               disabled={!hasAnswers}
               className="w-full rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground transition-all disabled:opacity-30 active:scale-[0.98]"
             >
@@ -457,12 +623,42 @@ export function CreateAgentFlow() {
           <div className="mx-auto max-w-lg border-t bg-background/80 backdrop-blur-sm px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <button
               type="button"
-              onClick={handleCreate}
+              onClick={handleGenerateSample}
+              className="w-full rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground transition-all active:scale-[0.98]"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 5 && samplePosts.length > 0 && !loadingSample && (
+        <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40">
+          <div className="mx-auto max-w-lg border-t bg-background/80 backdrop-blur-sm px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <button
+              type="button"
+              onClick={handleActivate}
               disabled={creating}
               className="w-full rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground transition-all disabled:opacity-30 active:scale-[0.98]"
             >
               {creating ? 'Activating...' : 'Activate agent'}
             </button>
+            <div className="flex items-center justify-center gap-6 pt-2">
+              <button
+                type="button"
+                onClick={handleTweakPreferences}
+                className="py-2 text-xs text-muted-foreground active:opacity-70"
+              >
+                Tweak preferences
+              </button>
+              <button
+                type="button"
+                onClick={handleShowMeAnother}
+                className="py-2 text-xs text-muted-foreground active:opacity-70"
+              >
+                Show me another
+              </button>
+            </div>
           </div>
         </div>
       )}
