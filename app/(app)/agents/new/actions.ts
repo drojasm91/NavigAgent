@@ -128,17 +128,18 @@ export async function generateSamplePost(
   type: UserAgentType,
   name: string,
   description: string,
-  topicTags: string[]
+  topicTags: string[],
+  previousPostHooks: string[] = []
 ): Promise<SamplePostResult> {
   try {
-    // Build researcher input — no history during creation
+    // Build researcher input — pass previous hooks to avoid topic repetition
     const researcherInput = {
       agentName: name,
       agentDescription: description,
       agentType: type,
       topicTags,
       promptConfig: {},
-      recentPostHooks: [],
+      recentPostHooks: previousPostHooks,
     }
 
     // Run researcher

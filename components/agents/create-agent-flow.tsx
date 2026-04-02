@@ -188,11 +188,13 @@ export function CreateAgentFlow() {
     setLoadingSample(true)
     setError(null)
 
+    const existingHooks = samplePosts.map((s) => s.subPosts[0]?.content ?? '')
     const result = await generateSamplePost(
       selectedType,
       preview.name,
       preview.description,
-      preview.topicTags
+      preview.topicTags,
+      existingHooks
     )
 
     setLoadingSample(false)
