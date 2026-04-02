@@ -11,7 +11,7 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function parseJsonFromAI(raw: string): unknown {
   // Strip markdown fences
-  let text = raw.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim()
+  const text = raw.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim()
 
   // Try direct parse first
   try {
