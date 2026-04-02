@@ -1,21 +1,54 @@
-import { PageHeader } from '@/components/navigation/page-header'
-import Link from 'next/link'
+export const dynamic = 'force-dynamic'
 
-export default function AgentsPage() {
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { PageHeader } from '@/components/navigation/page-header'
+import { MyAgentsList } from '@/components/agents/my-agents-list'
+
+export default async function AgentsPage() {
+  const supabase = createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  // Fetch all agents the user is subscribed to
+  const { data: subs } = await supabase
+    .from('user_agent_subscriptions')
+    .select('agent_id')
+    .eq('user_id', user.id)
+
+  const agentIds = subs?.map((s) => s.agent_id) ?? []
+
+  let agents: Array<{
+    id: string
+    name: string
+    type: string
+    description: string
+    owner_id: string
+    is_active: boolean
+    cadence: string
+    topic_tags: string[]
+    created_at: string
+  }> = []
+
+  if (agentIds.length > 0) {
+    const { data } = await supabase
+      .from('user_agents')
+      .select('id, name, type, description, owner_id, is_active, cadence, topic_tags, created_at')
+      .in('id', agentIds)
+      .order('created_at', { ascending: false })
+
+    agents = data ?? []
+  }
+
   return (
     <>
       <PageHeader title="My Agents" />
-      <div className="max-w-lg mx-auto px-4 py-20 text-center">
-        <h2 className="text-lg font-semibold mb-1">No agents yet</h2>
-        <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">
-          Create your first user-agent to start getting personalized content in your feed.
-        </p>
-        <Link
-          href="/agents/new"
-          className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium h-8 px-2.5"
-        >
-          Create your first agent
-        </Link>
+      <div className="max-w-lg mx-auto px-4 pb-24">
+        <MyAgentsList agents={agents} userId={user.id} />
       </div>
     </>
   )
