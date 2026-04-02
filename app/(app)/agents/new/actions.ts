@@ -60,7 +60,7 @@ export async function generateFollowUpQuestions(
     })
 
     const raw = message.content[0].type === 'text' ? message.content[0].text : ''
-    const parsed = parseJsonFromAI(raw) as Record<string, unknown>
+    const parsed = parseJsonFromAI(raw)
 
     if (!Array.isArray(parsed.questions)) {
       return { questions: [], error: true }
@@ -110,7 +110,7 @@ export async function generateAgentPreview(
     })
 
     const raw = message.content[0].type === 'text' ? message.content[0].text : ''
-    const parsed = parseJsonFromAI(raw) as Record<string, unknown>
+    const parsed = parseJsonFromAI(raw)
 
     return {
       name: typeof parsed.name === 'string' ? parsed.name : 'My Agent',

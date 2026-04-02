@@ -25,7 +25,7 @@ export async function runNewsWriter(input: WriterInput): Promise<WriterOutput> {
   })
 
   const raw = message.content[0].type === 'text' ? message.content[0].text : ''
-  const parsed = parseJsonFromAI(raw) as Record<string, unknown>
+  const parsed = parseJsonFromAI(raw)
 
   // Validate and clean sub-posts
   const subPosts: WriterSubPost[] = []

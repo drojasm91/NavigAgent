@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
  * Extract and parse JSON from AI model output.
  * Handles: pure JSON, markdown fences, text before/after JSON, nested objects.
  */
-export function parseJsonFromAI(raw: string): unknown {
+export function parseJsonFromAI(raw: string): any {
   // Strip markdown fences
   const text = raw.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim()
 

@@ -41,7 +41,7 @@ export async function classifyInterest(text: string): Promise<ClassifyResult> {
     })
 
     const raw = message.content[0].type === 'text' ? message.content[0].text : ''
-    const parsed = parseJsonFromAI(raw) as Record<string, unknown>
+    const parsed = parseJsonFromAI(raw)
 
     // Handle ambiguous response
     if (parsed.ambiguous && Array.isArray(parsed.options)) {

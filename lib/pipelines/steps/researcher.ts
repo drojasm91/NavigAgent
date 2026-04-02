@@ -35,7 +35,7 @@ export async function runNewsResearcher(input: ResearcherInput): Promise<Researc
   })
 
   const raw = message.content[0].type === 'text' ? message.content[0].text : ''
-  const parsed = parseJsonFromAI(raw) as Record<string, unknown>
+  const parsed = parseJsonFromAI(raw)
 
   if (parsed.skip) {
     return { skip: true }
