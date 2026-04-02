@@ -194,7 +194,7 @@ export function CreateAgentFlow() {
 
   return (
     <>
-      <div className="flex-1 px-4 pt-4 pb-44">
+      <div className="flex-1 px-4 pt-4 pb-56">
         {/* Back button */}
         {step > 1 && (
           <button
@@ -429,7 +429,7 @@ export function CreateAgentFlow() {
 
       {/* Sticky bottom CTA */}
       {step === 3 && !loadingQuestions && followUpQuestions.length > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-40">
+        <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40">
           <div className="mx-auto max-w-lg border-t bg-background/80 backdrop-blur-sm px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <button
               type="button"
@@ -453,7 +453,7 @@ export function CreateAgentFlow() {
       )}
 
       {step === 4 && preview && !loadingPreview && (
-        <div className="fixed inset-x-0 bottom-0 z-40">
+        <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40">
           <div className="mx-auto max-w-lg border-t bg-background/80 backdrop-blur-sm px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <button
               type="button"
