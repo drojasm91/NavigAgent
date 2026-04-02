@@ -4,6 +4,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { queryPerplexity } from '@/lib/perplexity'
 import { NEWS_RESEARCHER_PROMPT } from '@/lib/prompts'
+import { parseJsonFromAI } from '@/lib/utils'
 import type { ResearcherInput, ResearcherOutput } from '@/lib/pipelines/types'
 
 export async function runNewsResearcher(input: ResearcherInput): Promise<ResearcherOutput> {
@@ -34,8 +35,7 @@ export async function runNewsResearcher(input: ResearcherInput): Promise<Researc
   })
 
   const raw = message.content[0].type === 'text' ? message.content[0].text : ''
-  const cleaned = raw.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim()
-  const parsed = JSON.parse(cleaned)
+  const parsed = parseJsonFromAI(raw) as Record<string, unknown>
 
   if (parsed.skip) {
     return { skip: true }

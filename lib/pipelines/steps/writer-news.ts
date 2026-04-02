@@ -3,6 +3,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { NEWS_WRITER_PROMPT } from '@/lib/prompts'
+import { parseJsonFromAI } from '@/lib/utils'
 import type { WriterInput, WriterOutput, WriterSubPost } from '@/lib/pipelines/types'
 
 export async function runNewsWriter(input: WriterInput): Promise<WriterOutput> {
@@ -24,8 +25,7 @@ export async function runNewsWriter(input: WriterInput): Promise<WriterOutput> {
   })
 
   const raw = message.content[0].type === 'text' ? message.content[0].text : ''
-  const cleaned = raw.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim()
-  const parsed = JSON.parse(cleaned)
+  const parsed = parseJsonFromAI(raw) as Record<string, unknown>
 
   // Validate and clean sub-posts
   const subPosts: WriterSubPost[] = []

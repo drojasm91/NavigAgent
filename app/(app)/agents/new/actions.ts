@@ -4,6 +4,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { createAgentWithPosts } from '@/lib/supabase/queries/agents'
 import { AGENT_FOLLOWUP_PROMPT, AGENT_NAME_PROMPT } from '@/lib/prompts'
+import { parseJsonFromAI } from '@/lib/utils'
 import { runNewsResearcher } from '@/lib/pipelines/steps/researcher'
 import { runNewsWriter } from '@/lib/pipelines/steps/writer-news'
 import type { UserAgentType } from '@/lib/types'
@@ -59,8 +60,7 @@ export async function generateFollowUpQuestions(
     })
 
     const raw = message.content[0].type === 'text' ? message.content[0].text : ''
-    const cleaned = raw.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim()
-    const parsed = JSON.parse(cleaned)
+    const parsed = parseJsonFromAI(raw) as Record<string, unknown>
 
     if (!Array.isArray(parsed.questions)) {
       return { questions: [], error: true }
@@ -110,8 +110,7 @@ export async function generateAgentPreview(
     })
 
     const raw = message.content[0].type === 'text' ? message.content[0].text : ''
-    const cleaned = raw.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim()
-    const parsed = JSON.parse(cleaned)
+    const parsed = parseJsonFromAI(raw) as Record<string, unknown>
 
     return {
       name: typeof parsed.name === 'string' ? parsed.name : 'My Agent',
