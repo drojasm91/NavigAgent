@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, Loader2, Newspaper, GraduationCap, MapPin, Sparkles, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronDown, Loader2, Newspaper, GraduationCap, MapPin, Sparkles, Plus, Layers } from 'lucide-react'
 import { TopicChip } from '@/components/onboarding/topic-chip'
 import { SubPostItem } from '@/components/thread/sub-post-item'
 import {
@@ -52,6 +52,7 @@ export function CreateAgentFlow() {
   const [preview, setPreview] = useState<{ name: string; description: string; topicTags: string[] } | null>(null)
   const [loadingPreview, setLoadingPreview] = useState(false)
   const [samplePosts, setSamplePosts] = useState<WriterOutput[]>([])
+  const [expandedSamples, setExpandedSamples] = useState<Set<number>>(new Set())
   const [loadingSample, setLoadingSample] = useState(false)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -522,30 +523,75 @@ export function CreateAgentFlow() {
             )}
 
             {/* Sample posts list */}
-            <div className="space-y-6">
-              {samplePosts.map((sample, sampleIndex) => (
-                <div
-                  key={sampleIndex}
-                  className="rounded-2xl border border-border bg-card p-4"
-                >
-                  {samplePosts.length > 1 && (
-                    <p className="text-[11px] text-muted-foreground font-medium mb-3">
-                      Sample {sampleIndex + 1}
-                    </p>
-                  )}
-                  <div className="space-y-0">
-                    {sample.subPosts.map((sp) => (
-                      <SubPostItem
-                        key={sp.position}
-                        content={sp.content}
-                        position={sp.position}
-                        total={sample.subPosts.length}
-                        isLast={sp.position === sample.subPosts.length}
-                      />
-                    ))}
+            <div className="space-y-3">
+              {samplePosts.map((sample, sampleIndex) => {
+                const isLatest = sampleIndex === samplePosts.length - 1 && !loadingSample
+                const isManuallyExpanded = expandedSamples.has(sampleIndex)
+                const showExpanded = isLatest || isManuallyExpanded
+                const hookText = sample.subPosts[0]?.content ?? ''
+
+                return (
+                  <div
+                    key={sampleIndex}
+                    className="rounded-2xl border border-border bg-card p-4"
+                  >
+                    {showExpanded ? (
+                      <>
+                        {samplePosts.length > 1 && (
+                          <p className="text-[11px] text-muted-foreground font-medium mb-3">
+                            Sample {sampleIndex + 1}
+                          </p>
+                        )}
+                        <div className="space-y-0">
+                          {sample.subPosts.map((sp) => (
+                            <SubPostItem
+                              key={sp.position}
+                              content={sp.content}
+                              position={sp.position}
+                              total={sample.subPosts.length}
+                              isLast={sp.position === sample.subPosts.length}
+                            />
+                          ))}
+                        </div>
+                        {!isLatest && (
+                          <button
+                            type="button"
+                            onClick={() => setExpandedSamples((prev) => {
+                              const next = new Set(prev)
+                              next.delete(sampleIndex)
+                              return next
+                            })}
+                            className="mt-2 text-xs text-muted-foreground active:opacity-70"
+                          >
+                            Collapse
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setExpandedSamples((prev) => {
+                          const next = new Set(prev)
+                          next.add(sampleIndex)
+                          return next
+                        })}
+                        className="w-full text-left"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-[11px] text-muted-foreground font-medium">
+                            Sample {sampleIndex + 1}
+                          </p>
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <span>1/{sample.subPosts.length}</span>
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          </div>
+                        </div>
+                        <p className="text-[15px] leading-relaxed">{hookText}</p>
+                      </button>
+                    )}
                   </div>
-                </div>
-              ))}
+                )
+              })}
 
               {/* Loading skeleton for new sample */}
               {loadingSample && (
