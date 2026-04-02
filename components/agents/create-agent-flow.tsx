@@ -59,6 +59,11 @@ export function CreateAgentFlow() {
   const questionsRef = useRef<HTMLDivElement>(null)
   const samplesEndRef = useRef<HTMLDivElement>(null)
 
+  // Scroll to top on step change
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [step])
+
   // Auto-scroll when questions load
   useEffect(() => {
     if (followUpQuestions.length > 0 && questionsRef.current) {
