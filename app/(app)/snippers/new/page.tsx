@@ -6,7 +6,7 @@ export const maxDuration = 120
 export default function NewSnipperPage() {
   return (
     <>
-      <PageHeader title="Create a Snipper" />
+      <PageHeader />
       <div className="max-w-lg mx-auto">
         <CreateSnipperFlow />
       </div>

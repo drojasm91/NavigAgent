@@ -4,8 +4,10 @@ import Link from 'next/link'
 export default function DiscoverPage() {
   return (
     <>
-      <PageHeader title="Discover" />
-      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+      <PageHeader />
+      <div className="max-w-lg mx-auto px-4">
+        <h1 className="text-xl font-bold tracking-tight pt-4 mb-1">Discover</h1>
+        <div className="py-16 text-center">
         <h2 className="text-lg font-semibold mb-1">No community Snippers yet</h2>
         <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">
           Be the first to create a public Snipper and share it with the community.
@@ -16,6 +18,7 @@ export default function DiscoverPage() {
         >
           Create a Snipper
         </Link>
+        </div>
       </div>
     </>
   )

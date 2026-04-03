@@ -33,7 +33,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <PageHeader title="Snipper" />
+      <PageHeader />
       <div className="max-w-lg mx-auto px-4 py-4">
         <FeedShell userId={user.id} initialPosts={DUMMY_POSTS} />
       </div>

@@ -46,8 +46,9 @@ export default async function SnippersPage() {
 
   return (
     <>
-      <PageHeader title="My Snippers" />
+      <PageHeader />
       <div className="max-w-lg mx-auto px-4 pb-24">
+        <h1 className="text-xl font-bold tracking-tight pt-4 mb-1">My Snippers</h1>
         <MySnippersList snippers={snippers} userId={user.id} />
       </div>
     </>

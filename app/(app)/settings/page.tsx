@@ -12,13 +12,16 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" />
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+      <PageHeader />
+      <div className="max-w-lg mx-auto px-4 pb-24">
+        <h1 className="text-xl font-bold tracking-tight pt-4 mb-6">Settings</h1>
+        <div className="space-y-6">
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">Signed in as</p>
           <p className="text-sm font-medium">{user.email}</p>
         </div>
         <SignOutButton />
+        </div>
       </div>
     </>
   )
