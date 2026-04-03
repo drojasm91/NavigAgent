@@ -156,29 +156,23 @@ export function CreateAgentFlow() {
     }
 
     setPreview(result)
-  }
 
-  async function handleGenerateSample() {
-    if (!preview || !selectedType) return
+    // Immediately start generating the first sample post
     setLoadingSample(true)
-    setError(null)
-    scrollToTopAndSetStep(5)
-
-    const result = await generateSamplePost(
-      selectedType,
-      preview.name,
-      preview.description,
-      preview.topicTags
+    const sampleResult = await generateSamplePost(
+      selectedType!,
+      result.name,
+      result.description,
+      result.topicTags
     )
-
     setLoadingSample(false)
 
-    if (result.error || !result.post) {
-      setError(result.error ?? 'Failed to generate sample post. Please try again.')
+    if (sampleResult.error || !sampleResult.post) {
+      setError(sampleResult.error ?? 'Failed to generate sample post. Please try again.')
       return
     }
 
-    setSamplePosts((prev) => [...prev, result.post!])
+    setSamplePosts((prev) => [...prev, sampleResult.post!])
   }
 
   async function handleShowMeAnother() {
@@ -241,10 +235,8 @@ export function CreateAgentFlow() {
 
   function handleBack() {
     setError(null)
-    if (step === 5) {
+    if (step === 4) {
       setSamplePosts([])
-      scrollToTopAndSetStep(4)
-    } else if (step === 4) {
       setPreview(null)
       if (followUpQuestions.length > 0) {
         scrollToTopAndSetStep(3)
@@ -443,7 +435,7 @@ export function CreateAgentFlow() {
           </>
         )}
 
-        {/* Step 4: Name preview */}
+        {/* Step 4: Agent preview + sample posts (progressive) */}
         {step === 4 && (
           <>
             <h1 className="text-2xl font-bold tracking-tight">
@@ -453,73 +445,50 @@ export function CreateAgentFlow() {
               Here&apos;s what we came up with.
             </p>
 
+            {/* Phase 1: Creating agent name/description */}
             {loadingPreview ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse py-8">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Creating your agent...
               </div>
             ) : preview ? (
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="shrink-0 rounded-full bg-primary/10 p-3">
-                    <Sparkles className="h-5 w-5 text-primary" />
+              <>
+                <div className="rounded-2xl border border-border bg-card p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="shrink-0 rounded-full bg-primary/10 p-3">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-base">{preview.name}</p>
+                      <p className="text-xs text-muted-foreground capitalize">
+                        {selectedType} agent
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-base">{preview.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize">
-                      {selectedType} agent
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {preview.description}
+                  </p>
+                  {preview.topicTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-4">
+                      {preview.topicTags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Phase 2: Sample posts appear below */}
+                {(samplePosts.length > 0 || loadingSample) && (
+                  <div className="mt-6">
+                    <p className="text-sm font-semibold mb-3">
+                      {samplePosts.length === 0 ? 'Writing a sample post...' : 'Sample content'}
                     </p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {preview.description}
-                </p>
-                {preview.topicTags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-4">
-                    {preview.topicTags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : null}
-
-            {error && (
-              <p className="mt-4 text-sm text-red-500">{error}</p>
-            )}
-          </>
-        )}
-
-        {/* Step 5: Sample posts */}
-        {step === 5 && (
-          <>
-            <h1 className="text-2xl font-bold tracking-tight">
-              Here&apos;s a preview
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1.5 mb-6">
-              This is the kind of content your agent will create.
-            </p>
-
-            {/* Compact agent card */}
-            {preview && (
-              <div className="flex items-center gap-3 mb-6">
-                <div className="shrink-0 rounded-full bg-primary/10 p-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-semibold text-sm">{preview.name}</p>
-                  <p className="text-[11px] text-muted-foreground capitalize">{selectedType} agent</p>
-                </div>
-              </div>
-            )}
-
-            {/* Sample posts list */}
-            <div className="space-y-3">
+                    <div className="space-y-3">
               {samplePosts.map((sample, sampleIndex) => {
                 const isLatest = sampleIndex === samplePosts.length - 1 && !loadingSample
                 const isManuallyExpanded = expandedSamples.has(sampleIndex)
@@ -627,8 +596,12 @@ export function CreateAgentFlow() {
                 </div>
               )}
 
-              <div ref={samplesEndRef} />
-            </div>
+                    <div ref={samplesEndRef} />
+                  </div>
+                  </div>
+                )}
+              </>
+            ) : null}
 
             {error && (
               <p className="mt-4 text-sm text-red-500">{error}</p>
@@ -660,28 +633,7 @@ export function CreateAgentFlow() {
         </div>
       )}
 
-      {step === 4 && preview && !loadingPreview && (
-        <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40">
-          <div className="mx-auto max-w-lg border-t bg-background/80 backdrop-blur-sm px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            <button
-              type="button"
-              onClick={handleGenerateSample}
-              className="w-full rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground transition-all active:scale-[0.98]"
-            >
-              Show me a sample post
-            </button>
-            <button
-              type="button"
-              onClick={handleBack}
-              className="w-full py-3 text-xs text-muted-foreground active:opacity-70"
-            >
-              Go back and tweak
-            </button>
-          </div>
-        </div>
-      )}
-
-      {step === 5 && samplePosts.length > 0 && !loadingSample && (
+      {step === 4 && samplePosts.length > 0 && !loadingSample && (
         <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40">
           <div className="mx-auto max-w-lg border-t bg-background/80 backdrop-blur-sm px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <button
