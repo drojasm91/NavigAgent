@@ -346,7 +346,8 @@ export interface ChatMessage {
 export async function refineAgentChat(
   message: string,
   chatHistory: ChatMessage[],
-  currentPreview: { name: string; description: string; topicTags: string[] }
+  currentPreview: { name: string; description: string; topicTags: string[] },
+  context?: { sessionId: string; agentType: string; topic: string }
 ): Promise<{ response: string; refinementInstructions: string; error?: string }> {
   try {
     const client = new Anthropic()
@@ -367,10 +368,38 @@ export async function refineAgentChat(
     const raw = msg.content[0].type === 'text' ? msg.content[0].text : ''
     const parsed = parseJsonFromAI(raw)
 
-    return {
-      response: typeof parsed.response === 'string' ? parsed.response : 'Got it — regenerating with your preferences.',
-      refinementInstructions: typeof parsed.refinementInstructions === 'string' ? parsed.refinementInstructions : '',
+    const response = typeof parsed.response === 'string' ? parsed.response : 'Got it — regenerating with your preferences.'
+    const refinementInstructions = typeof parsed.refinementInstructions === 'string' ? parsed.refinementInstructions : ''
+
+    // Save both messages to refinement_logs (fire-and-forget)
+    if (context) {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('refinement_logs').insert([
+          {
+            user_id: user.id,
+            session_id: context.sessionId,
+            agent_type: context.agentType,
+            topic: context.topic,
+            agent_name: currentPreview.name,
+            role: 'user',
+            content: message,
+          },
+          {
+            user_id: user.id,
+            session_id: context.sessionId,
+            agent_type: context.agentType,
+            topic: context.topic,
+            agent_name: currentPreview.name,
+            role: 'assistant',
+            content: response,
+          },
+        ])
+      }
     }
+
+    return { response, refinementInstructions }
   } catch {
     return { response: '', refinementInstructions: '', error: 'Failed to process refinement' }
   }

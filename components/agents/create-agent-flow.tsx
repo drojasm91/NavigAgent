@@ -62,6 +62,7 @@ export function CreateAgentFlow() {
   const [refinementInstructions, setRefinementInstructions] = useState('')
   const [chatInput, setChatInput] = useState('')
   const [sendingChat, setSendingChat] = useState(false)
+  const [sessionId] = useState(() => crypto.randomUUID())
   const samplesEndRef = useRef<HTMLDivElement>(null)
   const sampleSectionRef = useRef<HTMLParagraphElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -220,7 +221,11 @@ export function CreateAgentFlow() {
     setChatMessages(updatedHistory)
 
     // 1. Get AI interpretation
-    const chatResult = await refineAgentChat(userMessage, chatMessages, preview)
+    const chatResult = await refineAgentChat(userMessage, chatMessages, preview, {
+      sessionId,
+      agentType: selectedType!,
+      topic: selectedTopic!,
+    })
 
     if (chatResult.error) {
       setError('Failed to process refinement. Please try again.')
