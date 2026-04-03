@@ -56,7 +56,6 @@ export function CreateAgentFlow() {
   const [loadingSample, setLoadingSample] = useState(false)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const questionsRef = useRef<HTMLDivElement>(null)
   const samplesEndRef = useRef<HTMLDivElement>(null)
 
   function scrollToTopAndSetStep(nextStep: number) {
@@ -65,16 +64,9 @@ export function CreateAgentFlow() {
     setStep(nextStep)
   }
 
-  // Auto-scroll when questions load
+  // Auto-scroll to bottom only when adding another sample (not the first)
   useEffect(() => {
-    if (followUpQuestions.length > 0 && questionsRef.current) {
-      questionsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  }, [followUpQuestions])
-
-  // Auto-scroll to bottom when new sample arrives
-  useEffect(() => {
-    if (samplePosts.length > 0 && samplesEndRef.current) {
+    if (samplePosts.length > 1 && samplesEndRef.current) {
       samplesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
   }, [samplePosts])
@@ -394,7 +386,7 @@ export function CreateAgentFlow() {
                 Thinking about {selectedTopic}...
               </div>
             ) : (
-              <div ref={questionsRef} className="space-y-8">
+              <div className="space-y-8">
                 {followUpQuestions.map((fq) => (
                   <div key={fq.question}>
                     <p className="text-sm font-semibold mb-3">{fq.question}</p>
