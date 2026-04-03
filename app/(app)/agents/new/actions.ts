@@ -223,8 +223,8 @@ export async function createAgentWithSamples(
     }, samplePosts)
 
     // Mark refinement session as activated
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (sessionId) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (supabase as any)
         .from('refinement_sessions')
         .update({ agent_id: agentId, activated: true })
