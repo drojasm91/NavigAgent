@@ -9,7 +9,7 @@ interface CreateAgentData {
   type: UserAgentType
   description: string
   topicTags: string[]
-  promptConfig?: Record<string, string>
+  promptConfig?: Record<string, unknown>
 }
 
 export async function createAgentWithSubscription(

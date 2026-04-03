@@ -291,7 +291,8 @@ export function CreateAgentFlow() {
       preview.description,
       preview.topicTags,
       samplePosts,
-      refinementInstructions || undefined
+      refinementInstructions || undefined,
+      chatMessages.length > 0 ? chatMessages : undefined
     )
 
     if (result.error) {

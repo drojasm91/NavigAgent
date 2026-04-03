@@ -194,7 +194,8 @@ export async function createAgentWithSamples(
   description: string,
   topicTags: string[],
   samplePosts: WriterOutput[],
-  refinementInstructions?: string
+  refinementInstructions?: string,
+  refinementChat?: ChatMessage[]
 ): Promise<CreateAgentResult> {
   const supabase = createClient()
 
@@ -212,7 +213,12 @@ export async function createAgentWithSamples(
       type,
       description,
       topicTags,
-      promptConfig: refinementInstructions ? { refinementInstructions } : undefined,
+      promptConfig: refinementInstructions || refinementChat
+        ? {
+            ...(refinementInstructions ? { refinementInstructions } : {}),
+            ...(refinementChat ? { refinementChat } : {}),
+          }
+        : undefined,
     }, samplePosts)
 
     return { agentId }
