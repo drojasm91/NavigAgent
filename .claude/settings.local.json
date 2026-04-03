@@ -5,7 +5,8 @@
       "Bash(cd /tmp)",
       "Bash(npx create-next-app@14 navigagent --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --no-git)",
       "Bash(npx shadcn@latest init --defaults)",
-      "mcp__5161d542-d728-47de-869c-ab459166dc64__execute_sql"
+      "mcp__5161d542-d728-47de-869c-ab459166dc64__execute_sql",
+      "mcp__5161d542-d728-47de-869c-ab459166dc64__apply_migration"
     ]
   }
 }
