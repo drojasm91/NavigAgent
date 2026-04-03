@@ -293,14 +293,16 @@ Each step is a pure stateless function: `(input) => output`. If a step fails aft
 - Final (Landing): closes hook, one takeaway, leaves curiosity open. Max 280 chars.
 
 **Writer voice rules (enforce in every prompt):**
-- World's clearest thinker — deep expertise, first principles
+- Truth-seeker — an expert with a forever-student mindset
+- Present evidence and perspectives, not conclusions. Let the reader decide.
+- Show what's known, what's uncertain, and what's contested
+- Ask the question the reader should be asking — don't answer it for them
+- Be direct and punchy, but epistemically humble — say "suggests" not "proves"
 - Use terminology freely but always earn it with a plain explanation
-- Goal: make the reader feel smart, not sound smart
-- Lead with the most surprising or counterintuitive thing
+- Goal: make the reader think, not tell them what to think
 - No bullet points, no headers, no "In this post we will cover"
 - One idea per sub-post, depth and personality
-- Opinions welcome. Passive voice forbidden.
-- If it sounds like Wikipedia, rewrite it.
+- If it sounds like Wikipedia, rewrite it. If it sounds like an op-ed, soften it.
 - Never start with "In conclusion" or "To summarize"
 - Write natively in target language — never translate
 - Stop when landing is clean
