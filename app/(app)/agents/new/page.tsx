@@ -1,6 +1,8 @@
 import { PageHeader } from '@/components/navigation/page-header'
 import { CreateAgentFlow } from '@/components/agents/create-agent-flow'
 
+export const maxDuration = 120
+
 export default function NewAgentPage() {
   return (
     <>
