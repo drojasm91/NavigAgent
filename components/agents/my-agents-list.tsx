@@ -28,7 +28,7 @@ const FILTER_OPTIONS: { label: string; value: string }[] = [
   { label: 'All', value: 'all' },
   { label: 'News', value: 'news' },
   { label: 'Learning', value: 'learning' },
-  { label: 'Recs', value: 'recommendation' },
+  { label: 'Recommendations', value: 'recommendation' },
 ]
 
 export function MyAgentsList({ agents, userId }: MyAgentsListProps) {
