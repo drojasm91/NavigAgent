@@ -485,9 +485,9 @@ export function CreateAgentFlow() {
                 {/* Phase 2: Sample posts appear below */}
                 {(samplePosts.length > 0 || loadingSample) && (
                   <div className="mt-6">
-                    <p className="text-sm font-semibold mb-3">
-                      {samplePosts.length === 0 ? 'Writing a sample post...' : 'Sample content'}
-                    </p>
+                    {samplePosts.length > 0 && (
+                      <p className="text-sm font-semibold mb-3">Sample content</p>
+                    )}
                     <div className="space-y-3">
               {samplePosts.map((sample, sampleIndex) => {
                 const isLatest = sampleIndex === samplePosts.length - 1 && !loadingSample
@@ -558,41 +558,11 @@ export function CreateAgentFlow() {
                 )
               })}
 
-              {/* Loading skeleton for new sample */}
+              {/* Loading indicator for sample — matches "Creating your agent..." style */}
               {loadingSample && (
-                <div className="rounded-2xl border border-border bg-card p-4">
-                  {samplePosts.length > 0 && (
-                    <p className="text-[11px] text-muted-foreground font-medium mb-3">
-                      Sample {samplePosts.length + 1}
-                    </p>
-                  )}
-                  <div className="space-y-4 animate-pulse">
-                    <div className="flex gap-3">
-                      <div className="h-6 w-6 rounded-full bg-muted shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-muted rounded w-full" />
-                        <div className="h-4 bg-muted rounded w-4/5" />
-                      </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <div className="h-6 w-6 rounded-full bg-muted shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-muted rounded w-full" />
-                        <div className="h-4 bg-muted rounded w-3/5" />
-                      </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <div className="h-6 w-6 rounded-full bg-muted shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-muted rounded w-full" />
-                        <div className="h-4 bg-muted rounded w-2/3" />
-                      </div>
-                    </div>
-                  </div>
-                  <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground animate-pulse">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Researching and writing...
-                  </p>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse py-4">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Writing a sample post...
                 </div>
               )}
 
