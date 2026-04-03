@@ -2,6 +2,8 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { Plus } from 'lucide-react'
 import { PageHeader } from '@/components/navigation/page-header'
 import { MyAgentsList } from '@/components/agents/my-agents-list'
 
@@ -46,7 +48,19 @@ export default async function AgentsPage() {
 
   return (
     <>
-      <PageHeader title="My Agents" />
+      <PageHeader
+        title="My Agents"
+        action={
+          agents.length > 0 ? (
+            <Link
+              href="/agents/new"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-95 transition-all"
+            >
+              <Plus className="h-4 w-4" />
+            </Link>
+          ) : undefined
+        }
+      />
       <div className="max-w-lg mx-auto px-4 pb-24">
         <MyAgentsList agents={agents} userId={user.id} />
       </div>

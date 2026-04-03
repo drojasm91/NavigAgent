@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { TypeBadge } from '@/components/feed/type-badge'
 import type { UserAgentType } from '@/lib/types'
 
@@ -22,7 +24,16 @@ interface MyAgentsListProps {
   userId: string
 }
 
+const FILTER_OPTIONS: { label: string; value: string }[] = [
+  { label: 'All', value: 'all' },
+  { label: 'News', value: 'news' },
+  { label: 'Learning', value: 'learning' },
+  { label: 'Recs', value: 'recommendation' },
+]
+
 export function MyAgentsList({ agents, userId }: MyAgentsListProps) {
+  const [filter, setFilter] = useState('all')
+
   if (agents.length === 0) {
     return (
       <div className="py-20 text-center">
@@ -41,9 +52,34 @@ export function MyAgentsList({ agents, userId }: MyAgentsListProps) {
     )
   }
 
+  const filteredAgents = filter === 'all' ? agents : agents.filter((a) => a.type === filter)
+  const hasMultipleTypes = new Set(agents.map((a) => a.type)).size > 1
+
   return (
-    <div className="pt-4 space-y-3">
-      {agents.map((agent) => {
+    <div className="pt-4">
+      {/* Type filter chips */}
+      {hasMultipleTypes && (
+        <div className="flex gap-2 mb-4">
+          {FILTER_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setFilter(opt.value)}
+              className={cn(
+                'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+                filter === opt.value
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground active:bg-accent'
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="space-y-3">
+      {filteredAgents.map((agent) => {
         const isOwner = agent.owner_id === userId
         const initial = agent.name.charAt(0).toUpperCase()
 
@@ -80,14 +116,12 @@ export function MyAgentsList({ agents, userId }: MyAgentsListProps) {
         )
       })}
 
-      {/* Create agent button */}
-      <Link
-        href="/agents/new"
-        className="flex items-center justify-center gap-1.5 rounded-2xl border border-dashed border-muted-foreground/30 p-4 text-sm text-muted-foreground transition-all active:scale-[0.98] active:bg-muted"
-      >
-        <Plus className="h-4 w-4" />
-        Create another agent
-      </Link>
+      {filteredAgents.length === 0 && filter !== 'all' && (
+        <p className="py-8 text-center text-sm text-muted-foreground">
+          No {filter} agents yet
+        </p>
+      )}
+      </div>
     </div>
   )
 }
