@@ -57,7 +57,7 @@ export async function runNewsResearcher(input: ResearcherInput): Promise<Researc
               }
             }
             return { url: '', label: '' }
-          }).filter((s) => s.url)
+          }).filter((s: { url: string; label: string }) => s.url)
         : perplexity.citations.map((url) => ({ url, label: url })),
       topicsToAvoid: Array.isArray(parsed.data?.topicsToAvoid)
         ? parsed.data.topicsToAvoid.filter((t: unknown) => typeof t === 'string')
