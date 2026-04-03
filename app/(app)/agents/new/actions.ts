@@ -330,7 +330,7 @@ export async function generateBackgroundPost(agentId: string): Promise<{ success
           sources: research.data?.sources ?? [],
           angle: research.data?.angle ?? '',
           isBreaking: research.data?.isBreaking ?? false,
-        },
+        } as Json,
       })
       .select('id')
       .single()
