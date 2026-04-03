@@ -60,10 +60,10 @@ export function MySnippersList({ snippers, userId }: MySnippersListProps) {
       {/* Create snipper */}
       <Link
         href="/snippers/new"
-        className="flex items-center gap-3 rounded-xl px-4 py-3 mb-4 active:bg-muted transition-colors"
+        className="flex items-center gap-3 px-4 py-3 mb-2 active:bg-muted rounded-2xl transition-colors"
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
-          <Plus className="h-4 w-4 text-primary" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-dashed border-muted-foreground/30 shrink-0">
+          <Plus className="h-4 w-4 text-muted-foreground" />
         </div>
         <div>
           <p className="text-sm font-medium">Create a Snipper</p>
