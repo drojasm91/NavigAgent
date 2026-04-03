@@ -141,7 +141,18 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
           {/* Sources */}
           {(() => {
             const metadata = post.metadata as Record<string, unknown> | null
-            const sources = Array.isArray(metadata?.sources) ? (metadata.sources as string[]).filter(Boolean) : []
+            const rawSources = Array.isArray(metadata?.sources) ? metadata.sources : []
+            const sources = rawSources.map((s: unknown) => {
+              if (typeof s === 'string') return { url: s, label: s }
+              if (s && typeof s === 'object' && 'url' in s) {
+                const obj = s as Record<string, unknown>
+                return {
+                  url: typeof obj.url === 'string' ? obj.url : '',
+                  label: typeof obj.label === 'string' ? obj.label : (typeof obj.url === 'string' ? obj.url : ''),
+                }
+              }
+              return null
+            }).filter((s): s is { url: string; label: string } => !!s?.url)
             if (sources.length === 0) return null
             return (
               <details className="mt-3 text-xs">
@@ -149,22 +160,18 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
                   Sources ({sources.length})
                 </summary>
                 <div className="mt-2 space-y-1.5 pl-1">
-                  {sources.map((url, i) => {
-                    let hostname = url
-                    try { hostname = new URL(url).hostname.replace('www.', '') } catch { /* keep raw */ }
-                    return (
-                      <a
-                        key={i}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="block text-primary truncate hover:underline"
-                      >
-                        {hostname}
-                      </a>
-                    )
-                  })}
+                  {sources.map((src, i) => (
+                    <a
+                      key={i}
+                      href={src.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="block text-primary truncate hover:underline"
+                    >
+                      {src.label}
+                    </a>
+                  ))}
                 </div>
               </details>
             )

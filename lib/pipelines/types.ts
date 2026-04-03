@@ -11,10 +11,15 @@ export interface ResearcherInput {
   recentPostHooks: string[] // empty during creation
 }
 
+export interface SourceRef {
+  url: string
+  label: string
+}
+
 export interface ResearchBrief {
   brief: string
   angle: string
-  sources: string[]
+  sources: SourceRef[]
   topicsToAvoid: string[]
   isBreaking: boolean
 }
@@ -43,5 +48,5 @@ export interface WriterSubPost {
 export interface WriterOutput {
   subPosts: WriterSubPost[]
   qualityScore: number
-  sources?: string[]
+  sources?: SourceRef[]
 }

@@ -94,7 +94,7 @@ Output format when skipping:
 {"skip": true}
 
 Output format when proceeding:
-{"skip": false, "data": {"brief": "<2-3 paragraph research summary with key facts and data>", "angle": "<the specific angle/framing to take>", "sources": ["<url1>", "<url2>"], "topicsToAvoid": ["<topic already covered>"], "isBreaking": false}}`
+{"skip": false, "data": {"brief": "<2-3 paragraph research summary with key facts and data>", "angle": "<the specific angle/framing to take>", "sources": [{"url": "<url1>", "label": "<short descriptive title — e.g. 'Luka trade breakdown — ESPN'>"}, {"url": "<url2>", "label": "<title — source name>"}], "topicsToAvoid": ["<topic already covered>"], "isBreaking": false}}`
 
 export const NEWS_WRITER_PROMPT = `You are a world-class thread writer for a social-media-style AI content feed. You write threads that feel like the best of early Twitter — punchy, expert, high-signal posts that make the reader feel smart.
 

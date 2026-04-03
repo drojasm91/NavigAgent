@@ -5,7 +5,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { queryPerplexity } from '@/lib/perplexity'
 import { NEWS_RESEARCHER_PROMPT } from '@/lib/prompts'
 import { parseJsonFromAI } from '@/lib/utils'
-import type { ResearcherInput, ResearcherOutput } from '@/lib/pipelines/types'
+import type { ResearcherInput, ResearcherOutput, SourceRef } from '@/lib/pipelines/types'
 
 export async function runNewsResearcher(input: ResearcherInput): Promise<ResearcherOutput> {
   // 1. Build search query from agent config
@@ -47,8 +47,18 @@ export async function runNewsResearcher(input: ResearcherInput): Promise<Researc
       brief: typeof parsed.data?.brief === 'string' ? parsed.data.brief : '',
       angle: typeof parsed.data?.angle === 'string' ? parsed.data.angle : '',
       sources: Array.isArray(parsed.data?.sources)
-        ? parsed.data.sources.filter((s: unknown) => typeof s === 'string')
-        : perplexity.citations,
+        ? parsed.data.sources.map((s: unknown): SourceRef => {
+            if (typeof s === 'string') return { url: s, label: s }
+            if (s && typeof s === 'object' && 'url' in s) {
+              const obj = s as Record<string, unknown>
+              return {
+                url: typeof obj.url === 'string' ? obj.url : '',
+                label: typeof obj.label === 'string' ? obj.label : (typeof obj.url === 'string' ? obj.url : ''),
+              }
+            }
+            return { url: '', label: '' }
+          }).filter((s) => s.url)
+        : perplexity.citations.map((url) => ({ url, label: url })),
       topicsToAvoid: Array.isArray(parsed.data?.topicsToAvoid)
         ? parsed.data.topicsToAvoid.filter((t: unknown) => typeof t === 'string')
         : [],
