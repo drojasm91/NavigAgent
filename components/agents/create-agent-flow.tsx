@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, ChevronDown, Loader2, Newspaper, GraduationCap, MapPin, Sparkles, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronDown, ArrowRight, Loader2, Newspaper, GraduationCap, MapPin, Sparkles, Plus } from 'lucide-react'
 import { TopicChip } from '@/components/onboarding/topic-chip'
 import { SubPostItem } from '@/components/thread/sub-post-item'
 import {
@@ -363,7 +363,7 @@ export function CreateAgentFlow() {
                   disabled={!customTopic.trim()}
                   className="shrink-0 rounded-xl bg-primary p-3 text-primary-foreground transition-all disabled:opacity-30 active:scale-95"
                 >
-                  <Plus className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
             </div>
