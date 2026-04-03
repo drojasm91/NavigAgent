@@ -414,6 +414,17 @@ export function CreateAgentFlow() {
                           onToggle={() => handleToggleAnswer(fq.question, option)}
                         />
                       ))}
+                      {followUpAnswers[fq.question] &&
+                        Array.from(followUpAnswers[fq.question])
+                          .filter((a) => !fq.options.includes(a))
+                          .map((custom) => (
+                            <TopicChip
+                              key={custom}
+                              label={custom}
+                              selected={true}
+                              onToggle={() => handleToggleAnswer(fq.question, custom)}
+                            />
+                          ))}
                     </div>
                     <div className="mt-3 flex items-center gap-2">
                       <input
@@ -440,20 +451,6 @@ export function CreateAgentFlow() {
                         <Plus className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                    {followUpAnswers[fq.question] && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {Array.from(followUpAnswers[fq.question])
-                          .filter((a) => !fq.options.includes(a))
-                          .map((custom) => (
-                            <TopicChip
-                              key={custom}
-                              label={custom}
-                              selected={true}
-                              onToggle={() => handleToggleAnswer(fq.question, custom)}
-                            />
-                          ))}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
