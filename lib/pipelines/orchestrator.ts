@@ -5,6 +5,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { runNewsResearcher } from '@/lib/pipelines/steps/researcher'
 import { runNewsWriter } from '@/lib/pipelines/steps/writer-news'
 import type { ResearcherInput, WriterInput } from '@/lib/pipelines/types'
+import type { Json } from '@/lib/types'
 
 interface OrchestratorInput {
   jobId: string
@@ -89,7 +90,7 @@ export async function runOrchestrator({ snipperId, supabase }: OrchestratorInput
         sources: research.data.sources,
         angle: research.data.angle,
         isBreaking: research.data.isBreaking,
-      },
+      } as unknown as Json,
     })
     .select('id')
     .single()

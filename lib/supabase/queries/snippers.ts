@@ -70,7 +70,7 @@ export async function createSnipperWithPosts(
         snipper_id: snipperId,
         type: 'thread',
         quality_score: sample.qualityScore,
-        metadata: { sources: sample.sources ?? [] } as Json,
+        metadata: { sources: sample.sources ?? [] } as unknown as Json,
       })
       .select('id')
       .single()

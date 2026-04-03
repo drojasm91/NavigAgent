@@ -218,7 +218,7 @@ export async function createSnipperWithSamples(
         ? {
             ...(refinementInstructions ? { refinementInstructions } : {}),
             ...(refinementChat ? { refinementChat: refinementChat as unknown as Json } : {}),
-          } as Json
+          } as unknown as Json
         : undefined,
     }, samplePosts)
 
@@ -330,7 +330,7 @@ export async function generateBackgroundPost(snipperId: string): Promise<{ succe
           sources: research.data?.sources ?? [],
           angle: research.data?.angle ?? '',
           isBreaking: research.data?.isBreaking ?? false,
-        } as Json,
+        } as unknown as Json,
       })
       .select('id')
       .single()
