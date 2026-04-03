@@ -2,12 +2,12 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
-import { createAgentWithPosts } from '@/lib/supabase/queries/agents'
-import { AGENT_FOLLOWUP_PROMPT, AGENT_NAME_PROMPT, AGENT_REFINEMENT_CHAT_PROMPT } from '@/lib/prompts'
+import { createSnipperWithPosts } from '@/lib/supabase/queries/snippers'
+import { SNIPPER_FOLLOWUP_PROMPT, SNIPPER_NAME_PROMPT, SNIPPER_REFINEMENT_CHAT_PROMPT } from '@/lib/prompts'
 import { parseJsonFromAI } from '@/lib/utils'
 import { runNewsResearcher } from '@/lib/pipelines/steps/researcher'
 import { runNewsWriter } from '@/lib/pipelines/steps/writer-news'
-import type { UserAgentType, Json } from '@/lib/types'
+import type { SnipperType, Json } from '@/lib/types'
 import type { WriterOutput, WriterSubPost } from '@/lib/pipelines/types'
 
 // Re-export for the UI component
@@ -23,15 +23,15 @@ interface FollowUpResult {
   error?: boolean
 }
 
-interface AgentPreview {
+interface SnipperPreview {
   name: string
   description: string
   topicTags: string[]
   error?: boolean
 }
 
-interface CreateAgentResult {
-  agentId?: string
+interface CreateSnipperResult {
+  snipperId?: string
   error?: string
 }
 
@@ -41,7 +41,7 @@ interface SamplePostResult {
 }
 
 export async function generateFollowUpQuestions(
-  type: UserAgentType,
+  type: SnipperType,
   topic: string
 ): Promise<FollowUpResult> {
   try {
@@ -50,11 +50,11 @@ export async function generateFollowUpQuestions(
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 400,
-      system: AGENT_FOLLOWUP_PROMPT,
+      system: SNIPPER_FOLLOWUP_PROMPT,
       messages: [
         {
           role: 'user',
-          content: `Agent type: ${type}\nTopic: ${topic}`,
+          content: `Snipper type: ${type}\nTopic: ${topic}`,
         },
       ],
     })
@@ -85,12 +85,12 @@ export async function generateFollowUpQuestions(
   }
 }
 
-export async function generateAgentPreview(
-  type: UserAgentType,
+export async function generateSnipperPreview(
+  type: SnipperType,
   topic: string,
   answers: Record<string, string[]>,
   refinementInstructions?: string
-): Promise<AgentPreview> {
+): Promise<SnipperPreview> {
   try {
     const client = new Anthropic()
 
@@ -101,11 +101,11 @@ export async function generateAgentPreview(
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 300,
-      system: AGENT_NAME_PROMPT,
+      system: SNIPPER_NAME_PROMPT,
       messages: [
         {
           role: 'user',
-          content: `Agent type: ${type}\nTopic: ${topic}\nPreferences:\n${answersText}${refinementInstructions ? `\n\nAdditional refinement instructions from the user:\n${refinementInstructions}` : ''}`,
+          content: `Snipper type: ${type}\nTopic: ${topic}\nPreferences:\n${answersText}${refinementInstructions ? `\n\nAdditional refinement instructions from the user:\n${refinementInstructions}` : ''}`,
         },
       ],
     })
@@ -114,19 +114,19 @@ export async function generateAgentPreview(
     const parsed = parseJsonFromAI(raw)
 
     return {
-      name: typeof parsed.name === 'string' ? parsed.name : 'My Agent',
+      name: typeof parsed.name === 'string' ? parsed.name : 'My Snipper',
       description: typeof parsed.description === 'string' ? parsed.description : '',
       topicTags: Array.isArray(parsed.topicTags)
         ? parsed.topicTags.filter((t: unknown) => typeof t === 'string').slice(0, 4)
         : [],
     }
   } catch {
-    return { name: 'My Agent', description: '', topicTags: [], error: true }
+    return { name: 'My Snipper', description: '', topicTags: [], error: true }
   }
 }
 
 export async function generateSamplePost(
-  type: UserAgentType,
+  type: SnipperType,
   name: string,
   description: string,
   topicTags: string[],
@@ -138,22 +138,22 @@ export async function generateSamplePost(
 
     // Build researcher input — pass previous hooks to avoid topic repetition
     const researcherInput = {
-      agentName: name,
-      agentDescription: description,
-      agentType: type,
+      snipperName: name,
+      snipperDescription: description,
+      snipperType: type,
       topicTags,
       promptConfig,
       recentPostHooks: previousPostHooks,
     }
 
-    // Run researcher
+    // Run researcher agent
     let research = await runNewsResearcher(researcherInput)
 
     // If researcher skips, retry with broader query
     if (research.skip) {
       const broadInput = {
         ...researcherInput,
-        agentDescription: `${description}. Find ANY recent development or interesting angle on this topic.`,
+        snipperDescription: `${description}. Find ANY recent development or interesting angle on this topic.`,
       }
       research = await runNewsResearcher(broadInput)
     }
@@ -172,11 +172,11 @@ export async function generateSamplePost(
       }
     }
 
-    // Run writer
+    // Run writer agent
     const writerOutput = await runNewsWriter({
-      agentName: name,
-      agentDescription: description,
-      agentType: type,
+      snipperName: name,
+      snipperDescription: description,
+      snipperType: type,
       topicTags,
       promptConfig,
       researchBrief: research.data!,
@@ -188,8 +188,8 @@ export async function generateSamplePost(
   }
 }
 
-export async function createAgentWithSamples(
-  type: UserAgentType,
+export async function createSnipperWithSamples(
+  type: SnipperType,
   name: string,
   description: string,
   topicTags: string[],
@@ -197,7 +197,7 @@ export async function createAgentWithSamples(
   refinementInstructions?: string,
   refinementChat?: ChatMessage[],
   sessionId?: string
-): Promise<CreateAgentResult> {
+): Promise<CreateSnipperResult> {
   const supabase = createClient()
 
   const {
@@ -209,7 +209,7 @@ export async function createAgentWithSamples(
   }
 
   try {
-    const agentId = await createAgentWithPosts(supabase, user.id, {
+    const snipperId = await createSnipperWithPosts(supabase, user.id, {
       name,
       type,
       description,
@@ -227,17 +227,17 @@ export async function createAgentWithSamples(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (supabase as any)
         .from('refinement_sessions')
-        .update({ agent_id: agentId, activated: true })
+        .update({ snipper_id: snipperId, activated: true })
         .eq('session_id', sessionId)
     }
 
-    return { agentId }
+    return { snipperId }
   } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Failed to create agent' }
+    return { error: err instanceof Error ? err.message : 'Failed to create snipper' }
   }
 }
 
-export async function generateBackgroundPost(agentId: string): Promise<{ success: boolean; error?: string }> {
+export async function generateBackgroundPost(snipperId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
 
   const {
@@ -249,27 +249,27 @@ export async function generateBackgroundPost(agentId: string): Promise<{ success
   }
 
   try {
-    // Fetch agent config
-    const { data: agent, error: agentError } = await supabase
-      .from('user_agents')
+    // Fetch snipper config
+    const { data: snipper, error: snipperError } = await supabase
+      .from('snippers')
       .select('id, name, type, description, topic_tags, prompt_config')
-      .eq('id', agentId)
+      .eq('id', snipperId)
       .eq('owner_id', user.id)
       .single()
 
-    if (agentError || !agent) {
-      return { success: false, error: 'Agent not found' }
+    if (snipperError || !snipper) {
+      return { success: false, error: 'Snipper not found' }
     }
 
-    if (agent.type !== 'news') {
-      return { success: false, error: `Pipeline not implemented for type: ${agent.type}` }
+    if (snipper.type !== 'news') {
+      return { success: false, error: `Pipeline not implemented for type: ${snipper.type}` }
     }
 
     // Fetch recent post hooks for dedup
     const { data: recentPosts } = await supabase
       .from('posts')
       .select('id')
-      .eq('agent_id', agentId)
+      .eq('snipper_id', snipperId)
       .order('created_at', { ascending: false })
       .limit(7)
 
@@ -286,13 +286,13 @@ export async function generateBackgroundPost(agentId: string): Promise<{ success
       recentPostHooks = hooks?.map((h) => h.content) ?? []
     }
 
-    // Run researcher
+    // Run researcher agent
     let research = await runNewsResearcher({
-      agentName: agent.name,
-      agentDescription: agent.description,
-      agentType: agent.type,
-      topicTags: agent.topic_tags ?? [],
-      promptConfig: agent.prompt_config ?? {},
+      snipperName: snipper.name,
+      snipperDescription: snipper.description,
+      snipperType: snipper.type,
+      topicTags: snipper.topic_tags ?? [],
+      promptConfig: snipper.prompt_config ?? {},
       recentPostHooks,
     })
 
@@ -300,7 +300,7 @@ export async function generateBackgroundPost(agentId: string): Promise<{ success
       research = {
         skip: false,
         data: {
-          brief: `Write an engaging overview of a current development in ${agent.description}. Focus on ${(agent.topic_tags ?? []).join(', ')}.`,
+          brief: `Write an engaging overview of a current development in ${snipper.description}. Focus on ${(snipper.topic_tags ?? []).join(', ')}.`,
           angle: 'Current state overview with an interesting recent development',
           sources: [],
           topicsToAvoid: recentPostHooks,
@@ -309,13 +309,13 @@ export async function generateBackgroundPost(agentId: string): Promise<{ success
       }
     }
 
-    // Run writer
+    // Run writer agent
     const writerOutput = await runNewsWriter({
-      agentName: agent.name,
-      agentDescription: agent.description,
-      agentType: agent.type,
-      topicTags: agent.topic_tags ?? [],
-      promptConfig: agent.prompt_config ?? {},
+      snipperName: snipper.name,
+      snipperDescription: snipper.description,
+      snipperType: snipper.type,
+      topicTags: snipper.topic_tags ?? [],
+      promptConfig: snipper.prompt_config ?? {},
       researchBrief: research.data!,
     })
 
@@ -323,7 +323,7 @@ export async function generateBackgroundPost(agentId: string): Promise<{ success
     const { data: post, error: postError } = await supabase
       .from('posts')
       .insert({
-        agent_id: agentId,
+        snipper_id: snipperId,
         type: 'thread',
         quality_score: writerOutput.qualityScore,
         metadata: {
@@ -358,17 +358,17 @@ export interface ChatMessage {
   content: string
 }
 
-export async function refineAgentChat(
+export async function refineSnipperChat(
   message: string,
   chatHistory: ChatMessage[],
   currentPreview: { name: string; description: string; topicTags: string[] },
-  context?: { sessionId: string; agentType: string; topic: string }
+  context?: { sessionId: string; snipperType: string; topic: string }
 ): Promise<{ response: string; refinementInstructions: string; error?: string }> {
   try {
     const client = new Anthropic()
 
     const userMessage = JSON.stringify({
-      currentAgent: currentPreview,
+      currentSnipper: currentPreview,
       chatHistory,
       latestMessage: message,
     })
@@ -376,7 +376,7 @@ export async function refineAgentChat(
     const msg = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 300,
-      system: AGENT_REFINEMENT_CHAT_PROMPT,
+      system: SNIPPER_REFINEMENT_CHAT_PROMPT,
       messages: [{ role: 'user', content: userMessage }],
     })
 
@@ -397,7 +397,7 @@ export async function refineAgentChat(
         await sb.from('refinement_sessions').upsert({
           session_id: context.sessionId,
           user_id: user.id,
-          agent_type: context.agentType,
+          agent_type: context.snipperType,
           topic: context.topic,
           agent_name: currentPreview.name,
         }, { onConflict: 'session_id' })
@@ -406,7 +406,7 @@ export async function refineAgentChat(
           {
             user_id: user.id,
             session_id: context.sessionId,
-            agent_type: context.agentType,
+            agent_type: context.snipperType,
             topic: context.topic,
             agent_name: currentPreview.name,
             role: 'user',
@@ -415,7 +415,7 @@ export async function refineAgentChat(
           {
             user_id: user.id,
             session_id: context.sessionId,
-            agent_type: context.agentType,
+            agent_type: context.snipperType,
             topic: context.topic,
             agent_name: currentPreview.name,
             role: 'assistant',

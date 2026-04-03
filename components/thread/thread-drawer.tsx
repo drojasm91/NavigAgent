@@ -21,7 +21,7 @@ interface ThreadDrawerProps {
   hideDigIn?: boolean
 }
 
-function AgentAvatar({ name }: { name: string }) {
+function SnipperAvatar({ name }: { name: string }) {
   const initial = name.charAt(0).toUpperCase()
   return (
     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
@@ -40,13 +40,13 @@ export function ThreadDrawer({
 
   if (!post) return null
 
-  const agent = post.user_agents
+  const snipper = post.snippers
   const subPosts = [...post.sub_posts].sort((a, b) => a.position - b.position)
   const likeCount = Math.floor((post.quality_score ?? 0.8) * 50)
 
   function handleDigIn() {
     onOpenChange(false)
-    router.push(`/agent/${post!.agent_id}?tab=posts`)
+    router.push(`/snipper/${post!.snipper_id}?tab=posts`)
   }
 
   return (
@@ -54,10 +54,10 @@ export function ThreadDrawer({
       <DrawerContent>
         <DrawerHeader className="text-left">
           <div className="flex items-center gap-3">
-            <AgentAvatar name={agent.name} />
+            <SnipperAvatar name={snipper.name} />
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <DrawerTitle className="text-base">{agent.name}</DrawerTitle>
-              <TypeBadge type={agent.type} />
+              <DrawerTitle className="text-base">{snipper.name}</DrawerTitle>
+              <TypeBadge type={snipper.type} />
             </div>
             <button
               onClick={() => onOpenChange(false)}

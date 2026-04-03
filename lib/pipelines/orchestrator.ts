@@ -1,4 +1,4 @@
-// Orchestrator — routes jobs to the correct pipeline based on user-agent type
+// Orchestrator — routes jobs to the correct pipeline based on snipper type
 // This is the ONLY pipeline layer that touches the database (for scheduled runs)
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -8,32 +8,32 @@ import type { ResearcherInput, WriterInput } from '@/lib/pipelines/types'
 
 interface OrchestratorInput {
   jobId: string
-  agentId: string
+  snipperId: string
   supabase: SupabaseClient
 }
 
-export async function runOrchestrator({ agentId, supabase }: OrchestratorInput): Promise<void> {
-  // 1. Fetch agent config
-  const { data: agent, error: agentError } = await supabase
-    .from('user_agents')
+export async function runOrchestrator({ snipperId, supabase }: OrchestratorInput): Promise<void> {
+  // 1. Fetch snipper config
+  const { data: snipper, error: snipperError } = await supabase
+    .from('snippers')
     .select('id, name, type, description, topic_tags, prompt_config')
-    .eq('id', agentId)
+    .eq('id', snipperId)
     .single()
 
-  if (agentError || !agent) {
-    throw new Error(`Agent not found: ${agentId}`)
+  if (snipperError || !snipper) {
+    throw new Error(`Snipper not found: ${snipperId}`)
   }
 
   // 2. Route by type
-  if (agent.type !== 'news') {
-    throw new Error(`Pipeline not implemented for type: ${agent.type}`)
+  if (snipper.type !== 'news') {
+    throw new Error(`Pipeline not implemented for type: ${snipper.type}`)
   }
 
   // 3. Fetch recent post hooks for dedup (position=1 sub-posts from last 7 posts)
   const { data: recentPosts } = await supabase
     .from('posts')
     .select('id')
-    .eq('agent_id', agentId)
+    .eq('snipper_id', snipperId)
     .order('created_at', { ascending: false })
     .limit(7)
 
@@ -50,13 +50,13 @@ export async function runOrchestrator({ agentId, supabase }: OrchestratorInput):
     recentPostHooks = hooks?.map((h) => h.content) ?? []
   }
 
-  // 4. Run researcher
+  // 4. Run researcher agent
   const researcherInput: ResearcherInput = {
-    agentName: agent.name,
-    agentDescription: agent.description,
-    agentType: agent.type,
-    topicTags: agent.topic_tags ?? [],
-    promptConfig: agent.prompt_config ?? {},
+    snipperName: snipper.name,
+    snipperDescription: snipper.description,
+    snipperType: snipper.type,
+    topicTags: snipper.topic_tags ?? [],
+    promptConfig: snipper.prompt_config ?? {},
     recentPostHooks,
   }
 
@@ -66,13 +66,13 @@ export async function runOrchestrator({ agentId, supabase }: OrchestratorInput):
     return // Nothing new — skip this run
   }
 
-  // 5. Run writer
+  // 5. Run writer agent
   const writerInput: WriterInput = {
-    agentName: agent.name,
-    agentDescription: agent.description,
-    agentType: agent.type,
-    topicTags: agent.topic_tags ?? [],
-    promptConfig: agent.prompt_config ?? {},
+    snipperName: snipper.name,
+    snipperDescription: snipper.description,
+    snipperType: snipper.type,
+    topicTags: snipper.topic_tags ?? [],
+    promptConfig: snipper.prompt_config ?? {},
     researchBrief: research.data,
   }
 
@@ -82,7 +82,7 @@ export async function runOrchestrator({ agentId, supabase }: OrchestratorInput):
   const { data: post, error: postError } = await supabase
     .from('posts')
     .insert({
-      agent_id: agentId,
+      snipper_id: snipperId,
       type: 'thread',
       quality_score: writerOutput.qualityScore,
       metadata: {
@@ -114,7 +114,7 @@ export async function runOrchestrator({ agentId, supabase }: OrchestratorInput):
 
   // 7. Update last_run_at
   await supabase
-    .from('user_agents')
+    .from('snippers')
     .update({ last_run_at: new Date().toISOString() })
-    .eq('id', agentId)
+    .eq('id', snipperId)
 }

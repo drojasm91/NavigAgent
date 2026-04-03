@@ -1,11 +1,11 @@
-import type { Json, UserAgentType } from '@/lib/types'
+import type { Json, SnipperType } from '@/lib/types'
 
 // --- Researcher ---
 
 export interface ResearcherInput {
-  agentName: string
-  agentDescription: string
-  agentType: UserAgentType
+  snipperName: string
+  snipperDescription: string
+  snipperType: SnipperType
   topicTags: string[]
   promptConfig: Json
   recentPostHooks: string[] // empty during creation
@@ -32,9 +32,9 @@ export interface ResearcherOutput {
 // --- Writer ---
 
 export interface WriterInput {
-  agentName: string
-  agentDescription: string
-  agentType: UserAgentType
+  snipperName: string
+  snipperDescription: string
+  snipperType: SnipperType
   topicTags: string[]
   promptConfig: Json
   researchBrief: ResearchBrief

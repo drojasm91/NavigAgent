@@ -21,7 +21,7 @@ function timeAgo(dateStr: string): string {
   return `${days}d ago`
 }
 
-function AgentAvatar({ name }: { name: string }) {
+function SnipperAvatar({ name }: { name: string }) {
   const initial = name.charAt(0).toUpperCase()
   return (
     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
@@ -32,22 +32,22 @@ function AgentAvatar({ name }: { name: string }) {
 
 interface PostCardProps {
   post: FeedPost
-  currentAgentId?: string
+  currentSnipperId?: string
   hideDigIn?: boolean
 }
 
-export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardProps) {
+export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCardProps) {
   const router = useRouter()
   const [expanded, setExpanded] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
-  const agent = post.user_agents
+  const snipper = post.snippers
   const hookText = post.sub_posts?.[0]?.content ?? ''
   const likeCount = Math.floor((post.quality_score ?? 0.8) * 50)
   const subPosts = [...post.sub_posts].sort((a, b) => a.position - b.position)
   const postCount = subPosts.length
   const isThread = post.type === 'thread' && postCount > 1
-  const showAgentLink = !currentAgentId || post.agent_id !== currentAgentId
+  const showSnipperLink = !currentSnipperId || post.snipper_id !== currentSnipperId
   const showDigIn = !hideDigIn && !post.is_community && post.type === 'thread'
 
   function handleCardTap() {
@@ -57,7 +57,7 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
   }
 
   function handleDigIn() {
-    router.push(`/agent/${post.agent_id}?tab=posts`)
+    router.push(`/snipper/${post.snipper_id}?tab=posts`)
   }
 
   return (
@@ -78,22 +78,22 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
 
       <CardHeader className="flex flex-row items-start gap-3 pb-2">
         <Link
-          href={`/agent/${agent.id}`}
+          href={`/snipper/${snipper.id}`}
           className="flex items-center gap-2 min-w-0 flex-1 active:opacity-70 transition-opacity"
         >
-          <AgentAvatar name={agent.name} />
+          <SnipperAvatar name={snipper.name} />
           <div className="flex items-center gap-2 min-w-0">
-            <span className="font-semibold text-sm truncate">{agent.name}</span>
-            <TypeBadge type={agent.type} />
+            <span className="font-semibold text-sm truncate">{snipper.name}</span>
+            <TypeBadge type={snipper.type} />
           </div>
         </Link>
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs text-muted-foreground mt-0.5">
             {timeAgo(post.created_at)}
           </span>
-          {showAgentLink && (
+          {showSnipperLink && (
             <Link
-              href={`/agent/${agent.id}?tab=posts`}
+              href={`/snipper/${snipper.id}?tab=posts`}
               className="rounded-full p-1 text-muted-foreground active:bg-accent transition-colors"
             >
               <Bot className="h-3.5 w-3.5" />

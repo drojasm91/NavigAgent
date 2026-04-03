@@ -3,10 +3,10 @@ import { buttonVariants } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export function DigInButton({ agentId }: { agentId: string }) {
+export function DigInButton({ snipperId }: { snipperId: string }) {
   return (
     <Link
-      href={`/rabbit-hole/${agentId}`}
+      href={`/snipper/${snipperId}?tab=posts`}
       className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'w-full mt-2')}
     >
       Dig In

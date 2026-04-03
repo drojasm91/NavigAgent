@@ -3,20 +3,20 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { AgentProfileHeader } from './agent-profile-header'
-import { AgentDashboardTab } from './agent-dashboard-tab'
-import { AgentPostsTab } from './agent-posts-tab'
-import { generateBackgroundPost } from '@/app/(app)/agents/new/actions'
-import type { FeedPost, FeedAgent } from '@/lib/types'
+import { SnipperProfileHeader } from './snipper-profile-header'
+import { SnipperDashboardTab } from './snipper-dashboard-tab'
+import { SnipperPostsTab } from './snipper-posts-tab'
+import { generateBackgroundPost } from '@/app/(app)/snippers/new/actions'
+import type { FeedPost, FeedSnipper } from '@/lib/types'
 
-interface AgentProfileShellProps {
+interface SnipperProfileShellProps {
   userId: string
-  agent: FeedAgent
+  snipper: FeedSnipper
   posts: FeedPost[]
   isGenerating?: boolean
 }
 
-export function AgentProfileShell({ userId, agent, posts, isGenerating }: AgentProfileShellProps) {
+export function SnipperProfileShell({ userId, snipper, posts, isGenerating }: SnipperProfileShellProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -27,7 +27,7 @@ export function AgentProfileShell({ userId, agent, posts, isGenerating }: AgentP
 
   // Auto-generate posts if the owner has fewer than 3
   useEffect(() => {
-    if (agent.owner_id !== userId || posts.length >= 3) return
+    if (snipper.owner_id !== userId || posts.length >= 3) return
     if (generationStarted.current) return
     generationStarted.current = true
 
@@ -39,7 +39,7 @@ export function AgentProfileShell({ userId, agent, posts, isGenerating }: AgentP
       for (let i = 0; i < needed; i++) {
         if (cancelled) break
         try {
-          const result = await generateBackgroundPost(agent.id)
+          const result = await generateBackgroundPost(snipper.id)
           if (cancelled) break
           if (result.success) {
             router.refresh()
@@ -69,7 +69,7 @@ export function AgentProfileShell({ userId, agent, posts, isGenerating }: AgentP
 
   return (
     <>
-      <AgentProfileHeader agent={agent} postCount={posts.length} isGenerating={generating} />
+      <SnipperProfileHeader snipper={snipper} postCount={posts.length} isGenerating={generating} />
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
@@ -77,10 +77,10 @@ export function AgentProfileShell({ userId, agent, posts, isGenerating }: AgentP
           <TabsTrigger value="posts">Posts</TabsTrigger>
         </TabsList>
         <TabsContent value="info">
-          <AgentDashboardTab agent={agent} posts={posts} />
+          <SnipperDashboardTab snipper={snipper} posts={posts} />
         </TabsContent>
         <TabsContent value="posts">
-          <AgentPostsTab userId={userId} agentId={agent.id} posts={posts} />
+          <SnipperPostsTab userId={userId} snipperId={snipper.id} posts={posts} />
         </TabsContent>
       </Tabs>
     </>

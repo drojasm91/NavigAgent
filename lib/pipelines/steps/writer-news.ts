@@ -11,8 +11,8 @@ export async function runNewsWriter(input: WriterInput): Promise<WriterOutput> {
 
   const userMessage = JSON.stringify({
     researchBrief: input.researchBrief,
-    agentName: input.agentName,
-    agentDescription: input.agentDescription,
+    snipperName: input.snipperName,
+    snipperDescription: input.snipperDescription,
     topicTags: input.topicTags,
     promptConfig: input.promptConfig,
   })

@@ -1,58 +1,58 @@
 // Layer 1 — Scheduler
-// Hourly cron. Checks which user-agents are due to run and enqueues pipeline jobs.
+// Hourly cron. Checks which snippers are due to run and enqueues pipeline jobs.
 
 import { schedules, logger } from '@trigger.dev/sdk/v3'
 import { createServiceClient } from '@/lib/supabase/service'
 import { pipelineJob } from './pipeline-job'
 
 export const schedulerTask = schedules.task({
-  id: 'navigagent-scheduler',
+  id: 'snipper-scheduler',
   // Runs at the top of every hour
   cron: '0 * * * *',
   run: async () => {
     const supabase = createServiceClient()
     const now = new Date()
 
-    // Fetch all active user-agents
-    const { data: userAgents, error } = await supabase
-      .from('user_agents')
+    // Fetch all active snippers
+    const { data: snippers, error } = await supabase
+      .from('snippers')
       .select('id, owner_id, cadence, last_run_at')
       .eq('is_active', true)
 
     if (error) {
-      logger.error('Scheduler: failed to fetch user-agents', { error })
+      logger.error('Scheduler: failed to fetch snippers', { error })
       return
     }
 
-    logger.log(`Scheduler: checking ${userAgents.length} active user-agents`)
+    logger.log(`Scheduler: checking ${snippers.length} active snippers`)
 
-    for (const userAgent of userAgents) {
-      if (!isDue(userAgent.cadence, userAgent.last_run_at, now)) continue
+    for (const snipper of snippers) {
+      if (!isDue(snipper.cadence, snipper.last_run_at, now)) continue
 
       // Check if any subscriber has fewer than 5 unread posts
-      const hasLowInventory = await checkLowInventory(supabase, userAgent.id)
+      const hasLowInventory = await checkLowInventory(supabase, snipper.id)
       if (!hasLowInventory) continue
 
       // Beta tier cap: daily cadence only (enforced by is_active flag at creation,
       // but double-checked here)
-      if (userAgent.cadence !== 'daily') continue
+      if (snipper.cadence !== 'daily') continue
 
       // Create a pending job record
       const { data: job, error: jobError } = await supabase
         .from('jobs')
-        .insert({ agent_id: userAgent.id, status: 'pending' })
+        .insert({ snipper_id: snipper.id, status: 'pending' })
         .select('id')
         .single()
 
       if (jobError || !job) {
-        logger.error('Scheduler: failed to create job', { agentId: userAgent.id, jobError })
+        logger.error('Scheduler: failed to create job', { snipperId: snipper.id, jobError })
         continue
       }
 
       // Enqueue the pipeline job
-      await pipelineJob.trigger({ jobId: job.id, agentId: userAgent.id })
+      await pipelineJob.trigger({ jobId: job.id, snipperId: snipper.id })
 
-      logger.log('Scheduler: enqueued job', { jobId: job.id, agentId: userAgent.id })
+      logger.log('Scheduler: enqueued job', { jobId: job.id, snipperId: snipper.id })
     }
   },
 })
@@ -67,20 +67,20 @@ function isDue(cadence: string, lastRunAt: string | null, now: Date): boolean {
   return false
 }
 
-// Returns true if any subscriber has fewer than 5 unread posts from this agent
-async function checkLowInventory(supabase: ReturnType<typeof createServiceClient>, agentId: string): Promise<boolean> {
+// Returns true if any subscriber has fewer than 5 unread posts from this snipper
+async function checkLowInventory(supabase: ReturnType<typeof createServiceClient>, snipperId: string): Promise<boolean> {
   const { data: subscriptions } = await supabase
-    .from('user_agent_subscriptions')
+    .from('snipper_subscriptions')
     .select('user_id, curriculum_pointer')
-    .eq('agent_id', agentId)
+    .eq('snipper_id', snipperId)
 
   if (!subscriptions || subscriptions.length === 0) return false
 
-  // Count total posts for this agent
+  // Count total posts for this snipper
   const { count: totalPosts } = await supabase
     .from('posts')
     .select('id', { count: 'exact', head: true })
-    .eq('agent_id', agentId)
+    .eq('snipper_id', snipperId)
 
   if (!totalPosts) return true // No posts at all — definitely needs to run
 

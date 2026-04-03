@@ -7,33 +7,33 @@ import { TopicChip } from '@/components/onboarding/topic-chip'
 import { SubPostItem } from '@/components/thread/sub-post-item'
 import {
   generateFollowUpQuestions,
-  generateAgentPreview,
+  generateSnipperPreview,
   generateSamplePost,
-  createAgentWithSamples,
-  refineAgentChat,
-} from '@/app/(app)/agents/new/actions'
-import type { FollowUpQuestion, ChatMessage } from '@/app/(app)/agents/new/actions'
+  createSnipperWithSamples,
+  refineSnipperChat,
+} from '@/app/(app)/snippers/new/actions'
+import type { FollowUpQuestion, ChatMessage } from '@/app/(app)/snippers/new/actions'
 import { cn } from '@/lib/utils'
 import type { WriterOutput } from '@/lib/pipelines/types'
-import type { UserAgentType } from '@/lib/types'
+import type { SnipperType } from '@/lib/types'
 
-const AGENT_TYPES = [
+const SNIPPER_TYPES = [
   {
-    type: 'news' as UserAgentType,
+    type: 'news' as SnipperType,
     label: 'Stay on top of news',
     description: 'Current events, trends, and developments',
     icon: Newspaper,
     topics: ['World politics', 'Tech & startups', 'Crypto & web3', 'Markets & finance', 'Sports', 'Science & space'],
   },
   {
-    type: 'learning' as UserAgentType,
+    type: 'learning' as SnipperType,
     label: 'Learn something new',
     description: 'Build knowledge on a subject over time',
     icon: GraduationCap,
     topics: ['History', 'Philosophy', 'Science', 'How things work', 'Psychology', 'Economics'],
   },
   {
-    type: 'recommendation' as UserAgentType,
+    type: 'recommendation' as SnipperType,
     label: 'Get recommendations',
     description: 'Discover restaurants, movies, books, and more',
     icon: MapPin,
@@ -41,10 +41,10 @@ const AGENT_TYPES = [
   },
 ]
 
-export function CreateAgentFlow() {
+export function CreateSnipperFlow() {
   const router = useRouter()
   const [step, setStep] = useState(1)
-  const [selectedType, setSelectedType] = useState<UserAgentType | null>(null)
+  const [selectedType, setSelectedType] = useState<SnipperType | null>(null)
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null)
   const [customTopic, setCustomTopic] = useState('')
   const [followUpQuestions, setFollowUpQuestions] = useState<FollowUpQuestion[]>([])
@@ -80,7 +80,7 @@ export function CreateAgentFlow() {
     }
   }, [samplePosts])
 
-  function handleSelectType(type: UserAgentType) {
+  function handleSelectType(type: SnipperType) {
     setSelectedType(type)
     setSelectedTopic(null)
     setCustomTopic('')
@@ -156,11 +156,11 @@ export function CreateAgentFlow() {
       answersObj[q] = Array.from(selections)
     }
 
-    const result = await generateAgentPreview(selectedType!, topic, answersObj)
+    const result = await generateSnipperPreview(selectedType!, topic, answersObj)
     setLoadingPreview(false)
 
     if (result.error) {
-      setError('Failed to generate agent preview. Please try again.')
+      setError('Failed to generate Snipper preview. Please try again.')
       return
     }
 
@@ -221,9 +221,9 @@ export function CreateAgentFlow() {
     setChatMessages(updatedHistory)
 
     // 1. Get AI interpretation
-    const chatResult = await refineAgentChat(userMessage, chatMessages, preview, {
+    const chatResult = await refineSnipperChat(userMessage, chatMessages, preview, {
       sessionId,
-      agentType: selectedType!,
+      snipperType: selectedType!,
       topic: selectedTopic!,
     })
 
@@ -243,7 +243,7 @@ export function CreateAgentFlow() {
       answersObj[q] = Array.from(selections)
     }
 
-    const newPreview = await generateAgentPreview(
+    const newPreview = await generateSnipperPreview(
       selectedType,
       selectedTopic!,
       answersObj,
@@ -290,7 +290,7 @@ export function CreateAgentFlow() {
     setCreating(true)
     setError(null)
 
-    const result = await createAgentWithSamples(
+    const result = await createSnipperWithSamples(
       selectedType,
       preview.name,
       preview.description,
@@ -307,7 +307,7 @@ export function CreateAgentFlow() {
       return
     }
 
-    router.push(`/agent/${result.agentId}`)
+    router.push(`/snipper/${result.snipperId}`)
   }
 
   function handleBack() {
@@ -335,7 +335,7 @@ export function CreateAgentFlow() {
     }
   }
 
-  const typeConfig = AGENT_TYPES.find((t) => t.type === selectedType)
+  const typeConfig = SNIPPER_TYPES.find((t) => t.type === selectedType)
   const hasAnswers = Object.values(followUpAnswers).some((s: Set<string>) => s.size > 0)
 
   return (
@@ -357,29 +357,29 @@ export function CreateAgentFlow() {
         {step === 1 && (
           <>
             <h1 className="text-2xl font-bold tracking-tight">
-              Create an agent
+              Create a Snipper
             </h1>
             <p className="text-sm text-muted-foreground mt-1.5 mb-8">
               What kind of content do you want?
             </p>
 
             <div className="flex flex-col gap-3">
-              {AGENT_TYPES.map((agentType) => {
-                const Icon = agentType.icon
+              {SNIPPER_TYPES.map((snipperType) => {
+                const Icon = snipperType.icon
                 return (
                   <button
-                    key={agentType.type}
+                    key={snipperType.type}
                     type="button"
-                    onClick={() => handleSelectType(agentType.type)}
+                    onClick={() => handleSelectType(snipperType.type)}
                     className="flex items-start gap-4 rounded-2xl border border-border bg-card p-4 text-left transition-all active:scale-[0.98] active:bg-muted"
                   >
                     <div className="shrink-0 rounded-xl bg-primary/10 p-3">
                       <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="font-semibold text-sm">{agentType.label}</p>
+                      <p className="font-semibold text-sm">{snipperType.label}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {agentType.description}
+                        {snipperType.description}
                       </p>
                     </div>
                   </button>
@@ -519,7 +519,7 @@ export function CreateAgentFlow() {
         {step === 4 && (
           <>
             <h1 className="text-2xl font-bold tracking-tight">
-              Meet your agent
+              Meet your Snipper
             </h1>
             <p className="text-sm text-muted-foreground mt-1.5 mb-8">
               Here&apos;s what we came up with.
@@ -529,7 +529,7 @@ export function CreateAgentFlow() {
             {loadingPreview ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse py-8">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Creating your agent...
+                Creating your Snipper...
               </div>
             ) : preview ? (
               <>
@@ -541,7 +541,7 @@ export function CreateAgentFlow() {
                     <div>
                       <p className="font-bold text-base">{preview.name}</p>
                       <p className="text-xs text-muted-foreground capitalize">
-                        {selectedType} agent
+                        {selectedType} snipper
                       </p>
                     </div>
                   </div>
@@ -659,7 +659,7 @@ export function CreateAgentFlow() {
               {/* Refinement chat */}
               {samplePosts.length > 0 && !loadingSample && !loadingPreview && (
                 <div className="mt-6 space-y-3">
-                  <p className="text-sm font-semibold">Refine your agent</p>
+                  <p className="text-sm font-semibold">Refine your Snipper</p>
 
                   {chatMessages.length > 0 && (
                     <div className="space-y-2">
@@ -753,7 +753,7 @@ export function CreateAgentFlow() {
               disabled={creating}
               className="w-full rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground transition-all disabled:opacity-30 active:scale-[0.98]"
             >
-              {creating ? 'Activating...' : 'Activate agent'}
+              {creating ? 'Activating...' : 'Activate Snipper'}
             </button>
           </div>
         </div>

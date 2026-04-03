@@ -3,15 +3,15 @@ export const maxDuration = 120
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import { AgentProfileShell } from '@/components/agent-profile/agent-profile-shell'
-import type { FeedAgent, FeedPost, FeedSubPost } from '@/lib/types'
+import { SnipperProfileShell } from '@/components/snipper-profile/snipper-profile-shell'
+import type { FeedSnipper, FeedPost, FeedSubPost } from '@/lib/types'
 
-interface AgentPageProps {
-  params: Promise<{ agentId: string }>
+interface SnipperPageProps {
+  params: Promise<{ snipperId: string }>
 }
 
-export default async function AgentPage({ params }: AgentPageProps) {
-  const { agentId } = await params
+export default async function SnipperPage({ params }: SnipperPageProps) {
+  const { snipperId } = await params
   const supabase = createClient()
 
   const {
@@ -20,31 +20,31 @@ export default async function AgentPage({ params }: AgentPageProps) {
 
   if (!user) redirect('/login')
 
-  // Fetch agent from DB
-  const { data: agentRow } = await supabase
-    .from('user_agents')
+  // Fetch snipper from DB
+  const { data: snipperRow } = await supabase
+    .from('snippers')
     .select('id, name, type, owner_id, is_public, topic_tags, description, created_at')
-    .eq('id', agentId)
+    .eq('id', snipperId)
     .single()
 
-  if (!agentRow) notFound()
+  if (!snipperRow) notFound()
 
-  const agent: FeedAgent = {
-    id: agentRow.id,
-    name: agentRow.name,
-    type: agentRow.type,
-    owner_id: agentRow.owner_id,
-    is_public: agentRow.is_public,
-    topic_tags: agentRow.topic_tags ?? [],
-    description: agentRow.description,
-    created_at: agentRow.created_at,
+  const snipper: FeedSnipper = {
+    id: snipperRow.id,
+    name: snipperRow.name,
+    type: snipperRow.type,
+    owner_id: snipperRow.owner_id,
+    is_public: snipperRow.is_public,
+    topic_tags: snipperRow.topic_tags ?? [],
+    description: snipperRow.description,
+    created_at: snipperRow.created_at,
   }
 
-  // Fetch real posts for this agent
+  // Fetch real posts for this snipper
   const { data: postRows } = await supabase
     .from('posts')
     .select('*')
-    .eq('agent_id', agentId)
+    .eq('snipper_id', snipperId)
     .order('created_at', { ascending: false })
 
   const posts: FeedPost[] = []
@@ -68,7 +68,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
       posts.push({
         ...post,
         sub_posts: subPostsByPost.get(post.id) ?? [],
-        user_agents: agent,
+        snippers: snipper,
         is_community: false,
       })
     }
@@ -76,7 +76,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
 
   // Sort: learning → curriculum order, news/recommendation → newest first
   const sortedPosts =
-    agent.type === 'learning'
+    snipper.type === 'learning'
       ? [...posts].sort(
           (a, b) => (a.curriculum_position ?? 0) - (b.curriculum_position ?? 0)
         )
@@ -84,7 +84,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-4">
-      <AgentProfileShell userId={user.id} agent={agent} posts={sortedPosts} />
+      <SnipperProfileShell userId={user.id} snipper={snipper} posts={sortedPosts} />
     </div>
   )
 }

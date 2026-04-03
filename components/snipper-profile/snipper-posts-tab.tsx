@@ -3,13 +3,13 @@
 import { FeedList } from '@/components/feed/feed-list'
 import type { FeedPost } from '@/lib/types'
 
-interface AgentPostsTabProps {
+interface SnipperPostsTabProps {
   userId: string
-  agentId: string
+  snipperId: string
   posts: FeedPost[]
 }
 
-export function AgentPostsTab({ agentId, posts }: AgentPostsTabProps) {
+export function SnipperPostsTab({ snipperId, posts }: SnipperPostsTabProps) {
   return (
     <div className="pt-4">
       <FeedList
@@ -18,7 +18,7 @@ export function AgentPostsTab({ agentId, posts }: AgentPostsTabProps) {
         loadingMore={false}
         hasMore={false}
         onLoadMore={() => {}}
-        currentAgentId={agentId}
+        currentSnipperId={snipperId}
         hideDigIn
       />
     </div>

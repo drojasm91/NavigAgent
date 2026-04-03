@@ -1,25 +1,25 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, UserAgentType, Json } from '@/lib/types'
+import type { Database, SnipperType, Json } from '@/lib/types'
 import type { WriterOutput } from '@/lib/pipelines/types'
 
 type TypedClient = SupabaseClient<Database>
 
-interface CreateAgentData {
+interface CreateSnipperData {
   name: string
-  type: UserAgentType
+  type: SnipperType
   description: string
   topicTags: string[]
   promptConfig?: Json
 }
 
-export async function createAgentWithSubscription(
+export async function createSnipperWithSubscription(
   supabase: TypedClient,
   userId: string,
-  data: CreateAgentData
+  data: CreateSnipperData
 ): Promise<string> {
-  // Insert the user-agent
-  const { data: agent, error: agentError } = await supabase
-    .from('user_agents')
+  // Insert the snipper
+  const { data: snipper, error: snipperError } = await supabase
+    .from('snippers')
     .insert({
       owner_id: userId,
       name: data.name,
@@ -34,40 +34,40 @@ export async function createAgentWithSubscription(
     .select('id')
     .single()
 
-  if (agentError || !agent) {
-    throw new Error(agentError?.message ?? 'Failed to create agent')
+  if (snipperError || !snipper) {
+    throw new Error(snipperError?.message ?? 'Failed to create snipper')
   }
 
   // Auto-subscribe the creator
   const { error: subError } = await supabase
-    .from('user_agent_subscriptions')
+    .from('snipper_subscriptions')
     .insert({
       user_id: userId,
-      agent_id: agent.id,
+      snipper_id: snipper.id,
     })
 
   if (subError) {
     throw new Error(subError.message)
   }
 
-  return agent.id
+  return snipper.id
 }
 
-export async function createAgentWithPosts(
+export async function createSnipperWithPosts(
   supabase: TypedClient,
   userId: string,
-  data: CreateAgentData,
+  data: CreateSnipperData,
   samplePosts: WriterOutput[]
 ): Promise<string> {
-  // 1. Create agent + subscription
-  const agentId = await createAgentWithSubscription(supabase, userId, data)
+  // 1. Create snipper + subscription
+  const snipperId = await createSnipperWithSubscription(supabase, userId, data)
 
   // 2. Insert each sample as a post + sub_posts
   for (const sample of samplePosts) {
     const { data: post, error: postError } = await supabase
       .from('posts')
       .insert({
-        agent_id: agentId,
+        snipper_id: snipperId,
         type: 'thread',
         quality_score: sample.qualityScore,
         metadata: { sources: sample.sources ?? [] } as Json,
@@ -88,9 +88,9 @@ export async function createAgentWithPosts(
 
   // 3. Set last_run_at so scheduler doesn't immediately re-run
   await supabase
-    .from('user_agents')
+    .from('snippers')
     .update({ last_run_at: new Date().toISOString() })
-    .eq('id', agentId)
+    .eq('id', snipperId)
 
-  return agentId
+  return snipperId
 }

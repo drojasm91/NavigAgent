@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type UserTier = 'beta' | 'free' | 'paid'
-export type UserAgentType = 'news' | 'learning' | 'recommendation'
+export type SnipperType = 'news' | 'learning' | 'recommendation'
 export type Cadence = 'daily' | 'weekly'
 export type PostType = 'thread' | 'card'
 export type SignalType = 'like' | 'skip' | 'read_full' | 'asked_question' | 'rabbit_hole_entered'
@@ -61,12 +61,12 @@ export interface Database {
         }
         Relationships: []
       }
-      user_agents: {
+      snippers: {
         Row: {
           id: string
           owner_id: string
           name: string
-          type: UserAgentType
+          type: SnipperType
           description: string
           topic_tags: string[]
           prompt_config: Json
@@ -81,7 +81,7 @@ export interface Database {
           id?: string
           owner_id: string
           name: string
-          type: UserAgentType
+          type: SnipperType
           description: string
           topic_tags?: string[]
           prompt_config?: Json
@@ -96,7 +96,7 @@ export interface Database {
           id?: string
           owner_id?: string
           name?: string
-          type?: UserAgentType
+          type?: SnipperType
           description?: string
           topic_tags?: string[]
           prompt_config?: Json
@@ -109,25 +109,25 @@ export interface Database {
         }
         Relationships: []
       }
-      user_agent_subscriptions: {
+      snipper_subscriptions: {
         Row: {
           id: string
           user_id: string
-          agent_id: string
+          snipper_id: string
           curriculum_pointer: number
           subscribed_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          agent_id: string
+          snipper_id: string
           curriculum_pointer?: number
           subscribed_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          agent_id?: string
+          snipper_id?: string
           curriculum_pointer?: number
           subscribed_at?: string
         }
@@ -136,7 +136,7 @@ export interface Database {
       posts: {
         Row: {
           id: string
-          agent_id: string
+          snipper_id: string
           type: PostType
           curriculum_position: number | null
           metadata: Json | null
@@ -145,7 +145,7 @@ export interface Database {
         }
         Insert: {
           id?: string
-          agent_id: string
+          snipper_id: string
           type: PostType
           curriculum_position?: number | null
           metadata?: Json | null
@@ -154,7 +154,7 @@ export interface Database {
         }
         Update: {
           id?: string
-          agent_id?: string
+          snipper_id?: string
           type?: PostType
           curriculum_position?: number | null
           metadata?: Json | null
@@ -214,7 +214,7 @@ export interface Database {
       jobs: {
         Row: {
           id: string
-          agent_id: string
+          snipper_id: string
           status: JobStatus
           triggered_at: string
           completed_at: string | null
@@ -222,7 +222,7 @@ export interface Database {
         }
         Insert: {
           id?: string
-          agent_id: string
+          snipper_id: string
           status?: JobStatus
           triggered_at?: string
           completed_at?: string | null
@@ -230,7 +230,7 @@ export interface Database {
         }
         Update: {
           id?: string
-          agent_id?: string
+          snipper_id?: string
           status?: JobStatus
           triggered_at?: string
           completed_at?: string | null

@@ -3,17 +3,17 @@
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, UserPlus } from 'lucide-react'
 import { TypeBadge } from '@/components/feed/type-badge'
-import type { FeedAgent } from '@/lib/types'
+import type { FeedSnipper } from '@/lib/types'
 
-interface AgentProfileHeaderProps {
-  agent: FeedAgent
+interface SnipperProfileHeaderProps {
+  snipper: FeedSnipper
   postCount: number
   isGenerating?: boolean
 }
 
-export function AgentProfileHeader({ agent, postCount, isGenerating }: AgentProfileHeaderProps) {
+export function SnipperProfileHeader({ snipper, postCount, isGenerating }: SnipperProfileHeaderProps) {
   const router = useRouter()
-  const initial = agent.name.charAt(0).toUpperCase()
+  const initial = snipper.name.charAt(0).toUpperCase()
 
   return (
     <div className="pb-3 space-y-2.5">
@@ -28,8 +28,8 @@ export function AgentProfileHeader({ agent, postCount, isGenerating }: AgentProf
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold shrink-0">
           {initial}
         </div>
-        <h1 className="font-bold text-base truncate">{agent.name}</h1>
-        <TypeBadge type={agent.type} />
+        <h1 className="font-bold text-base truncate">{snipper.name}</h1>
+        <TypeBadge type={snipper.type} />
         <div className="flex-1" />
         <button className="flex items-center gap-1.5 shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-medium active:bg-accent transition-colors">
           <UserPlus className="h-3.5 w-3.5" />
@@ -39,9 +39,9 @@ export function AgentProfileHeader({ agent, postCount, isGenerating }: AgentProf
 
       {/* Row 2: Tags + Stats */}
       <div className="flex items-center justify-between gap-3">
-        {agent.topic_tags.length > 0 && (
+        {snipper.topic_tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 min-w-0">
-            {agent.topic_tags.map((tag) => (
+            {snipper.topic_tags.map((tag) => (
               <span
                 key={tag}
                 className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] text-muted-foreground"

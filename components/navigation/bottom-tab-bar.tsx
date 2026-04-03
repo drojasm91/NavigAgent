@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 const tabs = [
   { href: '/', label: 'Feed', icon: Home, match: (p: string) => p === '/' },
   { href: '/discover', label: 'Discover', icon: Compass, match: (p: string) => p.startsWith('/discover') },
-  { href: '/agents', label: 'My Agents', icon: Bot, match: (p: string) => p.startsWith('/agents') },
+  { href: '/snippers', label: 'My Snippers', icon: Bot, match: (p: string) => p.startsWith('/snippers') },
   { href: '/settings', label: 'Settings', icon: Settings, match: (p: string) => p.startsWith('/settings') },
 ]
 

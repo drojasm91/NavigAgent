@@ -12,7 +12,7 @@ interface FeedListProps {
   loadingMore: boolean
   hasMore: boolean
   onLoadMore: () => void
-  currentAgentId?: string
+  currentSnipperId?: string
   hideDigIn?: boolean
 }
 
@@ -35,7 +35,7 @@ export function FeedList({
   loadingMore,
   hasMore,
   onLoadMore,
-  currentAgentId,
+  currentSnipperId,
   hideDigIn = false,
 }: FeedListProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -80,7 +80,7 @@ export function FeedList({
         <PostCard
           key={post.id}
           post={post}
-          currentAgentId={currentAgentId}
+          currentSnipperId={currentSnipperId}
           hideDigIn={hideDigIn}
         />
       ))}

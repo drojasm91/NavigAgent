@@ -3,9 +3,9 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { PageHeader } from '@/components/navigation/page-header'
-import { MyAgentsList } from '@/components/agents/my-agents-list'
+import { MySnippersList } from '@/components/snippers/my-snippers-list'
 
-export default async function AgentsPage() {
+export default async function SnippersPage() {
   const supabase = createClient()
 
   const {
@@ -14,15 +14,15 @@ export default async function AgentsPage() {
 
   if (!user) redirect('/login')
 
-  // Fetch all agents the user is subscribed to
+  // Fetch all snippers the user is subscribed to
   const { data: subs } = await supabase
-    .from('user_agent_subscriptions')
-    .select('agent_id')
+    .from('snipper_subscriptions')
+    .select('snipper_id')
     .eq('user_id', user.id)
 
-  const agentIds = subs?.map((s) => s.agent_id) ?? []
+  const snipperIds = subs?.map((s) => s.snipper_id) ?? []
 
-  let agents: Array<{
+  let snippers: Array<{
     id: string
     name: string
     type: string
@@ -34,21 +34,21 @@ export default async function AgentsPage() {
     created_at: string
   }> = []
 
-  if (agentIds.length > 0) {
+  if (snipperIds.length > 0) {
     const { data } = await supabase
-      .from('user_agents')
+      .from('snippers')
       .select('id, name, type, description, owner_id, is_active, cadence, topic_tags, created_at')
-      .in('id', agentIds)
+      .in('id', snipperIds)
       .order('created_at', { ascending: false })
 
-    agents = data ?? []
+    snippers = data ?? []
   }
 
   return (
     <>
-      <PageHeader title="My Agents" />
+      <PageHeader title="My Snippers" />
       <div className="max-w-lg mx-auto px-4 pb-24">
-        <MyAgentsList agents={agents} userId={user.id} />
+        <MySnippersList snippers={snippers} userId={user.id} />
       </div>
     </>
   )

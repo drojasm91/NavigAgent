@@ -1,8 +1,8 @@
 import { Badge } from '@/components/ui/badge'
-import type { UserAgentType } from '@/lib/types'
+import type { SnipperType } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
-const typeConfig: Record<UserAgentType, { label: string; className: string }> = {
+const typeConfig: Record<SnipperType, { label: string; className: string }> = {
   news: {
     label: 'News',
     className: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800',
@@ -17,7 +17,7 @@ const typeConfig: Record<UserAgentType, { label: string; className: string }> = 
   },
 }
 
-export function TypeBadge({ type }: { type: UserAgentType }) {
+export function TypeBadge({ type }: { type: SnipperType }) {
   const config = typeConfig[type]
   return (
     <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0', config.className)}>
