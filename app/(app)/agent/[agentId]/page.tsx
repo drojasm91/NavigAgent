@@ -81,20 +81,9 @@ export default async function AgentPage({ params }: AgentPageProps) {
         )
       : posts // already sorted newest first from query
 
-  // Check for active pipeline jobs
-  const { data: activeJob } = await supabase
-    .from('jobs')
-    .select('status')
-    .eq('agent_id', agentId)
-    .in('status', ['pending', 'running'])
-    .limit(1)
-    .maybeSingle()
-
-  const isGenerating = !!activeJob
-
   return (
     <div className="max-w-lg mx-auto px-4 py-4">
-      <AgentProfileShell userId={user.id} agent={agent} posts={sortedPosts} isGenerating={isGenerating} />
+      <AgentProfileShell userId={user.id} agent={agent} posts={sortedPosts} />
     </div>
   )
 }

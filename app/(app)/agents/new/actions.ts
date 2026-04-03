@@ -209,31 +209,119 @@ export async function createAgentWithSamples(
       topicTags,
     }, samplePosts)
 
-    // Trigger background jobs to fill up to 3 posts
-    const remaining = Math.max(0, 3 - samplePosts.length)
-    if (remaining > 0) {
-      // Create pending jobs and trigger pipeline
-      for (let i = 0; i < remaining; i++) {
-        const { data: job } = await supabase
-          .from('jobs')
-          .insert({ agent_id: agentId, status: 'pending' })
-          .select('id')
-          .single()
-
-        if (job) {
-          // Dynamically import to avoid bundling Trigger.dev in client
-          try {
-            const { pipelineJob } = await import('@/lib/trigger/pipeline-job')
-            await pipelineJob.trigger({ jobId: job.id, agentId })
-          } catch {
-            // Trigger.dev may not be available in dev — jobs stay pending for scheduler
-          }
-        }
-      }
-    }
-
     return { agentId }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Failed to create agent' }
+  }
+}
+
+export async function generateBackgroundPost(agentId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  try {
+    // Fetch agent config
+    const { data: agent, error: agentError } = await supabase
+      .from('user_agents')
+      .select('id, name, type, description, topic_tags, prompt_config')
+      .eq('id', agentId)
+      .eq('owner_id', user.id)
+      .single()
+
+    if (agentError || !agent) {
+      return { success: false, error: 'Agent not found' }
+    }
+
+    if (agent.type !== 'news') {
+      return { success: false, error: `Pipeline not implemented for type: ${agent.type}` }
+    }
+
+    // Fetch recent post hooks for dedup
+    const { data: recentPosts } = await supabase
+      .from('posts')
+      .select('id')
+      .eq('agent_id', agentId)
+      .order('created_at', { ascending: false })
+      .limit(7)
+
+    const recentPostIds = recentPosts?.map((p) => p.id) ?? []
+    let recentPostHooks: string[] = []
+
+    if (recentPostIds.length > 0) {
+      const { data: hooks } = await supabase
+        .from('sub_posts')
+        .select('content')
+        .in('post_id', recentPostIds)
+        .eq('position', 1)
+
+      recentPostHooks = hooks?.map((h) => h.content) ?? []
+    }
+
+    // Run researcher
+    let research = await runNewsResearcher({
+      agentName: agent.name,
+      agentDescription: agent.description,
+      agentType: agent.type,
+      topicTags: agent.topic_tags ?? [],
+      promptConfig: agent.prompt_config ?? {},
+      recentPostHooks,
+    })
+
+    if (research.skip || !research.data) {
+      research = {
+        skip: false,
+        data: {
+          brief: `Write an engaging overview of a current development in ${agent.description}. Focus on ${(agent.topic_tags ?? []).join(', ')}.`,
+          angle: 'Current state overview with an interesting recent development',
+          sources: [],
+          topicsToAvoid: recentPostHooks,
+          isBreaking: false,
+        },
+      }
+    }
+
+    // Run writer
+    const writerOutput = await runNewsWriter({
+      agentName: agent.name,
+      agentDescription: agent.description,
+      agentType: agent.type,
+      topicTags: agent.topic_tags ?? [],
+      promptConfig: agent.prompt_config ?? {},
+      researchBrief: research.data!,
+    })
+
+    // Save post + sub_posts
+    const { data: post, error: postError } = await supabase
+      .from('posts')
+      .insert({
+        agent_id: agentId,
+        type: 'thread',
+        quality_score: writerOutput.qualityScore,
+      })
+      .select('id')
+      .single()
+
+    if (postError || !post) {
+      return { success: false, error: 'Failed to save post' }
+    }
+
+    const subPostRows = writerOutput.subPosts.map((sp) => ({
+      post_id: post.id,
+      position: sp.position,
+      content: sp.content,
+    }))
+
+    await supabase.from('sub_posts').insert(subPostRows)
+
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to generate post' }
   }
 }
