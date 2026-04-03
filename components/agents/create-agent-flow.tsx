@@ -199,18 +199,6 @@ export function CreateAgentFlow() {
     setSamplePosts((prev) => [...prev, result.post!])
   }
 
-  function handleTweakPreferences() {
-    // Erase all samples, go back to Step 3
-    setSamplePosts([])
-    setPreview(null)
-    setError(null)
-    if (followUpQuestions.length > 0) {
-      scrollToTopAndSetStep(3)
-    } else {
-      scrollToTopAndSetStep(2)
-    }
-  }
-
   async function handleActivate() {
     if (!preview || !selectedType || samplePosts.length === 0) return
     setCreating(true)
@@ -566,6 +554,16 @@ export function CreateAgentFlow() {
                 </div>
               )}
 
+              {samplePosts.length > 0 && !loadingSample && (
+                <button
+                  type="button"
+                  onClick={handleShowMeAnother}
+                  className="text-sm text-muted-foreground active:opacity-70 pt-2"
+                >
+                  Show me another sample
+                </button>
+              )}
+
                     <div ref={samplesEndRef} />
                   </div>
                   </div>
@@ -614,22 +612,6 @@ export function CreateAgentFlow() {
             >
               {creating ? 'Activating...' : 'Activate agent'}
             </button>
-            <div className="flex items-center justify-center gap-6 pt-2">
-              <button
-                type="button"
-                onClick={handleTweakPreferences}
-                className="py-2 text-xs text-muted-foreground active:opacity-70"
-              >
-                Tweak preferences
-              </button>
-              <button
-                type="button"
-                onClick={handleShowMeAnother}
-                className="py-2 text-xs text-muted-foreground active:opacity-70"
-              >
-                Show me another
-              </button>
-            </div>
           </div>
         </div>
       )}
