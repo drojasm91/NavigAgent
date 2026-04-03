@@ -56,19 +56,14 @@ export function CreateAgentFlow() {
   const [loadingSample, setLoadingSample] = useState(false)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const topRef = useRef<HTMLDivElement>(null)
   const questionsRef = useRef<HTMLDivElement>(null)
   const samplesEndRef = useRef<HTMLDivElement>(null)
 
-  // Scroll to top on step change — use multiple strategies for reliability
-  useEffect(() => {
-    // Immediate scroll
-    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
-    // Also scroll the ref into view after React paint
-    requestAnimationFrame(() => {
-      topRef.current?.scrollIntoView({ block: 'start' })
-    })
-  }, [step])
+  function scrollToTopAndSetStep(nextStep: number) {
+    window.scrollTo(0, 0)
+    document.documentElement.scrollTop = 0
+    setStep(nextStep)
+  }
 
   // Auto-scroll when questions load
   useEffect(() => {
@@ -93,7 +88,7 @@ export function CreateAgentFlow() {
     setCustomAnswers({})
     setPreview(null)
     setSamplePosts([])
-    setStep(2)
+    scrollToTopAndSetStep(2)
   }
 
   async function handleSelectTopic(topic: string) {
@@ -104,7 +99,7 @@ export function CreateAgentFlow() {
     setPreview(null)
     setSamplePosts([])
     setLoadingQuestions(true)
-    setStep(3)
+    scrollToTopAndSetStep(3)
 
     const result = await generateFollowUpQuestions(selectedType!, topic)
     setLoadingQuestions(false)
@@ -153,7 +148,7 @@ export function CreateAgentFlow() {
     answers: Record<string, Set<string>>
   ) {
     setLoadingPreview(true)
-    setStep(4)
+    scrollToTopAndSetStep(4)
 
     const answersObj: Record<string, string[]> = {}
     for (const [q, selections] of Object.entries(answers)) {
@@ -175,7 +170,7 @@ export function CreateAgentFlow() {
     if (!preview || !selectedType) return
     setLoadingSample(true)
     setError(null)
-    setStep(5)
+    scrollToTopAndSetStep(5)
 
     const result = await generateSamplePost(
       selectedType,
@@ -224,9 +219,9 @@ export function CreateAgentFlow() {
     setPreview(null)
     setError(null)
     if (followUpQuestions.length > 0) {
-      setStep(3)
+      scrollToTopAndSetStep(3)
     } else {
-      setStep(2)
+      scrollToTopAndSetStep(2)
     }
   }
 
@@ -256,22 +251,21 @@ export function CreateAgentFlow() {
     setError(null)
     if (step === 5) {
       setSamplePosts([])
-      setStep(4)
+      scrollToTopAndSetStep(4)
     } else if (step === 4) {
+      setPreview(null)
       if (followUpQuestions.length > 0) {
-        setStep(3)
-        setPreview(null)
+        scrollToTopAndSetStep(3)
       } else {
-        setStep(2)
-        setPreview(null)
+        scrollToTopAndSetStep(2)
       }
     } else if (step === 3) {
-      setStep(2)
       setFollowUpQuestions([])
       setFollowUpAnswers({})
+      scrollToTopAndSetStep(2)
     } else if (step === 2) {
-      setStep(1)
       setSelectedType(null)
+      scrollToTopAndSetStep(1)
     } else {
       router.back()
     }
@@ -283,7 +277,6 @@ export function CreateAgentFlow() {
   return (
     <>
       <div className="flex-1 px-4 pt-4 pb-56">
-        <div ref={topRef} />
         {/* Back button */}
         {step > 1 && (
           <button
