@@ -9,6 +9,7 @@ interface CreateAgentData {
   type: UserAgentType
   description: string
   topicTags: string[]
+  promptConfig?: Record<string, string>
 }
 
 export async function createAgentWithSubscription(
@@ -25,6 +26,7 @@ export async function createAgentWithSubscription(
       type: data.type,
       description: data.description,
       topic_tags: data.topicTags,
+      prompt_config: data.promptConfig ?? {},
       cadence: 'daily',
       is_public: false,
       is_active: true,

@@ -10,8 +10,10 @@ import {
   generateAgentPreview,
   generateSamplePost,
   createAgentWithSamples,
+  refineAgentChat,
 } from '@/app/(app)/agents/new/actions'
-import type { FollowUpQuestion } from '@/app/(app)/agents/new/actions'
+import type { FollowUpQuestion, ChatMessage } from '@/app/(app)/agents/new/actions'
+import { cn } from '@/lib/utils'
 import type { WriterOutput } from '@/lib/pipelines/types'
 import type { UserAgentType } from '@/lib/types'
 
@@ -56,8 +58,13 @@ export function CreateAgentFlow() {
   const [loadingSample, setLoadingSample] = useState(false)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+  const [refinementInstructions, setRefinementInstructions] = useState('')
+  const [chatInput, setChatInput] = useState('')
+  const [sendingChat, setSendingChat] = useState(false)
   const samplesEndRef = useRef<HTMLDivElement>(null)
   const sampleSectionRef = useRef<HTMLParagraphElement>(null)
+  const chatEndRef = useRef<HTMLDivElement>(null)
 
   function scrollToTopAndSetStep(nextStep: number) {
     window.scrollTo(0, 0)
@@ -187,7 +194,8 @@ export function CreateAgentFlow() {
       preview.name,
       preview.description,
       preview.topicTags,
-      existingHooks
+      existingHooks,
+      refinementInstructions || undefined
     )
 
     setLoadingSample(false)
@@ -200,6 +208,78 @@ export function CreateAgentFlow() {
     setSamplePosts((prev) => [...prev, result.post!])
   }
 
+  async function handleSendRefinement() {
+    if (!chatInput.trim() || !preview || !selectedType || sendingChat) return
+
+    const userMessage = chatInput.trim()
+    setChatInput('')
+    setSendingChat(true)
+    setError(null)
+
+    const updatedHistory: ChatMessage[] = [...chatMessages, { role: 'user', content: userMessage }]
+    setChatMessages(updatedHistory)
+
+    // 1. Get AI interpretation
+    const chatResult = await refineAgentChat(userMessage, chatMessages, preview)
+
+    if (chatResult.error) {
+      setError('Failed to process refinement. Please try again.')
+      setSendingChat(false)
+      return
+    }
+
+    setChatMessages([...updatedHistory, { role: 'assistant', content: chatResult.response }])
+    setRefinementInstructions(chatResult.refinementInstructions)
+
+    // 2. Regenerate preview
+    setLoadingPreview(true)
+    const answersObj: Record<string, string[]> = {}
+    for (const [q, selections] of Object.entries(followUpAnswers)) {
+      answersObj[q] = Array.from(selections)
+    }
+
+    const newPreview = await generateAgentPreview(
+      selectedType,
+      selectedTopic!,
+      answersObj,
+      chatResult.refinementInstructions
+    )
+
+    if (newPreview.error) {
+      setError('Failed to regenerate preview.')
+      setLoadingPreview(false)
+      setSendingChat(false)
+      return
+    }
+
+    setPreview(newPreview)
+    setLoadingPreview(false)
+
+    // 3. Regenerate sample
+    setSamplePosts([])
+    setExpandedSamples(new Set())
+    setLoadingSample(true)
+
+    const sampleResult = await generateSamplePost(
+      selectedType,
+      newPreview.name,
+      newPreview.description,
+      newPreview.topicTags,
+      [],
+      chatResult.refinementInstructions
+    )
+
+    setLoadingSample(false)
+    setSendingChat(false)
+
+    if (sampleResult.error || !sampleResult.post) {
+      setError(sampleResult.error ?? 'Failed to regenerate sample.')
+      return
+    }
+
+    setSamplePosts([sampleResult.post])
+  }
+
   async function handleActivate() {
     if (!preview || !selectedType || samplePosts.length === 0) return
     setCreating(true)
@@ -210,7 +290,8 @@ export function CreateAgentFlow() {
       preview.name,
       preview.description,
       preview.topicTags,
-      samplePosts
+      samplePosts,
+      refinementInstructions || undefined
     )
 
     if (result.error) {
@@ -227,6 +308,9 @@ export function CreateAgentFlow() {
     if (step === 4) {
       setSamplePosts([])
       setPreview(null)
+      setChatMessages([])
+      setRefinementInstructions('')
+      setChatInput('')
       if (followUpQuestions.length > 0) {
         scrollToTopAndSetStep(3)
       } else {
@@ -563,6 +647,57 @@ export function CreateAgentFlow() {
                 >
                   Show me another sample
                 </button>
+              )}
+
+              {/* Refinement chat */}
+              {samplePosts.length > 0 && !loadingSample && !loadingPreview && (
+                <div className="mt-6 space-y-3">
+                  <p className="text-sm font-semibold">Refine your agent</p>
+
+                  {chatMessages.length > 0 && (
+                    <div className="space-y-2">
+                      {chatMessages.map((msg, i) => (
+                        <div
+                          key={i}
+                          className={cn(
+                            'rounded-2xl px-4 py-2.5 text-sm max-w-[85%]',
+                            msg.role === 'user'
+                              ? 'ml-auto bg-primary text-primary-foreground'
+                              : 'bg-muted text-foreground'
+                          )}
+                        >
+                          {msg.content}
+                        </div>
+                      ))}
+                      <div ref={chatEndRef} />
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          handleSendRefinement()
+                        }
+                      }}
+                      placeholder="e.g. Make it more technical..."
+                      disabled={sendingChat}
+                      className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors disabled:opacity-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSendRefinement}
+                      disabled={!chatInput.trim() || sendingChat}
+                      className="shrink-0 rounded-xl bg-primary p-3 text-primary-foreground transition-all disabled:opacity-30 active:scale-95"
+                    >
+                      {sendingChat ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
               )}
 
                     <div ref={samplesEndRef} />

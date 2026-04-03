@@ -3,7 +3,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { createAgentWithPosts } from '@/lib/supabase/queries/agents'
-import { AGENT_FOLLOWUP_PROMPT, AGENT_NAME_PROMPT } from '@/lib/prompts'
+import { AGENT_FOLLOWUP_PROMPT, AGENT_NAME_PROMPT, AGENT_REFINEMENT_CHAT_PROMPT } from '@/lib/prompts'
 import { parseJsonFromAI } from '@/lib/utils'
 import { runNewsResearcher } from '@/lib/pipelines/steps/researcher'
 import { runNewsWriter } from '@/lib/pipelines/steps/writer-news'
@@ -88,7 +88,8 @@ export async function generateFollowUpQuestions(
 export async function generateAgentPreview(
   type: UserAgentType,
   topic: string,
-  answers: Record<string, string[]>
+  answers: Record<string, string[]>,
+  refinementInstructions?: string
 ): Promise<AgentPreview> {
   try {
     const client = new Anthropic()
@@ -104,7 +105,7 @@ export async function generateAgentPreview(
       messages: [
         {
           role: 'user',
-          content: `Agent type: ${type}\nTopic: ${topic}\nPreferences:\n${answersText}`,
+          content: `Agent type: ${type}\nTopic: ${topic}\nPreferences:\n${answersText}${refinementInstructions ? `\n\nAdditional refinement instructions from the user:\n${refinementInstructions}` : ''}`,
         },
       ],
     })
@@ -129,16 +130,19 @@ export async function generateSamplePost(
   name: string,
   description: string,
   topicTags: string[],
-  previousPostHooks: string[] = []
+  previousPostHooks: string[] = [],
+  refinementInstructions?: string
 ): Promise<SamplePostResult> {
   try {
+    const promptConfig = refinementInstructions ? { refinementInstructions } : {}
+
     // Build researcher input — pass previous hooks to avoid topic repetition
     const researcherInput = {
       agentName: name,
       agentDescription: description,
       agentType: type,
       topicTags,
-      promptConfig: {},
+      promptConfig,
       recentPostHooks: previousPostHooks,
     }
 
@@ -174,7 +178,7 @@ export async function generateSamplePost(
       agentDescription: description,
       agentType: type,
       topicTags,
-      promptConfig: {},
+      promptConfig,
       researchBrief: research.data!,
     })
 
@@ -189,7 +193,8 @@ export async function createAgentWithSamples(
   name: string,
   description: string,
   topicTags: string[],
-  samplePosts: WriterOutput[]
+  samplePosts: WriterOutput[],
+  refinementInstructions?: string
 ): Promise<CreateAgentResult> {
   const supabase = createClient()
 
@@ -207,6 +212,7 @@ export async function createAgentWithSamples(
       type,
       description,
       topicTags,
+      promptConfig: refinementInstructions ? { refinementInstructions } : undefined,
     }, samplePosts)
 
     return { agentId }
@@ -323,5 +329,43 @@ export async function generateBackgroundPost(agentId: string): Promise<{ success
     return { success: true }
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : 'Failed to generate post' }
+  }
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export async function refineAgentChat(
+  message: string,
+  chatHistory: ChatMessage[],
+  currentPreview: { name: string; description: string; topicTags: string[] }
+): Promise<{ response: string; refinementInstructions: string; error?: string }> {
+  try {
+    const client = new Anthropic()
+
+    const userMessage = JSON.stringify({
+      currentAgent: currentPreview,
+      chatHistory,
+      latestMessage: message,
+    })
+
+    const msg = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 300,
+      system: AGENT_REFINEMENT_CHAT_PROMPT,
+      messages: [{ role: 'user', content: userMessage }],
+    })
+
+    const raw = msg.content[0].type === 'text' ? msg.content[0].text : ''
+    const parsed = parseJsonFromAI(raw)
+
+    return {
+      response: typeof parsed.response === 'string' ? parsed.response : 'Got it — regenerating with your preferences.',
+      refinementInstructions: typeof parsed.refinementInstructions === 'string' ? parsed.refinementInstructions : '',
+    }
+  } catch {
+    return { response: '', refinementInstructions: '', error: 'Failed to process refinement' }
   }
 }
