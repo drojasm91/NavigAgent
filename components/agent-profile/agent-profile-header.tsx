@@ -8,9 +8,10 @@ import type { FeedAgent } from '@/lib/types'
 interface AgentProfileHeaderProps {
   agent: FeedAgent
   postCount: number
+  isGenerating?: boolean
 }
 
-export function AgentProfileHeader({ agent, postCount }: AgentProfileHeaderProps) {
+export function AgentProfileHeader({ agent, postCount, isGenerating }: AgentProfileHeaderProps) {
   const router = useRouter()
   const initial = agent.name.charAt(0).toUpperCase()
 
@@ -55,6 +56,17 @@ export function AgentProfileHeader({ agent, postCount }: AgentProfileHeaderProps
           <span><strong className="text-foreground">--</strong> followers</span>
         </div>
       </div>
+
+      {/* Generating indicator */}
+      {isGenerating && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/60" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary/80" />
+          </span>
+          Researching new content...
+        </div>
+      )}
     </div>
   )
 }

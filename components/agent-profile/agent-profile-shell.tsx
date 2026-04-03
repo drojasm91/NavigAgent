@@ -11,9 +11,10 @@ interface AgentProfileShellProps {
   userId: string
   agent: FeedAgent
   posts: FeedPost[]
+  isGenerating?: boolean
 }
 
-export function AgentProfileShell({ userId, agent, posts }: AgentProfileShellProps) {
+export function AgentProfileShell({ userId, agent, posts, isGenerating }: AgentProfileShellProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -33,7 +34,7 @@ export function AgentProfileShell({ userId, agent, posts }: AgentProfileShellPro
 
   return (
     <>
-      <AgentProfileHeader agent={agent} postCount={posts.length} />
+      <AgentProfileHeader agent={agent} postCount={posts.length} isGenerating={isGenerating} />
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
