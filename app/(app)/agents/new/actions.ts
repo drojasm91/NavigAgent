@@ -195,7 +195,8 @@ export async function createAgentWithSamples(
   topicTags: string[],
   samplePosts: WriterOutput[],
   refinementInstructions?: string,
-  refinementChat?: ChatMessage[]
+  refinementChat?: ChatMessage[],
+  sessionId?: string
 ): Promise<CreateAgentResult> {
   const supabase = createClient()
 
@@ -220,6 +221,14 @@ export async function createAgentWithSamples(
           }
         : undefined,
     }, samplePosts)
+
+    // Mark refinement session as activated
+    if (sessionId) {
+      await supabase
+        .from('refinement_sessions')
+        .update({ agent_id: agentId, activated: true })
+        .eq('session_id', sessionId)
+    }
 
     return { agentId }
   } catch (err) {
@@ -371,11 +380,20 @@ export async function refineAgentChat(
     const response = typeof parsed.response === 'string' ? parsed.response : 'Got it — regenerating with your preferences.'
     const refinementInstructions = typeof parsed.refinementInstructions === 'string' ? parsed.refinementInstructions : ''
 
-    // Save both messages to refinement_logs (fire-and-forget)
+    // Save both messages to refinement_logs + track session
     if (context) {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
+        // Create session row on first message, upsert on subsequent
+        await supabase.from('refinement_sessions').upsert({
+          session_id: context.sessionId,
+          user_id: user.id,
+          agent_type: context.agentType,
+          topic: context.topic,
+          agent_name: currentPreview.name,
+        }, { onConflict: 'session_id' })
+
         await supabase.from('refinement_logs').insert([
           {
             user_id: user.id,

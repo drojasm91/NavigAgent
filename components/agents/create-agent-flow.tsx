@@ -297,7 +297,8 @@ export function CreateAgentFlow() {
       preview.topicTags,
       samplePosts,
       refinementInstructions || undefined,
-      chatMessages.length > 0 ? chatMessages : undefined
+      chatMessages.length > 0 ? chatMessages : undefined,
+      sessionId
     )
 
     if (result.error) {
