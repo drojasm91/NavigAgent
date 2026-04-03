@@ -6,7 +6,6 @@ export default function DiscoverPage() {
     <>
       <PageHeader />
       <div className="max-w-lg mx-auto px-4">
-        <h1 className="text-xl font-bold tracking-tight pt-4 mb-1">Discover</h1>
         <div className="py-16 text-center">
         <h2 className="text-lg font-semibold mb-1">No community Snippers yet</h2>
         <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">
