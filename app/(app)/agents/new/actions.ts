@@ -7,7 +7,7 @@ import { AGENT_FOLLOWUP_PROMPT, AGENT_NAME_PROMPT, AGENT_REFINEMENT_CHAT_PROMPT 
 import { parseJsonFromAI } from '@/lib/utils'
 import { runNewsResearcher } from '@/lib/pipelines/steps/researcher'
 import { runNewsWriter } from '@/lib/pipelines/steps/writer-news'
-import type { UserAgentType } from '@/lib/types'
+import type { UserAgentType, Json } from '@/lib/types'
 import type { WriterOutput, WriterSubPost } from '@/lib/pipelines/types'
 
 // Re-export for the UI component
@@ -217,8 +217,8 @@ export async function createAgentWithSamples(
       promptConfig: refinementInstructions || refinementChat
         ? {
             ...(refinementInstructions ? { refinementInstructions } : {}),
-            ...(refinementChat ? { refinementChat } : {}),
-          }
+            ...(refinementChat ? { refinementChat: refinementChat as unknown as Json } : {}),
+          } as Json
         : undefined,
     }, samplePosts)
 
