@@ -57,6 +57,7 @@ export function CreateAgentFlow() {
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const samplesEndRef = useRef<HTMLDivElement>(null)
+  const sampleSectionRef = useRef<HTMLParagraphElement>(null)
 
   function scrollToTopAndSetStep(nextStep: number) {
     window.scrollTo(0, 0)
@@ -64,10 +65,10 @@ export function CreateAgentFlow() {
     setStep(nextStep)
   }
 
-  // Auto-scroll to bottom only when adding another sample (not the first)
+  // Scroll to top of sample section when a new sample is added (not the first)
   useEffect(() => {
-    if (samplePosts.length > 1 && samplesEndRef.current) {
-      samplesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    if (samplePosts.length > 1 && sampleSectionRef.current) {
+      sampleSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [samplePosts])
 
@@ -474,7 +475,7 @@ export function CreateAgentFlow() {
                 {(samplePosts.length > 0 || loadingSample) && (
                   <div className="mt-6">
                     {samplePosts.length > 0 && (
-                      <p className="text-sm font-semibold mb-3">Sample content</p>
+                      <p ref={sampleSectionRef} className="text-sm font-semibold mb-3">Sample content</p>
                     )}
                     <div className="space-y-3">
               {samplePosts.map((sample, sampleIndex) => {
