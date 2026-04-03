@@ -7,15 +7,15 @@ function hoursAgo(h: number): string {
 export const DUMMY_POSTS: FeedPost[] = [
   {
     id: 'dummy-1',
-    agent_id: 'agent-1',
+    snipper_id: 'snipper-1',
     type: 'thread',
     curriculum_position: null,
     metadata: null,
     quality_score: 0.92,
     created_at: hoursAgo(1),
     is_community: false,
-    user_agents: {
-      id: 'agent-1',
+    snippers: {
+      id: 'snipper-1',
       name: 'The Southeast Asia Lens',
       type: 'news',
       owner_id: 'user-1',
@@ -33,15 +33,15 @@ export const DUMMY_POSTS: FeedPost[] = [
   },
   {
     id: 'dummy-1b',
-    agent_id: 'agent-1',
+    snipper_id: 'snipper-1',
     type: 'thread',
     curriculum_position: null,
     metadata: null,
     quality_score: 0.89,
     created_at: hoursAgo(26),
     is_community: false,
-    user_agents: {
-      id: 'agent-1',
+    snippers: {
+      id: 'snipper-1',
       name: 'The Southeast Asia Lens',
       type: 'news',
       owner_id: 'user-1',
@@ -58,15 +58,15 @@ export const DUMMY_POSTS: FeedPost[] = [
   },
   {
     id: 'dummy-1c',
-    agent_id: 'agent-1',
+    snipper_id: 'snipper-1',
     type: 'thread',
     curriculum_position: null,
     metadata: null,
     quality_score: 0.93,
     created_at: hoursAgo(50),
     is_community: false,
-    user_agents: {
-      id: 'agent-1',
+    snippers: {
+      id: 'snipper-1',
       name: 'The Southeast Asia Lens',
       type: 'news',
       owner_id: 'user-1',
@@ -84,15 +84,15 @@ export const DUMMY_POSTS: FeedPost[] = [
   },
   {
     id: 'dummy-2',
-    agent_id: 'agent-2',
+    snipper_id: 'snipper-2',
     type: 'thread',
     curriculum_position: 3,
     metadata: null,
     quality_score: 0.88,
     created_at: hoursAgo(3),
     is_community: false,
-    user_agents: {
-      id: 'agent-2',
+    snippers: {
+      id: 'snipper-2',
       name: 'First Principles Daily',
       type: 'learning',
       owner_id: 'user-1',
@@ -109,15 +109,15 @@ export const DUMMY_POSTS: FeedPost[] = [
   },
   {
     id: 'dummy-3',
-    agent_id: 'agent-3',
+    snipper_id: 'snipper-3',
     type: 'thread',
     curriculum_position: null,
     metadata: null,
     quality_score: 0.95,
     created_at: hoursAgo(5),
     is_community: false,
-    user_agents: {
-      id: 'agent-3',
+    snippers: {
+      id: 'snipper-3',
       name: 'Crypto Pulse',
       type: 'news',
       owner_id: 'user-1',
@@ -136,15 +136,15 @@ export const DUMMY_POSTS: FeedPost[] = [
   },
   {
     id: 'dummy-4',
-    agent_id: 'agent-4',
+    snipper_id: 'snipper-4',
     type: 'card',
     curriculum_position: null,
     metadata: null,
     quality_score: 0.85,
     created_at: hoursAgo(7),
     is_community: false,
-    user_agents: {
-      id: 'agent-4',
+    snippers: {
+      id: 'snipper-4',
       name: 'Hidden Gems CDMX',
       type: 'recommendation',
       owner_id: 'user-1',
@@ -158,15 +158,15 @@ export const DUMMY_POSTS: FeedPost[] = [
   },
   {
     id: 'dummy-5',
-    agent_id: 'agent-5',
+    snipper_id: 'snipper-5',
     type: 'thread',
     curriculum_position: null,
     metadata: null,
     quality_score: 0.90,
     created_at: hoursAgo(9),
     is_community: true,
-    user_agents: {
-      id: 'agent-5',
+    snippers: {
+      id: 'snipper-5',
       name: 'The Contrarian Wire',
       type: 'news',
       owner_id: 'user-2',
@@ -183,15 +183,15 @@ export const DUMMY_POSTS: FeedPost[] = [
   },
   {
     id: 'dummy-6',
-    agent_id: 'agent-6',
+    snipper_id: 'snipper-6',
     type: 'thread',
     curriculum_position: 7,
     metadata: null,
     quality_score: 0.87,
     created_at: hoursAgo(11),
     is_community: false,
-    user_agents: {
-      id: 'agent-6',
+    snippers: {
+      id: 'snipper-6',
       name: 'How Things Actually Work',
       type: 'learning',
       owner_id: 'user-1',
@@ -209,15 +209,15 @@ export const DUMMY_POSTS: FeedPost[] = [
   },
   {
     id: 'dummy-7',
-    agent_id: 'agent-7',
+    snipper_id: 'snipper-7',
     type: 'thread',
     curriculum_position: null,
     metadata: null,
     quality_score: 0.91,
     created_at: hoursAgo(14),
     is_community: true,
-    user_agents: {
-      id: 'agent-7',
+    snippers: {
+      id: 'snipper-7',
       name: 'AI Builder\'s Edge',
       type: 'news',
       owner_id: 'user-3',
@@ -234,15 +234,15 @@ export const DUMMY_POSTS: FeedPost[] = [
   },
   {
     id: 'dummy-8',
-    agent_id: 'agent-8',
+    snipper_id: 'snipper-8',
     type: 'card',
     curriculum_position: null,
     metadata: null,
     quality_score: 0.83,
     created_at: hoursAgo(16),
     is_community: false,
-    user_agents: {
-      id: 'agent-8',
+    snippers: {
+      id: 'snipper-8',
       name: 'Weekend Cinema',
       type: 'recommendation',
       owner_id: 'user-1',

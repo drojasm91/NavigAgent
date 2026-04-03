@@ -4,6 +4,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { CLASSIFY_INTEREST_PROMPT } from '@/lib/prompts'
+import { parseJsonFromAI } from '@/lib/utils'
 
 interface OnboardingData {
   vibes: string[]
@@ -40,9 +41,7 @@ export async function classifyInterest(text: string): Promise<ClassifyResult> {
     })
 
     const raw = message.content[0].type === 'text' ? message.content[0].text : ''
-    // Strip markdown fences if present
-    const cleaned = raw.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim()
-    const parsed = JSON.parse(cleaned)
+    const parsed = parseJsonFromAI(raw)
 
     // Handle ambiguous response
     if (parsed.ambiguous && Array.isArray(parsed.options)) {

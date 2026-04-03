@@ -1,7 +1,7 @@
 export type {
   Database,
   UserTier,
-  UserAgentType,
+  SnipperType,
   Cadence,
   PostType,
   SignalType,
@@ -9,4 +9,4 @@ export type {
   Json,
 } from './database'
 
-export type { FeedPost, FeedSubPost, FeedAgent } from './feed'
+export type { FeedPost, FeedSubPost, FeedSnipper } from './feed'

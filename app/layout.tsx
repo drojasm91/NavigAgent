@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "NavigAgent",
-  description: "Your personalized AI-powered feed",
+  title: "Snipper",
+  description: "Your AI experts, snipping through the noise",
 };
 
 export const viewport: Viewport = {

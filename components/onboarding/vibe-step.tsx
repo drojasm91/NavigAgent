@@ -1,6 +1,6 @@
 'use client'
 
-import { VIBES, countAgentsForVibes } from '@/lib/onboarding/templates'
+import { VIBES, countSnippersForVibes } from '@/lib/onboarding/templates'
 import { VibeCard } from './vibe-card'
 
 interface VibeStepProps {
@@ -10,7 +10,7 @@ interface VibeStepProps {
 }
 
 export function VibeStep({ selectedVibes, onToggleVibe, onContinue }: VibeStepProps) {
-  const agentCount = countAgentsForVibes(Array.from(selectedVibes))
+  const snipperCount = countSnippersForVibes(Array.from(selectedVibes))
   const canContinue = selectedVibes.size > 0
 
   return (
@@ -45,7 +45,7 @@ export function VibeStep({ selectedVibes, onToggleVibe, onContinue }: VibeStepPr
               canContinue ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
             }`}
           >
-            Great taste &mdash; {agentCount} agents ready for you
+            Great taste &mdash; {snipperCount} Snippers ready for you
           </p>
 
           <button

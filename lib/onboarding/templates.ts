@@ -1,4 +1,4 @@
-import type { UserAgentType } from '@/lib/types'
+import type { SnipperType } from '@/lib/types'
 
 export interface VibeOption {
   id: string
@@ -7,13 +7,13 @@ export interface VibeOption {
   description: string
 }
 
-export interface AgentTemplate {
+export interface SnipperTemplate {
   id: string
   vibeId: string
   emoji: string
   name: string
   description: string
-  type: UserAgentType
+  type: SnipperType
   topicTags: string[]
 }
 
@@ -44,7 +44,7 @@ export const VIBES: VibeOption[] = [
   },
 ]
 
-export const AGENT_TEMPLATES: AgentTemplate[] = [
+export const SNIPPER_TEMPLATES: SnipperTemplate[] = [
   // Stay informed
   {
     id: 'geopolitics-wire',
@@ -157,16 +157,16 @@ export function getTopicsForVibes(selectedVibeIds: string[]): TopicOption[] {
   return TOPICS.filter((t) => selectedVibeIds.includes(t.vibeId))
 }
 
-export function getTemplatesForVibes(selectedVibeIds: string[]): AgentTemplate[] {
-  const templates: AgentTemplate[] = []
+export function getTemplatesForVibes(selectedVibeIds: string[]): SnipperTemplate[] {
+  const templates: SnipperTemplate[] = []
   for (const vibeId of selectedVibeIds) {
-    const matching = AGENT_TEMPLATES.filter((t) => t.vibeId === vibeId)
+    const matching = SNIPPER_TEMPLATES.filter((t) => t.vibeId === vibeId)
     templates.push(...matching.slice(0, 2))
     if (templates.length >= 8) break
   }
   return templates.slice(0, 8)
 }
 
-export function countAgentsForVibes(selectedVibeIds: string[]): number {
+export function countSnippersForVibes(selectedVibeIds: string[]): number {
   return getTemplatesForVibes(selectedVibeIds).length
 }

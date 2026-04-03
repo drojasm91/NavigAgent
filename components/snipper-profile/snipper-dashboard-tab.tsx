@@ -1,14 +1,14 @@
 'use client'
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import type { FeedPost, FeedAgent } from '@/lib/types'
+import type { FeedPost, FeedSnipper } from '@/lib/types'
 
-interface AgentDashboardTabProps {
-  agent: FeedAgent
+interface SnipperDashboardTabProps {
+  snipper: FeedSnipper
   posts: FeedPost[]
 }
 
-export function AgentDashboardTab({ agent, posts }: AgentDashboardTabProps) {
+export function SnipperDashboardTab({ snipper, posts }: SnipperDashboardTabProps) {
   const avgQuality = posts.length > 0
     ? (posts.reduce((sum, p) => sum + (p.quality_score ?? 0), 0) / posts.length).toFixed(2)
     : '--'
@@ -20,9 +20,9 @@ export function AgentDashboardTab({ agent, posts }: AgentDashboardTabProps) {
   return (
     <div className="space-y-4 pt-4">
       {/* Description */}
-      {agent.description && (
+      {snipper.description && (
         <p className="text-sm text-muted-foreground leading-relaxed">
-          {agent.description}
+          {snipper.description}
         </p>
       )}
 
@@ -49,7 +49,7 @@ export function AgentDashboardTab({ agent, posts }: AgentDashboardTabProps) {
             <span className="text-[11px] text-muted-foreground font-medium">Type</span>
           </CardHeader>
           <CardContent className="px-3 pb-3">
-            <span className="text-2xl font-bold capitalize">{agent.type}</span>
+            <span className="text-2xl font-bold capitalize">{snipper.type}</span>
           </CardContent>
         </Card>
         <Card>

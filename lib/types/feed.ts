@@ -1,4 +1,4 @@
-import type { PostType, UserAgentType, Json } from './database'
+import type { PostType, SnipperType, Json } from './database'
 
 export interface FeedSubPost {
   id: string
@@ -8,10 +8,10 @@ export interface FeedSubPost {
   created_at: string
 }
 
-export interface FeedAgent {
+export interface FeedSnipper {
   id: string
   name: string
-  type: UserAgentType
+  type: SnipperType
   owner_id: string
   is_public: boolean
   topic_tags: string[]
@@ -21,13 +21,13 @@ export interface FeedAgent {
 
 export interface FeedPost {
   id: string
-  agent_id: string
+  snipper_id: string
   type: PostType
   curriculum_position: number | null
   metadata: Json | null
   quality_score: number | null
   created_at: string
   sub_posts: FeedSubPost[]
-  user_agents: FeedAgent
+  snippers: FeedSnipper
   is_community: boolean
 }

@@ -197,7 +197,7 @@ export function TopicStep({
       <div className="fixed inset-x-0 bottom-0 z-40">
         <div className="mx-auto max-w-lg border-t bg-background/80 backdrop-blur-sm px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <p className="text-center text-xs text-muted-foreground mb-3">
-            We&apos;ll create AI agents for each topic you pick.
+            We&apos;ll create Snippers for each topic you pick.
           </p>
 
           <button

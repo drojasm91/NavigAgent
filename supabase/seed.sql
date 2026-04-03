@@ -1,16 +1,16 @@
--- NavigAgent Seed Data
+-- Snipper Seed Data
 -- Run this after creating a test user in Supabase Auth dashboard.
 -- Replace the UUIDs below with actual user IDs from your auth.users table.
 
 -- Test user (must match a Supabase Auth user)
 -- Create this user in the Supabase dashboard first, then update the ID here.
 INSERT INTO users (id, email, name, tier) VALUES
-  ('00000000-0000-0000-0000-000000000001', 'test@navigagent.com', 'Test User', 'beta'),
-  ('00000000-0000-0000-0000-000000000002', 'community@navigagent.com', 'Community Creator', 'beta')
+  ('00000000-0000-0000-0000-000000000001', 'test@snipper.com', 'Test User', 'beta'),
+  ('00000000-0000-0000-0000-000000000002', 'community@snipper.com', 'Community Creator', 'beta')
 ON CONFLICT (id) DO NOTHING;
 
--- User-agents (3 owned by test user, 2 public community agents)
-INSERT INTO user_agents (id, owner_id, name, type, description, topic_tags, is_public, is_active, cadence) VALUES
+-- Snippers (3 owned by test user, 2 public community snippers)
+INSERT INTO snippers (id, owner_id, name, type, description, topic_tags, is_public, is_active, cadence) VALUES
   -- Test user's agents
   ('a0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001',
    'The Southeast Asia Lens', 'news',
@@ -39,15 +39,15 @@ INSERT INTO user_agents (id, owner_id, name, type, description, topic_tags, is_p
    ARRAY['engineering', 'science', 'explainers'], true, true, 'daily')
 ON CONFLICT (id) DO NOTHING;
 
--- Subscriptions (test user follows their own 3 agents)
-INSERT INTO user_agent_subscriptions (user_id, agent_id) VALUES
+-- Subscriptions (test user follows their own 3 snippers)
+INSERT INTO snipper_subscriptions (user_id, snipper_id) VALUES
   ('00000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001'),
   ('00000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002'),
   ('00000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000003')
 ON CONFLICT DO NOTHING;
 
 -- Posts (2 per own agent + 1 community)
-INSERT INTO posts (id, agent_id, type, quality_score, created_at) VALUES
+INSERT INTO posts (id, snipper_id, type, quality_score, created_at) VALUES
   -- Southeast Asia Lens posts
   ('p0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'thread', 0.85, NOW() - INTERVAL '2 hours'),
   ('p0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'thread', 0.9, NOW() - INTERVAL '26 hours'),
