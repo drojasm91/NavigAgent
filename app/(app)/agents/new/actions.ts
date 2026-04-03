@@ -223,8 +223,9 @@ export async function createAgentWithSamples(
     }, samplePosts)
 
     // Mark refinement session as activated
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (sessionId) {
-      await supabase
+      await (supabase as any)
         .from('refinement_sessions')
         .update({ agent_id: agentId, activated: true })
         .eq('session_id', sessionId)
@@ -388,10 +389,12 @@ export async function refineAgentChat(
     // Save both messages to refinement_logs + track session
     if (context) {
       const supabase = createClient()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         // Create session row on first message, upsert on subsequent
-        await supabase.from('refinement_sessions').upsert({
+        await sb.from('refinement_sessions').upsert({
           session_id: context.sessionId,
           user_id: user.id,
           agent_type: context.agentType,
@@ -399,7 +402,7 @@ export async function refineAgentChat(
           agent_name: currentPreview.name,
         }, { onConflict: 'session_id' })
 
-        await supabase.from('refinement_logs').insert([
+        await sb.from('refinement_logs').insert([
           {
             user_id: user.id,
             session_id: context.sessionId,
