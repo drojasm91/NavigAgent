@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Plus, ArrowRight } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TypeBadge } from '@/components/feed/type-badge'
 import type { SnipperType } from '@/lib/types'
@@ -57,16 +57,13 @@ export function MySnippersList({ snippers, userId }: MySnippersListProps) {
 
   return (
     <div className="pt-4">
-      {/* Create snipper banner */}
+      {/* Create snipper */}
       <Link
         href="/snippers/new"
-        className="flex items-center justify-between rounded-2xl bg-primary/5 border border-primary/10 px-4 py-3.5 mb-4 active:scale-[0.98] transition-all"
+        className="flex items-center gap-2 text-sm text-muted-foreground mb-4 py-2 active:text-foreground transition-colors"
       >
-        <div>
-          <p className="text-sm font-semibold">Create a new Snipper</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Add an AI expert to your feed</p>
-        </div>
-        <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+        <Plus className="h-4 w-4" />
+        <span>Add a custom AI expert to your feed</span>
       </Link>
 
       {/* Type filter chips */}
