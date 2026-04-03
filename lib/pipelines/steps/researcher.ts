@@ -59,5 +59,11 @@ export async function runNewsResearcher(input: ResearcherInput): Promise<Researc
 
 function buildSearchQuery(input: ResearcherInput): string {
   const tags = input.topicTags.join(', ')
-  return `Latest developments and news about ${input.agentDescription}. Topics: ${tags}. Focus on the most significant events from the last 24-48 hours. Include specific facts, numbers, and expert opinions.`
+  let query = `Latest developments and news about ${input.agentDescription}. Topics: ${tags}. Focus on the most significant events from the last 24-48 hours. Include specific facts, numbers, and expert opinions.`
+
+  if (input.recentPostHooks.length > 0) {
+    query += ` IMPORTANT: Do NOT cover these topics that were already written about: ${input.recentPostHooks.join(' | ')}. Find a DIFFERENT story or angle.`
+  }
+
+  return query
 }

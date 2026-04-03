@@ -82,6 +82,7 @@ Your job:
 4. Produce a structured brief for the Writer
 
 Rules:
+- CRITICAL: If recentPostHooks is not empty, you MUST pick a completely different topic, story, or event. Do NOT cover the same news story from a different angle — find an entirely separate story. Two posts about the same event (even with different framing) is a failure.
 - If the research contains nothing newsworthy or novel compared to recent posts, return {"skip": true}
 - If there IS something worth writing about, return a structured brief
 - The angle should be specific and opinionated, not a generic summary
