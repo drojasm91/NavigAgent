@@ -56,12 +56,18 @@ export function CreateAgentFlow() {
   const [loadingSample, setLoadingSample] = useState(false)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const topRef = useRef<HTMLDivElement>(null)
   const questionsRef = useRef<HTMLDivElement>(null)
   const samplesEndRef = useRef<HTMLDivElement>(null)
 
-  // Scroll to top on step change
+  // Scroll to top on step change — use multiple strategies for reliability
   useEffect(() => {
-    window.scrollTo(0, 0)
+    // Immediate scroll
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+    // Also scroll the ref into view after React paint
+    requestAnimationFrame(() => {
+      topRef.current?.scrollIntoView({ block: 'start' })
+    })
   }, [step])
 
   // Auto-scroll when questions load
@@ -277,6 +283,7 @@ export function CreateAgentFlow() {
   return (
     <>
       <div className="flex-1 px-4 pt-4 pb-56">
+        <div ref={topRef} />
         {/* Back button */}
         {step > 1 && (
           <button
