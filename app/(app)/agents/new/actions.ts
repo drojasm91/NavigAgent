@@ -182,7 +182,7 @@ export async function generateSamplePost(
       researchBrief: research.data!,
     })
 
-    return { post: writerOutput }
+    return { post: { ...writerOutput, sources: research.data?.sources ?? [] } }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Failed to generate sample post' }
   }
@@ -325,6 +325,11 @@ export async function generateBackgroundPost(agentId: string): Promise<{ success
         agent_id: agentId,
         type: 'thread',
         quality_score: writerOutput.qualityScore,
+        metadata: {
+          sources: research.data?.sources ?? [],
+          angle: research.data?.angle ?? '',
+          isBreaking: research.data?.isBreaking ?? false,
+        },
       })
       .select('id')
       .single()

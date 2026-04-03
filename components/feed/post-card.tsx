@@ -138,6 +138,38 @@ export function PostCard({ post, currentAgentId, hideDigIn = false }: PostCardPr
             ))}
           </div>
 
+          {/* Sources */}
+          {(() => {
+            const metadata = post.metadata as Record<string, unknown> | null
+            const sources = Array.isArray(metadata?.sources) ? (metadata.sources as string[]).filter(Boolean) : []
+            if (sources.length === 0) return null
+            return (
+              <details className="mt-3 text-xs">
+                <summary className="text-muted-foreground cursor-pointer select-none">
+                  Sources ({sources.length})
+                </summary>
+                <div className="mt-2 space-y-1.5 pl-1">
+                  {sources.map((url, i) => {
+                    let hostname = url
+                    try { hostname = new URL(url).hostname.replace('www.', '') } catch { /* keep raw */ }
+                    return (
+                      <a
+                        key={i}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="block text-primary truncate hover:underline"
+                      >
+                        {hostname}
+                      </a>
+                    )
+                  })}
+                </div>
+              </details>
+            )
+          })()}
+
           {/* Bottom actions */}
           <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
             <button className="flex items-center gap-1.5 text-muted-foreground active:text-foreground transition-colors">

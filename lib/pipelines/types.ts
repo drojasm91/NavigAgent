@@ -43,4 +43,5 @@ export interface WriterSubPost {
 export interface WriterOutput {
   subPosts: WriterSubPost[]
   qualityScore: number
+  sources?: string[]
 }

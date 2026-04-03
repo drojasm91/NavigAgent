@@ -70,6 +70,7 @@ export async function createAgentWithPosts(
         agent_id: agentId,
         type: 'thread',
         quality_score: sample.qualityScore,
+        metadata: { sources: sample.sources ?? [] },
       })
       .select('id')
       .single()
