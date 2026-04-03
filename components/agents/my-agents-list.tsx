@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { Plus, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TypeBadge } from '@/components/feed/type-badge'
 import type { UserAgentType } from '@/lib/types'
@@ -57,6 +57,18 @@ export function MyAgentsList({ agents, userId }: MyAgentsListProps) {
 
   return (
     <div className="pt-4">
+      {/* Create agent banner */}
+      <Link
+        href="/agents/new"
+        className="flex items-center justify-between rounded-2xl bg-primary/5 border border-primary/10 px-4 py-3.5 mb-4 active:scale-[0.98] transition-all"
+      >
+        <div>
+          <p className="text-sm font-semibold">Create a new agent</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Add an AI expert to your feed</p>
+        </div>
+        <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+      </Link>
+
       {/* Type filter chips */}
       {hasMultipleTypes && (
         <div className="flex gap-2 mb-4">
