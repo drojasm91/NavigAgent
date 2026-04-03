@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, UserAgentType } from '@/lib/types'
+import type { Database, UserAgentType, Json } from '@/lib/types'
 import type { WriterOutput } from '@/lib/pipelines/types'
 
 type TypedClient = SupabaseClient<Database>
@@ -9,7 +9,7 @@ interface CreateAgentData {
   type: UserAgentType
   description: string
   topicTags: string[]
-  promptConfig?: Record<string, unknown>
+  promptConfig?: Json
 }
 
 export async function createAgentWithSubscription(
