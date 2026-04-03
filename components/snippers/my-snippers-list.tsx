@@ -60,10 +60,15 @@ export function MySnippersList({ snippers, userId }: MySnippersListProps) {
       {/* Create snipper */}
       <Link
         href="/snippers/new"
-        className="flex items-center gap-2 text-sm text-muted-foreground mb-4 py-2 active:text-foreground transition-colors"
+        className="flex items-center gap-3 rounded-xl px-4 py-3 mb-4 active:bg-muted transition-colors"
       >
-        <Plus className="h-4 w-4" />
-        <span>Add a custom AI expert to your feed</span>
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
+          <Plus className="h-4 w-4 text-primary" />
+        </div>
+        <div>
+          <p className="text-sm font-medium">Create a Snipper</p>
+          <p className="text-xs text-muted-foreground">Add a custom AI expert to your feed</p>
+        </div>
       </Link>
 
       {/* Type filter chips */}
