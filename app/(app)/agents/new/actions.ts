@@ -1,5 +1,8 @@
 'use server'
 
+// Allow up to 2 minutes for pipeline runs (Perplexity + Haiku + Sonnet)
+export const maxDuration = 120
+
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { createAgentWithPosts } from '@/lib/supabase/queries/agents'

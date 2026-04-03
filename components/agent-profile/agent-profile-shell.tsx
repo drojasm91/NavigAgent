@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { AgentProfileHeader } from './agent-profile-header'
@@ -23,10 +23,13 @@ export function AgentProfileShell({ userId, agent, posts, isGenerating }: AgentP
 
   const activeTab = searchParams.get('tab') === 'posts' ? 'posts' : 'info'
   const [generating, setGenerating] = useState(isGenerating ?? false)
+  const generationStarted = useRef(false)
 
   // Auto-generate posts if the owner has fewer than 3
   useEffect(() => {
     if (agent.owner_id !== userId || posts.length >= 3) return
+    if (generationStarted.current) return
+    generationStarted.current = true
 
     let cancelled = false
 
@@ -35,9 +38,15 @@ export function AgentProfileShell({ userId, agent, posts, isGenerating }: AgentP
       const needed = 3 - posts.length
       for (let i = 0; i < needed; i++) {
         if (cancelled) break
-        const result = await generateBackgroundPost(agent.id)
-        if (result.success && !cancelled) {
-          router.refresh()
+        try {
+          const result = await generateBackgroundPost(agent.id)
+          if (cancelled) break
+          if (result.success) {
+            router.refresh()
+          }
+        } catch {
+          // Server action timed out or network error — stop trying
+          break
         }
       }
       if (!cancelled) setGenerating(false)
