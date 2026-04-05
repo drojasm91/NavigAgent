@@ -12,7 +12,10 @@ interface SubPostItemProps {
 
 export function SubPostItem({ content, position, isLast, postId, conversationCount }: SubPostItemProps) {
   const inner = (
-    <div className="relative">
+    <div
+      className="relative scroll-mt-20"
+      id={postId ? `sn-sp-${postId}-${position}` : undefined}
+    >
       {!isLast && (
         <div className="absolute left-3 top-8 bottom-0 w-px bg-border" />
       )}

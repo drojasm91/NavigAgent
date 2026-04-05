@@ -61,6 +61,18 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
     }
   }, [expanded, post.id])
 
+  // Scroll to the last-viewed sub-post when returning from the detail page
+  useEffect(() => {
+    if (!expanded || typeof window === 'undefined') return
+
+    const lastSubPos = sessionStorage.getItem(`sn-last-sub-${post.id}`)
+    if (!lastSubPos) return
+
+    const el = document.getElementById(`sn-sp-${post.id}-${lastSubPos}`)
+    el?.scrollIntoView({ behavior: 'auto', block: 'center' })
+    sessionStorage.removeItem(`sn-last-sub-${post.id}`)
+  }, [expanded, post.id])
+
   const snipper = post.snippers
   const hookText = post.sub_posts?.[0]?.content ?? ''
   const likeCount = Math.floor((post.quality_score ?? 0.8) * 50)
