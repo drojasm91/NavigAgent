@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useMemo } from 'react'
+import { useState, useRef, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
@@ -42,6 +42,25 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
   const router = useRouter()
   const [expanded, setExpanded] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
+
+  // Restore expanded state on mount (e.g. when returning from sub-post detail)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (sessionStorage.getItem(`sn-exp-${post.id}`) === '1') {
+      setExpanded(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Persist expanded state so it survives navigation back to the feed
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (expanded) {
+      sessionStorage.setItem(`sn-exp-${post.id}`, '1')
+    } else {
+      sessionStorage.removeItem(`sn-exp-${post.id}`)
+    }
+  }, [expanded, post.id])
 
   const snipper = post.snippers
   const hookText = post.sub_posts?.[0]?.content ?? ''
