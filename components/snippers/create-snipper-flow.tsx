@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronDown, ArrowRight, Loader2, Newspaper, GraduationCap, MapPin, Sparkles, Plus } from 'lucide-react'
 import { TopicChip } from '@/components/onboarding/topic-chip'
 import { SubPostItem } from '@/components/thread/sub-post-item'
+import { TypeBadge } from '@/components/feed/type-badge'
+import { DepthBadge } from '@/components/feed/depth-badge'
 import {
   generateFollowUpQuestions,
   generateSnipperPreview,
@@ -581,9 +583,10 @@ export function CreateSnipperFlow() {
                     </div>
                     <div>
                       <p className="font-bold text-base">{preview.name}</p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {selectedType} snipper
-                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <TypeBadge type={selectedType!} />
+                        <DepthBadge depth={depthPreference} />
+                      </div>
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
