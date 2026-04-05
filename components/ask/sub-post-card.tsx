@@ -52,17 +52,20 @@ export function SubPostCard({
           <ChevronLeft className="w-4 h-4" />
         </button>
 
-        <div
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-background text-[10px] font-bold ${
-            preview ? 'bg-foreground/60' : 'bg-foreground'
-          }`}
-        >
-          {position}
-        </div>
+        <div className="flex-1" />
 
-        <span className="text-xs text-muted-foreground">
-          {position} of {total}
-        </span>
+        <div className="flex items-center gap-2">
+          <div
+            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-background text-[10px] font-bold ${
+              preview ? 'bg-foreground/60' : 'bg-foreground'
+            }`}
+          >
+            {position}
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {position} of {total}
+          </span>
+        </div>
 
         <div className="flex-1" />
 
