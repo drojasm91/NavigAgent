@@ -1,11 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { fetchConversationSummaries } from '@/lib/supabase/queries'
-import { SubPostHero } from '@/components/ask/sub-post-hero'
+import { SubPostCard } from '@/components/ask/sub-post-card'
 import { ConversationSummaryList } from '@/components/ask/conversation-summary-list'
 import { AskInput } from '@/components/ask/ask-input'
 import { SubPostNavShell } from '@/components/ask/sub-post-nav-shell'
-import { SubPostArrowNav } from '@/components/ask/sub-post-arrow-nav'
 
 interface SubPostPageProps {
   params: Promise<{ postId: string; position: string }>
@@ -64,29 +63,20 @@ export default async function SubPostPage({ params }: SubPostPageProps) {
           content: sp.content,
         }))}
       >
-        <div className="px-2 py-6 space-y-6">
-          <SubPostArrowNav
+        <div className="px-4 py-6 space-y-6">
+          <SubPostCard
+            content={targetSubPost.content}
+            position={targetSubPost.position}
+            total={subPosts.length}
+            postId={postId}
+          />
+
+          <ConversationSummaryList summaries={summaries} />
+
+          <AskInput
             postId={postId}
             position={position}
-            totalSubPosts={subPosts.length}
-          >
-            <SubPostHero
-              content={targetSubPost.content}
-              position={targetSubPost.position}
-              total={subPosts.length}
-            />
-          </SubPostArrowNav>
-
-          <div className="px-2">
-            <ConversationSummaryList summaries={summaries} />
-          </div>
-
-          <div className="px-2">
-            <AskInput
-              postId={postId}
-              position={position}
-            />
-          </div>
+          />
         </div>
       </SubPostNavShell>
     </div>

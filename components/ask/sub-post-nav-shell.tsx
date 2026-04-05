@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { BackButton } from './back-button'
-import { SubPostArrowNav } from './sub-post-arrow-nav'
+import { SubPostCard } from './sub-post-card'
 
 interface SubPostLite {
   position: number
@@ -170,22 +170,14 @@ function SubPostPreview({
   content: string
 }) {
   return (
-    <div className="px-2 py-6">
-      <SubPostArrowNav postId={postId} position={position} totalSubPosts={total}>
-        <div className="rounded-xl bg-muted/30 border border-dashed p-4 opacity-70">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground/60 text-background text-[10px] font-bold">
-              {position}
-            </div>
-            <span className="text-xs text-muted-foreground">
-              {position} of {total}
-            </span>
-          </div>
-          <p className="text-[15px] leading-relaxed text-foreground/80">
-            {content}
-          </p>
-        </div>
-      </SubPostArrowNav>
+    <div className="px-4 py-6">
+      <SubPostCard
+        postId={postId}
+        position={position}
+        total={total}
+        content={content}
+        preview
+      />
     </div>
   )
 }
