@@ -8,6 +8,5 @@ export {
 
 export {
   fetchConversationSummaries,
-  fetchConversationCounts,
   saveConversationSummary,
 } from './conversations'

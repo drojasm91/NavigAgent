@@ -173,6 +173,7 @@ export interface Database {
           post_id: string
           position: number
           content: string
+          conversation_count: number
           created_at: string
         }
         Insert: {
@@ -180,6 +181,7 @@ export interface Database {
           post_id: string
           position: number
           content: string
+          conversation_count?: number
           created_at?: string
         }
         Update: {
@@ -187,6 +189,7 @@ export interface Database {
           post_id?: string
           position?: number
           content?: string
+          conversation_count?: number
           created_at?: string
         }
         Relationships: []

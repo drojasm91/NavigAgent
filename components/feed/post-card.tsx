@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useRef, useMemo, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TypeBadge } from './type-badge'
 import { DepthBadge } from './depth-badge'
 import { SubPostItem } from '@/components/thread/sub-post-item'
-import { useConversationCounts } from '@/hooks/use-conversation-counts'
 import type { FeedPost } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { Heart, Layers, Bot, ArrowRight, ChevronUp } from 'lucide-react'
@@ -70,10 +69,6 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
   const isThread = post.type === 'thread' && postCount > 1
   const showSnipperLink = !currentSnipperId || post.snipper_id !== currentSnipperId
   const showDigIn = !hideDigIn && !post.is_community && post.type === 'thread'
-
-  // Fetch conversation counts lazily when thread is expanded
-  const subPostIds = useMemo(() => subPosts.map((sp) => sp.id), [subPosts])
-  const { counts: conversationCounts, loaded: conversationCountsLoaded } = useConversationCounts(subPostIds, expanded)
 
   function handleCardTap() {
     if (isThread) {
@@ -163,8 +158,7 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
                 total={postCount}
                 isLast={i === subPosts.length - 2}
                 postId={post.id}
-                conversationCount={conversationCounts[sp.id] ?? 0}
-                conversationCountLoading={!conversationCountsLoaded}
+                conversationCount={sp.conversation_count ?? 0}
               />
             ))}
           </div>

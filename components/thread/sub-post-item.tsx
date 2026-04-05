@@ -8,10 +8,9 @@ interface SubPostItemProps {
   isLast: boolean
   postId?: string
   conversationCount?: number
-  conversationCountLoading?: boolean
 }
 
-export function SubPostItem({ content, position, isLast, postId, conversationCount, conversationCountLoading }: SubPostItemProps) {
+export function SubPostItem({ content, position, isLast, postId, conversationCount }: SubPostItemProps) {
   const inner = (
     <div className="relative">
       {!isLast && (
@@ -26,11 +25,7 @@ export function SubPostItem({ content, position, isLast, postId, conversationCou
             {content}
           </p>
           {postId && (
-            <div
-              className={`flex items-center justify-end gap-1 pb-2 transition-opacity ${
-                conversationCountLoading ? 'invisible' : 'opacity-100'
-              }`}
-            >
+            <div className="flex items-center justify-end gap-1 pb-2">
               {(conversationCount ?? 0) > 0 ? (
                 <>
                   <MessageCircle className="w-3 h-3 text-muted-foreground" />

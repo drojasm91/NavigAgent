@@ -5,6 +5,7 @@ export interface FeedSubPost {
   post_id: string
   position: number
   content: string
+  conversation_count?: number
   created_at: string
 }
 

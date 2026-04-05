@@ -21,27 +21,6 @@ export async function fetchConversationSummaries(
   return data ?? []
 }
 
-export async function fetchConversationCounts(
-  supabase: TypedClient,
-  subPostIds: string[]
-): Promise<Record<string, number>> {
-  if (subPostIds.length === 0) return {}
-
-  const { data, error } = await supabase
-    .from('conversation_summaries')
-    .select('sub_post_id')
-    .in('sub_post_id', subPostIds)
-
-  // Gracefully return empty if table doesn't exist yet
-  if (error) return {}
-
-  const counts: Record<string, number> = {}
-  for (const row of data ?? []) {
-    counts[row.sub_post_id] = (counts[row.sub_post_id] ?? 0) + 1
-  }
-  return counts
-}
-
 export async function saveConversationSummary(
   supabase: TypedClient,
   data: {
