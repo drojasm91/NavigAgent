@@ -58,6 +58,10 @@ export default async function SubPostPage({ params }: SubPostPageProps) {
         position={position}
         totalSubPosts={subPosts.length}
         snipperName={snipperRow.name}
+        allSubPosts={subPosts.map((sp: { position: number; content: string }) => ({
+          position: sp.position,
+          content: sp.content,
+        }))}
       >
         <div className="px-4 py-6 space-y-6">
           <SubPostHero
