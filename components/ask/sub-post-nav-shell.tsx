@@ -32,14 +32,14 @@ export function SubPostNavShell({
     router.replace(`/post/${postId}/sub/${newPosition}`)
   }
 
-  function handleTouchStart(e: { touches: { clientX: number; clientY: number }[] }) {
+  function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
     touchStart.current = {
       x: e.touches[0].clientX,
       y: e.touches[0].clientY,
     }
   }
 
-  function handleTouchEnd(e: { changedTouches: { clientX: number; clientY: number }[] }) {
+  function handleTouchEnd(e: React.TouchEvent<HTMLDivElement>) {
     if (!touchStart.current) return
     const dx = e.changedTouches[0].clientX - touchStart.current.x
     const dy = e.changedTouches[0].clientY - touchStart.current.y
