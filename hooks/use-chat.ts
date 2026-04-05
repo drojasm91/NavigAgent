@@ -126,6 +126,7 @@ export function useChat({ threadContext, snipperContext, postId, subPostId }: Us
           messages,
           subPostId,
           postId,
+          position: threadContext.targetPosition,
         }),
       })
 
@@ -136,7 +137,7 @@ export function useChat({ threadContext, snipperContext, postId, subPostId }: Us
     } finally {
       setIsSaving(false)
     }
-  }, [messages, subPostId, postId])
+  }, [messages, subPostId, postId, threadContext.targetPosition])
 
   return {
     messages,

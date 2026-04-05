@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { saveConversationSummary, recordLikeSignal } from '@/lib/supabase/queries'
 import { ASK_SUMMARY_PROMPT } from '@/lib/prompts'
@@ -8,6 +9,7 @@ interface SummarizeRequestBody {
   messages: { role: 'user' | 'assistant'; content: string }[]
   subPostId: string
   postId: string
+  position: number
 }
 
 export async function POST(request: Request) {
@@ -19,9 +21,9 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as SummarizeRequestBody
-  const { messages, subPostId, postId } = body
+  const { messages, subPostId, postId, position } = body
 
-  if (!messages?.length || !subPostId || !postId) {
+  if (!messages?.length || !subPostId || !postId || position == null) {
     return Response.json({ error: 'Bad request' }, { status: 400 })
   }
 
@@ -64,6 +66,10 @@ export async function POST(request: Request) {
     }),
     recordLikeSignal(supabase, user.id, postId, 'asked_question'),
   ])
+
+  // Invalidate the sub-post detail page cache so the new summary shows up
+  // immediately when the user navigates back from the chat page.
+  revalidatePath(`/post/${postId}/sub/${position}`)
 
   return Response.json({
     question: parsed.question,
