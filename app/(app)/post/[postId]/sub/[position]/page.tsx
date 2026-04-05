@@ -5,7 +5,6 @@ import { SubPostHero } from '@/components/ask/sub-post-hero'
 import { ConversationSummaryList } from '@/components/ask/conversation-summary-list'
 import { AskInput } from '@/components/ask/ask-input'
 import { BackButton } from '@/components/ask/back-button'
-import type { FeedSubPost, FeedSnipper } from '@/lib/types'
 
 interface SubPostPageProps {
   params: Promise<{ postId: string; position: string }>

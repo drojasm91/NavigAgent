@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as ChatRequestBody
-  const { messages, threadContext, snipperContext } = body
+  const { messages, threadContext } = body
 
   if (!messages?.length || !threadContext) {
     return new Response('Bad request', { status: 400 })
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
         controller.close()
       })
 
-      stream.on('error', (_error: unknown) => {
+      stream.on('error', () => {
         controller.enqueue(
           encoder.encode(`data: ${JSON.stringify({ type: 'error', error: 'Something went wrong' })}\n\n`)
         )
