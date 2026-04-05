@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { BackButton } from './back-button'
 import { SubPostCard } from './sub-post-card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface SubPostLite {
   position: number
@@ -19,7 +20,7 @@ interface SubPostNavShellProps {
   children: React.ReactNode
 }
 
-const SWIPE_COMMIT_RATIO = 0.25 // 25% of viewport width triggers a navigation
+const SWIPE_COMMIT_RATIO = 0.15 // 15% of viewport width triggers a navigation
 const EDGE_RESISTANCE = 0.3 // How much of the drag to apply when at an edge
 const ANIMATION_MS = 250
 
@@ -170,14 +171,17 @@ function SubPostPreview({
   content: string
 }) {
   return (
-    <div className="px-4 py-6">
+    <div className="px-4 py-6 space-y-6">
       <SubPostCard
         postId={postId}
         position={position}
         total={total}
         content={content}
-        preview
       />
+      <div className="space-y-4">
+        <Skeleton className="h-4 w-48 mx-auto" />
+        <Skeleton className="h-11 w-full rounded-full" />
+      </div>
     </div>
   )
 }

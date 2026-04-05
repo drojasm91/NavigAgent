@@ -8,7 +8,6 @@ interface SubPostCardProps {
   position: number
   total: number
   postId: string
-  preview?: boolean
 }
 
 export function SubPostCard({
@@ -16,7 +15,6 @@ export function SubPostCard({
   position,
   total,
   postId,
-  preview = false,
 }: SubPostCardProps) {
   const router = useRouter()
   const canPrev = position > 1
@@ -32,13 +30,7 @@ export function SubPostCard({
   }
 
   return (
-    <div
-      className={
-        preview
-          ? 'rounded-xl bg-muted/30 border border-dashed p-4 opacity-70'
-          : 'rounded-xl bg-muted/50 border p-4'
-      }
-    >
+    <div className="rounded-xl bg-muted/50 border p-4">
       <div className="flex items-center gap-2 mb-3">
         <button
           onClick={() => navigateTo(position - 1)}
@@ -55,11 +47,7 @@ export function SubPostCard({
         <div className="flex-1" />
 
         <div className="flex items-center gap-2">
-          <div
-            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-background text-[10px] font-bold ${
-              preview ? 'bg-foreground/60' : 'bg-foreground'
-            }`}
-          >
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-background text-[10px] font-bold bg-foreground">
             {position}
           </div>
           <span className="text-xs text-muted-foreground">
@@ -82,11 +70,7 @@ export function SubPostCard({
         </button>
       </div>
 
-      <p
-        className={`text-[15px] leading-relaxed ${
-          preview ? 'text-foreground/80' : 'text-foreground'
-        }`}
-      >
+      <p className="text-[15px] leading-relaxed text-foreground">
         {content}
       </p>
     </div>
