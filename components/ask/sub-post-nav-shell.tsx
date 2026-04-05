@@ -2,8 +2,8 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { BackButton } from './back-button'
+import { SubPostArrowNav } from './sub-post-arrow-nav'
 
 interface SubPostLite {
   position: number
@@ -104,9 +104,6 @@ export function SubPostNavShell({
     }
   }
 
-  const canPrev = position > 1
-  const canNext = position < totalSubPosts
-
   const trackStyle: React.CSSProperties = {
     transform: `translate3d(calc(-33.3333% + ${dragDelta}px), 0, 0)`,
     transition: isAnimating ? `transform ${ANIMATION_MS}ms ease-out` : 'none',
@@ -121,27 +118,9 @@ export function SubPostNavShell({
           <span className="text-sm font-medium text-muted-foreground truncate flex-1">
             {snipperName}
           </span>
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              onClick={() => navigateTo(position - 1)}
-              disabled={!canPrev}
-              className="flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground active:bg-muted disabled:opacity-30 transition-colors"
-              aria-label="Previous sub-post"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="text-xs text-muted-foreground tabular-nums px-1">
-              {position} of {totalSubPosts}
-            </span>
-            <button
-              onClick={() => navigateTo(position + 1)}
-              disabled={!canNext}
-              className="flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground active:bg-muted disabled:opacity-30 transition-colors"
-              aria-label="Next sub-post"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+            {position} of {totalSubPosts}
+          </span>
         </div>
       </header>
 
@@ -155,6 +134,7 @@ export function SubPostNavShell({
           <div className="w-1/3 shrink-0">
             {prev ? (
               <SubPostPreview
+                postId={postId}
                 position={prev.position}
                 total={totalSubPosts}
                 content={prev.content}
@@ -165,6 +145,7 @@ export function SubPostNavShell({
           <div className="w-1/3 shrink-0">
             {next ? (
               <SubPostPreview
+                postId={postId}
                 position={next.position}
                 total={totalSubPosts}
                 content={next.content}
@@ -178,29 +159,33 @@ export function SubPostNavShell({
 }
 
 function SubPostPreview({
+  postId,
   position,
   total,
   content,
 }: {
+  postId: string
   position: number
   total: number
   content: string
 }) {
   return (
-    <div className="px-4 py-6">
-      <div className="rounded-xl bg-muted/30 border border-dashed p-4 opacity-70">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground/60 text-background text-[10px] font-bold">
-            {position}
+    <div className="px-2 py-6">
+      <SubPostArrowNav postId={postId} position={position} totalSubPosts={total}>
+        <div className="rounded-xl bg-muted/30 border border-dashed p-4 opacity-70">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground/60 text-background text-[10px] font-bold">
+              {position}
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {position} of {total}
+            </span>
           </div>
-          <span className="text-xs text-muted-foreground">
-            {position} of {total}
-          </span>
+          <p className="text-[15px] leading-relaxed text-foreground/80">
+            {content}
+          </p>
         </div>
-        <p className="text-[15px] leading-relaxed text-foreground/80">
-          {content}
-        </p>
-      </div>
+      </SubPostArrowNav>
     </div>
   )
 }
