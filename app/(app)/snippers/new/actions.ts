@@ -7,7 +7,7 @@ import { SNIPPER_FOLLOWUP_PROMPT, SNIPPER_NAME_PROMPT, SNIPPER_REFINEMENT_CHAT_P
 import { parseJsonFromAI } from '@/lib/utils'
 import { runNewsResearcher } from '@/lib/pipelines/steps/researcher'
 import { runNewsWriter } from '@/lib/pipelines/steps/writer-news'
-import type { SnipperType, Json } from '@/lib/types'
+import type { SnipperType, SnipperDepth, Json } from '@/lib/types'
 import type { WriterOutput, WriterSubPost } from '@/lib/pipelines/types'
 
 // Re-export for the UI component
@@ -131,10 +131,14 @@ export async function generateSamplePost(
   description: string,
   topicTags: string[],
   previousPostHooks: string[] = [],
-  refinementInstructions?: string
+  refinementInstructions?: string,
+  depthPreference: SnipperDepth = 'balanced'
 ): Promise<SamplePostResult> {
   try {
-    const promptConfig = refinementInstructions ? { refinementInstructions } : {}
+    const promptConfig = {
+      ...(refinementInstructions ? { refinementInstructions } : {}),
+      depthPreference,
+    }
 
     // Build researcher input — pass previous hooks to avoid topic repetition
     const researcherInput = {
@@ -196,7 +200,8 @@ export async function createSnipperWithSamples(
   samplePosts: WriterOutput[],
   refinementInstructions?: string,
   refinementChat?: ChatMessage[],
-  sessionId?: string
+  sessionId?: string,
+  depthPreference: SnipperDepth = 'balanced'
 ): Promise<CreateSnipperResult> {
   const supabase = createClient()
 
@@ -209,17 +214,17 @@ export async function createSnipperWithSamples(
   }
 
   try {
+    const promptConfig = {
+      ...(refinementInstructions ? { refinementInstructions } : {}),
+      ...(refinementChat ? { refinementChat: refinementChat as unknown as Json } : {}),
+    }
     const snipperId = await createSnipperWithPosts(supabase, user.id, {
       name,
       type,
+      depth: depthPreference,
       description,
       topicTags,
-      promptConfig: refinementInstructions || refinementChat
-        ? {
-            ...(refinementInstructions ? { refinementInstructions } : {}),
-            ...(refinementChat ? { refinementChat: refinementChat as unknown as Json } : {}),
-          } as unknown as Json
-        : undefined,
+      promptConfig: Object.keys(promptConfig).length > 0 ? promptConfig as unknown as Json : undefined,
     }, samplePosts)
 
     // Mark refinement session as activated
@@ -252,7 +257,7 @@ export async function generateBackgroundPost(snipperId: string): Promise<{ succe
     // Fetch snipper config
     const { data: snipper, error: snipperError } = await supabase
       .from('snippers')
-      .select('id, name, type, description, topic_tags, prompt_config')
+      .select('id, name, type, depth, description, topic_tags, prompt_config')
       .eq('id', snipperId)
       .eq('owner_id', user.id)
       .single()
@@ -260,6 +265,8 @@ export async function generateBackgroundPost(snipperId: string): Promise<{ succe
     if (snipperError || !snipper) {
       return { success: false, error: 'Snipper not found' }
     }
+
+    const promptConfig = { ...(snipper.prompt_config as Record<string, unknown> ?? {}), depthPreference: snipper.depth ?? 'balanced' }
 
     if (snipper.type !== 'news') {
       return { success: false, error: `Pipeline not implemented for type: ${snipper.type}` }
@@ -292,7 +299,7 @@ export async function generateBackgroundPost(snipperId: string): Promise<{ succe
       snipperDescription: snipper.description,
       snipperType: snipper.type,
       topicTags: snipper.topic_tags ?? [],
-      promptConfig: snipper.prompt_config ?? {},
+      promptConfig,
       recentPostHooks,
     })
 
@@ -315,7 +322,7 @@ export async function generateBackgroundPost(snipperId: string): Promise<{ succe
       snipperDescription: snipper.description,
       snipperType: snipper.type,
       topicTags: snipper.topic_tags ?? [],
-      promptConfig: snipper.prompt_config ?? {},
+      promptConfig,
       researchBrief: research.data!,
     })
 

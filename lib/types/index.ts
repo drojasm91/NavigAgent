@@ -6,6 +6,7 @@ export type {
   PostType,
   SignalType,
   JobStatus,
+  SnipperDepth,
   Json,
 } from './database'
 

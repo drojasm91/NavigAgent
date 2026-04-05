@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TypeBadge } from './type-badge'
+import { DepthBadge } from './depth-badge'
 import { SubPostItem } from '@/components/thread/sub-post-item'
 import type { FeedPost } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -85,6 +86,7 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
           <div className="flex items-center gap-2 min-w-0">
             <span className="font-semibold text-sm truncate">{snipper.name}</span>
             <TypeBadge type={snipper.type} />
+            <DepthBadge depth={snipper.depth} />
           </div>
         </Link>
         <div className="flex items-center gap-2 shrink-0">

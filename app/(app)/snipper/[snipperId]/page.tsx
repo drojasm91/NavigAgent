@@ -18,7 +18,7 @@ export default async function SnipperPage({ params }: SnipperPageProps) {
     supabase.auth.getUser(),
     supabase
       .from('snippers')
-      .select('id, name, type, owner_id, is_public, topic_tags, description, created_at')
+      .select('id, name, type, depth, owner_id, is_public, topic_tags, description, created_at')
       .eq('id', snipperId)
       .single(),
   ])
@@ -30,6 +30,7 @@ export default async function SnipperPage({ params }: SnipperPageProps) {
     id: snipperRow.id,
     name: snipperRow.name,
     type: snipperRow.type,
+    depth: snipperRow.depth,
     owner_id: snipperRow.owner_id,
     is_public: snipperRow.is_public,
     topic_tags: snipperRow.topic_tags ?? [],

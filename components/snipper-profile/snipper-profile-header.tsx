@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, UserPlus } from 'lucide-react'
 import { TypeBadge } from '@/components/feed/type-badge'
+import { DepthBadge } from '@/components/feed/depth-badge'
 import type { FeedSnipper } from '@/lib/types'
 
 interface SnipperProfileHeaderProps {
@@ -30,6 +31,7 @@ export function SnipperProfileHeader({ snipper, postCount, isGenerating }: Snipp
         </div>
         <h1 className="font-bold text-base truncate">{snipper.name}</h1>
         <TypeBadge type={snipper.type} />
+        <DepthBadge depth={snipper.depth} />
         <div className="flex-1" />
         <button className="flex items-center gap-1.5 shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-medium active:bg-accent transition-colors">
           <UserPlus className="h-3.5 w-3.5" />

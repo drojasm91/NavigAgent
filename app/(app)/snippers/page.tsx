@@ -24,6 +24,7 @@ export default async function SnippersPage() {
     id: string
     name: string
     type: string
+    depth: string
     description: string
     owner_id: string
     is_active: boolean
@@ -35,7 +36,7 @@ export default async function SnippersPage() {
   if (snipperIds.length > 0) {
     const { data } = await supabase
       .from('snippers')
-      .select('id, name, type, description, owner_id, is_active, cadence, topic_tags, created_at')
+      .select('id, name, type, depth, description, owner_id, is_active, cadence, topic_tags, created_at')
       .in('id', snipperIds)
       .order('created_at', { ascending: false })
 

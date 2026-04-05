@@ -5,12 +5,14 @@ import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TypeBadge } from '@/components/feed/type-badge'
-import type { SnipperType } from '@/lib/types'
+import { DepthBadge } from '@/components/feed/depth-badge'
+import type { SnipperType, SnipperDepth } from '@/lib/types'
 
 interface SnipperItem {
   id: string
   name: string
   type: string
+  depth: string
   description: string
   owner_id: string
   is_active: boolean
@@ -110,6 +112,7 @@ export function MySnippersList({ snippers, userId }: MySnippersListProps) {
               <div className="flex items-center gap-2">
                 <p className="font-semibold text-sm truncate">{snipper.name}</p>
                 <TypeBadge type={snipper.type as SnipperType} />
+                <DepthBadge depth={snipper.depth as SnipperDepth} />
               </div>
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                 {snipper.description}

@@ -1,4 +1,4 @@
-import type { PostType, SnipperType, Json } from './database'
+import type { PostType, SnipperType, SnipperDepth, Json } from './database'
 
 export interface FeedSubPost {
   id: string
@@ -12,6 +12,7 @@ export interface FeedSnipper {
   id: string
   name: string
   type: SnipperType
+  depth: SnipperDepth
   owner_id: string
   is_public: boolean
   topic_tags: string[]

@@ -7,6 +7,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { TypeBadge } from '@/components/feed/type-badge'
+import { DepthBadge } from '@/components/feed/depth-badge'
 import { SubPostItem } from './sub-post-item'
 import { X, Heart, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -58,6 +59,7 @@ export function ThreadDrawer({
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <DrawerTitle className="text-base">{snipper.name}</DrawerTitle>
               <TypeBadge type={snipper.type} />
+              <DepthBadge depth={snipper.depth} />
             </div>
             <button
               onClick={() => onOpenChange(false)}

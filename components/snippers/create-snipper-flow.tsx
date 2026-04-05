@@ -15,7 +15,7 @@ import {
 import type { FollowUpQuestion, ChatMessage } from '@/app/(app)/snippers/new/actions'
 import { cn } from '@/lib/utils'
 import type { WriterOutput } from '@/lib/pipelines/types'
-import type { SnipperType } from '@/lib/types'
+import type { SnipperType, SnipperDepth } from '@/lib/types'
 
 const SNIPPER_TYPES = [
   {
@@ -47,6 +47,7 @@ export function CreateSnipperFlow() {
   const [selectedType, setSelectedType] = useState<SnipperType | null>(null)
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null)
   const [customTopic, setCustomTopic] = useState('')
+  const [depthPreference, setDepthPreference] = useState<SnipperDepth>('balanced')
   const [followUpQuestions, setFollowUpQuestions] = useState<FollowUpQuestion[]>([])
   const [followUpAnswers, setFollowUpAnswers] = useState<Record<string, Set<string>>>({})
   const [customAnswers, setCustomAnswers] = useState<Record<string, string>>({})
@@ -84,6 +85,7 @@ export function CreateSnipperFlow() {
     setSelectedType(type)
     setSelectedTopic(null)
     setCustomTopic('')
+    setDepthPreference('balanced')
     setFollowUpQuestions([])
     setFollowUpAnswers({})
     setCustomAnswers({})
@@ -92,31 +94,35 @@ export function CreateSnipperFlow() {
     scrollToTopAndSetStep(2)
   }
 
-  async function handleSelectTopic(topic: string) {
+  function handleSelectTopic(topic: string) {
     setSelectedTopic(topic)
     setFollowUpQuestions([])
     setFollowUpAnswers({})
     setCustomAnswers({})
     setPreview(null)
     setSamplePosts([])
-    setLoadingQuestions(true)
-    scrollToTopAndSetStep(3)
-
-    const result = await generateFollowUpQuestions(selectedType!, topic)
-    setLoadingQuestions(false)
-
-    if (result.error || result.questions.length === 0) {
-      await handleGeneratePreview(topic, {})
-      return
-    }
-
-    setFollowUpQuestions(result.questions)
   }
 
   function handleSubmitCustomTopic() {
     const trimmed = customTopic.trim()
     if (!trimmed) return
     handleSelectTopic(trimmed)
+  }
+
+  async function handleContinueFromTopic() {
+    if (!selectedTopic || !selectedType) return
+    setLoadingQuestions(true)
+    scrollToTopAndSetStep(3)
+
+    const result = await generateFollowUpQuestions(selectedType, selectedTopic)
+    setLoadingQuestions(false)
+
+    if (result.error || result.questions.length === 0) {
+      await handleGeneratePreview(selectedTopic, {})
+      return
+    }
+
+    setFollowUpQuestions(result.questions)
   }
 
   function handleToggleAnswer(question: string, option: string) {
@@ -172,7 +178,10 @@ export function CreateSnipperFlow() {
       selectedType!,
       result.name,
       result.description,
-      result.topicTags
+      result.topicTags,
+      [],
+      undefined,
+      depthPreference
     )
     setLoadingSample(false)
 
@@ -196,7 +205,8 @@ export function CreateSnipperFlow() {
       preview.description,
       preview.topicTags,
       existingHooks,
-      refinementInstructions || undefined
+      refinementInstructions || undefined,
+      depthPreference
     )
 
     setLoadingSample(false)
@@ -271,7 +281,8 @@ export function CreateSnipperFlow() {
       newPreview.description,
       newPreview.topicTags,
       [],
-      chatResult.refinementInstructions
+      chatResult.refinementInstructions,
+      depthPreference
     )
 
     setLoadingSample(false)
@@ -298,7 +309,8 @@ export function CreateSnipperFlow() {
       samplePosts,
       refinementInstructions || undefined,
       chatMessages.length > 0 ? chatMessages : undefined,
-      sessionId
+      sessionId,
+      depthPreference
     )
 
     if (result.error) {
@@ -404,7 +416,7 @@ export function CreateSnipperFlow() {
                 <TopicChip
                   key={topic}
                   label={topic}
-                  selected={false}
+                  selected={selectedTopic === topic}
                   onToggle={() => handleSelectTopic(topic)}
                 />
               ))}
@@ -439,6 +451,35 @@ export function CreateSnipperFlow() {
                 </button>
               </div>
             </div>
+
+            {/* Depth preference — shown after topic is selected */}
+            {selectedTopic && (
+              <div className="mt-8">
+                <p className="text-sm font-medium mb-3">How deep should it go?</p>
+                <div className="flex gap-2">
+                  {([
+                    { value: 'high_level' as SnipperDepth, label: 'High-level' },
+                    { value: 'balanced' as SnipperDepth, label: 'Balanced' },
+                    { value: 'deep' as SnipperDepth, label: 'Deep' },
+                  ]).map((option) => (
+                    <TopicChip
+                      key={option.value}
+                      label={option.label}
+                      selected={depthPreference === option.value}
+                      onToggle={() => setDepthPreference(option.value)}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleContinueFromTopic}
+                  className="mt-8 w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-all active:scale-[0.98]"
+                >
+                  Continue
+                </button>
+              </div>
+            )}
           </>
         )}
 

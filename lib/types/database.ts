@@ -12,6 +12,7 @@ export type Cadence = 'daily' | 'weekly'
 export type PostType = 'thread' | 'card'
 export type SignalType = 'like' | 'skip' | 'read_full' | 'asked_question' | 'rabbit_hole_entered'
 export type JobStatus = 'pending' | 'running' | 'completed' | 'failed'
+export type SnipperDepth = 'high_level' | 'balanced' | 'deep'
 
 export interface Database {
   public: {
@@ -67,6 +68,7 @@ export interface Database {
           owner_id: string
           name: string
           type: SnipperType
+          depth: SnipperDepth
           description: string
           topic_tags: string[]
           prompt_config: Json
@@ -82,6 +84,7 @@ export interface Database {
           owner_id: string
           name: string
           type: SnipperType
+          depth?: SnipperDepth
           description: string
           topic_tags?: string[]
           prompt_config?: Json
@@ -97,6 +100,7 @@ export interface Database {
           owner_id?: string
           name?: string
           type?: SnipperType
+          depth?: SnipperDepth
           description?: string
           topic_tags?: string[]
           prompt_config?: Json

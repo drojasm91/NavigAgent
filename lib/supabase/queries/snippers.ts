@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, SnipperType, Json } from '@/lib/types'
+import type { Database, SnipperType, SnipperDepth, Json } from '@/lib/types'
 import type { WriterOutput } from '@/lib/pipelines/types'
 
 type TypedClient = SupabaseClient<Database>
@@ -7,6 +7,7 @@ type TypedClient = SupabaseClient<Database>
 interface CreateSnipperData {
   name: string
   type: SnipperType
+  depth?: SnipperDepth
   description: string
   topicTags: string[]
   promptConfig?: Json
@@ -24,6 +25,7 @@ export async function createSnipperWithSubscription(
       owner_id: userId,
       name: data.name,
       type: data.type,
+      depth: data.depth ?? 'balanced',
       description: data.description,
       topic_tags: data.topicTags,
       prompt_config: data.promptConfig ?? {},

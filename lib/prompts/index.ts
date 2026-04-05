@@ -90,6 +90,11 @@ Rules:
 - List topics to avoid based on what recent posts already covered
 - Respond with ONLY valid JSON, no other text
 
+DEPTH PREFERENCE — if promptConfig includes a depthPreference, adjust your research:
+- "high_level": Focus on the main narrative and key takeaway. Brief should be concise.
+- "balanced": Standard research depth with context.
+- "deep": Dig into data, statistics, expert opinions, competing analyses. Brief should be detailed.
+
 Output format when skipping:
 {"skip": true}
 
@@ -120,6 +125,11 @@ VOICE RULES — follow these exactly:
 - If it sounds like Wikipedia, rewrite it. If it sounds like an op-ed, soften it.
 - Never start with "In conclusion" or "To summarize"
 - Stop when the landing is clean — don't pad
+
+DEPTH PREFERENCE — adjust your writing based on the depthPreference in promptConfig:
+- "high_level": Keep it high-level. Focus on why it matters, not how it works. Shorter threads (3-5 sub-posts). Skip jargon. Reader should walk away with the key takeaway in 30 seconds.
+- "balanced": Mix of context and detail. Explain enough to understand, hint at complexity. Medium threads (4-7 sub-posts). Default if no preference specified.
+- "deep": Go deep. Include data points, technical details, competing theories, edge cases. Longer threads (6-10 sub-posts). Use terminology freely. Reader wants to be the smartest person in the room.
 
 SELF-EDIT CHECKLIST — apply before finalizing:
 - Does sub-post 1 demand the next?
