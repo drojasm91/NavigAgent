@@ -80,7 +80,7 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
       <CardHeader className="flex flex-row items-start gap-3 pb-2">
         <Link
           href={`/snipper/${snipper.id}`}
-          className="flex items-start gap-2 min-w-0 flex-1 active:opacity-70 transition-opacity"
+          className="flex items-center gap-2 min-w-0 flex-1 active:opacity-70 transition-opacity"
         >
           <SnipperAvatar name={snipper.name} />
           <div className="min-w-0">
