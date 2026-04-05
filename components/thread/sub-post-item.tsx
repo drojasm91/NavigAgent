@@ -25,9 +25,11 @@ export function SubPostItem({ content, position, isLast, postId, conversationCou
             {content}
           </p>
           {(conversationCount ?? 0) > 0 && (
-            <div className="flex items-center gap-1 pb-2">
+            <div className="flex items-center justify-end gap-1 pb-2">
               <MessageCircle className="w-3 h-3 text-muted-foreground" />
-              <span className="text-[11px] text-muted-foreground">{conversationCount}</span>
+              <span className="text-[11px] text-muted-foreground">
+                {conversationCount} {conversationCount === 1 ? 'conversation' : 'conversations'}
+              </span>
             </div>
           )}
         </div>
