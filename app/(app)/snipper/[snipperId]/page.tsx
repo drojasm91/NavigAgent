@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic'
 export const maxDuration = 120
 
 import { createClient } from '@/lib/supabase/server'
@@ -14,19 +13,17 @@ export default async function SnipperPage({ params }: SnipperPageProps) {
   const { snipperId } = await params
   const supabase = createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Parallelize auth + snipper fetch (independent queries)
+  const [{ data: { user } }, { data: snipperRow }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from('snippers')
+      .select('id, name, type, owner_id, is_public, topic_tags, description, created_at')
+      .eq('id', snipperId)
+      .single(),
+  ])
 
   if (!user) redirect('/login')
-
-  // Fetch snipper from DB
-  const { data: snipperRow } = await supabase
-    .from('snippers')
-    .select('id, name, type, owner_id, is_public, topic_tags, description, created_at')
-    .eq('id', snipperId)
-    .single()
-
   if (!snipperRow) notFound()
 
   const snipper: FeedSnipper = {

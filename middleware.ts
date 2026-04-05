@@ -9,6 +9,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request })
   }
 
+  // Skip auth for OAuth callback — no need to call getUser()
+  if (request.nextUrl.pathname.startsWith('/auth/callback')) {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   try {

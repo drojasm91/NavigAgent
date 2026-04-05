@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { SnipperProfileHeader } from './snipper-profile-header'
 import { SnipperDashboardTab } from './snipper-dashboard-tab'
@@ -16,12 +16,16 @@ interface SnipperProfileShellProps {
   isGenerating?: boolean
 }
 
-export function SnipperProfileShell({ userId, snipper, posts, isGenerating }: SnipperProfileShellProps) {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
+function getInitialTab(): 'info' | 'posts' {
+  if (typeof window === 'undefined') return 'info'
+  const params = new URLSearchParams(window.location.search)
+  return params.get('tab') === 'posts' ? 'posts' : 'info'
+}
 
-  const activeTab = searchParams.get('tab') === 'posts' ? 'posts' : 'info'
+export function SnipperProfileShell({ userId, snipper, posts, isGenerating }: SnipperProfileShellProps) {
+  const router = useRouter()
+
+  const [activeTab, setActiveTab] = useState<'info' | 'posts'>(getInitialTab)
   const [generating, setGenerating] = useState(isGenerating ?? false)
   const generationStarted = useRef(false)
 
@@ -57,14 +61,15 @@ export function SnipperProfileShell({ userId, snipper, posts, isGenerating }: Sn
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleTabChange(value: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (value === 'info') {
-      params.delete('tab')
+    const tab = value as 'info' | 'posts'
+    setActiveTab(tab)
+    const url = new URL(window.location.href)
+    if (tab === 'info') {
+      url.searchParams.delete('tab')
     } else {
-      params.set('tab', value)
+      url.searchParams.set('tab', tab)
     }
-    const query = params.toString()
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+    window.history.replaceState(null, '', url.toString())
   }
 
   return (
