@@ -73,7 +73,7 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
 
   // Fetch conversation counts lazily when thread is expanded
   const subPostIds = useMemo(() => subPosts.map((sp) => sp.id), [subPosts])
-  const conversationCounts = useConversationCounts(subPostIds, expanded)
+  const { counts: conversationCounts, loaded: conversationCountsLoaded } = useConversationCounts(subPostIds, expanded)
 
   function handleCardTap() {
     if (isThread) {
@@ -164,6 +164,7 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
                 isLast={i === subPosts.length - 2}
                 postId={post.id}
                 conversationCount={conversationCounts[sp.id] ?? 0}
+                conversationCountLoading={!conversationCountsLoaded}
               />
             ))}
           </div>
