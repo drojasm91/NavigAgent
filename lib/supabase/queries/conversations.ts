@@ -16,7 +16,8 @@ export async function fetchConversationSummaries(
     .order('created_at', { ascending: false })
     .limit(limit)
 
-  if (error) throw error
+  // Gracefully return empty if table doesn't exist yet
+  if (error) return []
   return data ?? []
 }
 
@@ -31,7 +32,8 @@ export async function fetchConversationCounts(
     .select('sub_post_id')
     .in('sub_post_id', subPostIds)
 
-  if (error) throw error
+  // Gracefully return empty if table doesn't exist yet
+  if (error) return {}
 
   const counts: Record<string, number> = {}
   for (const row of data ?? []) {
