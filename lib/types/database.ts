@@ -242,6 +242,36 @@ export interface Database {
         }
         Relationships: []
       }
+      conversation_summaries: {
+        Row: {
+          id: string
+          sub_post_id: string
+          post_id: string
+          user_id: string
+          question: string
+          key_insights: string[]
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          sub_post_id: string
+          post_id: string
+          user_id: string
+          question: string
+          key_insights: string[]
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          sub_post_id?: string
+          post_id?: string
+          user_id?: string
+          question?: string
+          key_insights?: string[]
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

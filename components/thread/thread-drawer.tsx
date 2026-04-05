@@ -84,6 +84,7 @@ export function ThreadDrawer({
                 position={sp.position}
                 total={subPosts.length}
                 isLast={i === subPosts.length - 1}
+                postId={post!.id}
               />
             ))}
           </div>

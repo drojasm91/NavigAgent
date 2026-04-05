@@ -10,4 +10,4 @@ export type {
   Json,
 } from './database'
 
-export type { FeedPost, FeedSubPost, FeedSnipper } from './feed'
+export type { FeedPost, FeedSubPost, FeedSnipper, ConversationSummaryPreview } from './feed'

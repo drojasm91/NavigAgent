@@ -20,6 +20,13 @@ export interface FeedSnipper {
   created_at?: string
 }
 
+export interface ConversationSummaryPreview {
+  id: string
+  question: string
+  key_insights: string[]
+  created_at: string
+}
+
 export interface FeedPost {
   id: string
   snipper_id: string
