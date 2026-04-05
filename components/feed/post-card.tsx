@@ -9,7 +9,7 @@ import { DepthBadge } from './depth-badge'
 import { SubPostItem } from '@/components/thread/sub-post-item'
 import type { FeedPost } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Heart, Layers, Bot, ArrowRight, ChevronUp } from 'lucide-react'
+import { Heart, Layers, Bot, ArrowRight, ChevronUp, MessageCircle, MessageCirclePlus } from 'lucide-react'
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -74,9 +74,10 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
   }, [expanded, post.id])
 
   const snipper = post.snippers
-  const hookText = post.sub_posts?.[0]?.content ?? ''
-  const likeCount = Math.floor((post.quality_score ?? 0.8) * 50)
   const subPosts = [...post.sub_posts].sort((a, b) => a.position - b.position)
+  const hookText = subPosts[0]?.content ?? ''
+  const hookConversationCount = subPosts[0]?.conversation_count ?? 0
+  const likeCount = Math.floor((post.quality_score ?? 0.8) * 50)
   const postCount = subPosts.length
   const isThread = post.type === 'thread' && postCount > 1
   const showSnipperLink = !currentSnipperId || post.snipper_id !== currentSnipperId
@@ -138,8 +139,27 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
       </CardHeader>
 
       <div onClick={handleCardTap} className="active:scale-[0.98] transition-transform">
-        <CardContent className="pb-3">
-          <p className="text-[15px] leading-relaxed">{hookText}</p>
+        <CardContent className="pb-3" id={`sn-sp-${post.id}-1`}>
+          <p className="text-[15px] leading-relaxed pb-2">{hookText}</p>
+          <Link
+            href={`/post/${post.id}/sub/1`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center justify-end gap-1 active:opacity-70 transition-opacity"
+          >
+            {hookConversationCount > 0 ? (
+              <>
+                <MessageCircle className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[11px] text-muted-foreground">
+                  {hookConversationCount} {hookConversationCount === 1 ? 'conversation' : 'conversations'}
+                </span>
+              </>
+            ) : (
+              <>
+                <MessageCirclePlus className="w-3 h-3 text-muted-foreground/60" />
+                <span className="text-[11px] text-muted-foreground/60">Ask</span>
+              </>
+            )}
+          </Link>
         </CardContent>
 
         {!expanded && (
