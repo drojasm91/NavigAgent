@@ -46,6 +46,11 @@ export function ChatShell({
     subPostId,
   })
 
+  // Scroll window to top so the chat header isn't behind the status bar
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   // Send initial question from URL param
   useEffect(() => {
     if (initialQuestion && !sentInitial.current) {
