@@ -65,7 +65,7 @@ export function ChatShell({
       : targetContent
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] max-w-lg mx-auto">
+    <div className="flex flex-col h-[calc(100dvh-4rem)] max-w-lg mx-auto overflow-hidden">
       <ChatHeader
         snipperName={snipperName}
         subPostSnippet={subPostSnippet}
