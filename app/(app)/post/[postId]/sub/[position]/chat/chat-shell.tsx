@@ -56,7 +56,7 @@ export function ChatShell({
 
   async function handleDone() {
     await endConversation()
-    router.back()
+    router.push(`/post/${postId}/sub/${position}`)
   }
 
   const subPostSnippet =
