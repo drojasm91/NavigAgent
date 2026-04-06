@@ -14,8 +14,10 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
 
   useEffect(() => {
     if (messages.length > prevCount.current) {
-      // Only scroll when a new message is added, not on streaming content updates
-      if (prevCount.current > 0) {
+      // Scroll to the latest user message when the user sends a follow-up,
+      // but not on the initial exchange (first 2 messages)
+      if (prevCount.current >= 2 && messages.length % 2 === 1) {
+        // User just sent a new message (odd count = user message added)
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
       }
       prevCount.current = messages.length
