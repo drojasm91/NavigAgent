@@ -46,11 +46,6 @@ export function ChatShell({
     subPostId,
   })
 
-  // Scroll window to top so the chat header isn't behind the status bar
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
-
   // Send initial question from URL param
   useEffect(() => {
     if (initialQuestion && !sentInitial.current) {
@@ -70,7 +65,7 @@ export function ChatShell({
       : targetContent
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-4rem)] max-w-lg mx-auto overflow-hidden">
+    <div className="fixed inset-x-0 top-0 bottom-16 z-30 bg-background flex flex-col max-w-lg mx-auto overflow-hidden">
       <ChatHeader
         snipperName={snipperName}
         subPostSnippet={subPostSnippet}
