@@ -22,7 +22,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="sticky bottom-0 border-t bg-background px-4 py-3 flex gap-2"
+      className="shrink-0 border-t bg-background px-4 py-3 flex gap-2"
     >
       <input
         type="text"
