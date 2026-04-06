@@ -9,7 +9,7 @@ interface ChatHeaderProps {
 
 export function ChatHeader({ snipperName, subPostSnippet, onDone, isSaving }: ChatHeaderProps) {
   return (
-    <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b">
+    <header className="shrink-0 z-40 bg-background border-b">
       <div className="px-4 py-3 flex items-center justify-between gap-3">
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{snipperName}</p>
