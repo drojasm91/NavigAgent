@@ -1,8 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { fetchConversationSummariesByPost } from '@/lib/supabase/queries'
-import { ConversationSummaryList } from '@/components/ask/conversation-summary-list'
-import { AskInput } from '@/components/ask/ask-input'
 import { PostAskShell } from '@/components/ask/post-ask-shell'
 
 interface SubPostPageProps {
@@ -56,20 +54,15 @@ export default async function SubPostPage({ params }: SubPostPageProps) {
         postId={postId}
         initialPosition={position}
         snipperName={snipperRow.name}
-        allSubPosts={subPosts.map((sp: { position: number; content: string }) => ({
+        snipperType={snipperRow.type}
+        snipperTopicTags={snipperRow.topic_tags ?? []}
+        allSubPosts={subPosts.map((sp: { id: string; position: number; content: string }) => ({
+          id: sp.id,
           position: sp.position,
           content: sp.content,
         }))}
-      >
-        <div className="px-4 pt-4 pb-6 space-y-6">
-          <ConversationSummaryList summaries={summaries} />
-
-          <AskInput
-            postId={postId}
-            position={position}
-          />
-        </div>
-      </PostAskShell>
+        summaries={summaries}
+      />
     </div>
   )
 }

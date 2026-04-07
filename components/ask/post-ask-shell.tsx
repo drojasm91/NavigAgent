@@ -3,8 +3,11 @@
 import { useRef, useState } from 'react'
 import { BackButton } from './back-button'
 import { SubPostCard } from './sub-post-card'
+import { PostConversations } from './post-conversations'
+import type { ConversationSummaryPreview } from '@/lib/types'
 
-interface SubPostLite {
+interface SubPostWithId {
+  id: string
   position: number
   content: string
 }
@@ -13,8 +16,10 @@ interface PostAskShellProps {
   postId: string
   initialPosition: number
   snipperName: string
-  allSubPosts: SubPostLite[]
-  children: React.ReactNode
+  snipperType: string
+  snipperTopicTags: string[]
+  allSubPosts: SubPostWithId[]
+  summaries: ConversationSummaryPreview[]
 }
 
 const SWIPE_COMMIT_RATIO = 0.15
@@ -25,8 +30,10 @@ export function PostAskShell({
   postId,
   initialPosition,
   snipperName,
+  snipperType,
+  snipperTopicTags,
   allSubPosts,
-  children,
+  summaries,
 }: PostAskShellProps) {
   const touchStart = useRef<{ x: number; y: number } | null>(null)
   const [dragDelta, setDragDelta] = useState(0)
@@ -157,7 +164,15 @@ export function PostAskShell({
         </div>
       </div>
 
-      {children}
+      <PostConversations
+        postId={postId}
+        activePosition={activePosition}
+        allSubPosts={allSubPosts}
+        snipperName={snipperName}
+        snipperType={snipperType}
+        snipperTopicTags={snipperTopicTags}
+        summaries={summaries}
+      />
     </div>
   )
 }

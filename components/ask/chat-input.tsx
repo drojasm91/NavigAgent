@@ -6,9 +6,10 @@ import { Send } from 'lucide-react'
 interface ChatInputProps {
   onSend: (message: string) => void
   disabled?: boolean
+  inputRef?: React.Ref<HTMLInputElement>
 }
 
-export function ChatInput({ onSend, disabled }: ChatInputProps) {
+export function ChatInput({ onSend, disabled, inputRef }: ChatInputProps) {
   const [text, setText] = useState('')
 
   function handleSubmit(e: { preventDefault: () => void }) {
@@ -25,10 +26,11 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
       className="shrink-0 border-t bg-background px-4 py-3 flex gap-2"
     >
       <input
+        ref={inputRef}
         type="text"
         value={text}
         onChange={(e: { target: { value: string } }) => setText(e.target.value)}
-        placeholder="Ask a follow-up..."
+        placeholder="Ask about this..."
         disabled={disabled}
         className="flex-1 rounded-full border bg-muted/50 px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
       />
