@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface SubPostCardProps {
   content: string
@@ -17,8 +17,6 @@ export function SubPostCard({
   postId,
 }: SubPostCardProps) {
   const router = useRouter()
-  const canPrev = position > 1
-  const canNext = position < total
 
   function navigateTo(newPosition: number) {
     if (newPosition < 1 || newPosition > total) return
@@ -31,44 +29,24 @@ export function SubPostCard({
 
   return (
     <div className="rounded-xl bg-muted/50 border p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <button
-          onClick={() => navigateTo(position - 1)}
-          disabled={!canPrev}
-          className={`flex items-center justify-center w-7 h-7 shrink-0 rounded-full text-muted-foreground active:bg-background transition-colors ${
-            canPrev ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-          aria-label="Previous sub-post"
-          aria-hidden={!canPrev}
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-
-        <div className="flex-1" />
-
-        <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-background text-[10px] font-bold bg-foreground">
-            {position}
-          </div>
-          <span className="text-xs text-muted-foreground">
-            {position} of {total}
-          </span>
+      {total > 1 && (
+        <div className="flex items-center justify-center gap-2 mb-3">
+          {Array.from({ length: total }, (_, i) => i + 1).map((num) => (
+            <button
+              key={num}
+              onClick={() => navigateTo(num)}
+              className={cn(
+                'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] transition-colors',
+                num === position
+                  ? 'bg-foreground text-background font-bold'
+                  : 'bg-muted text-muted-foreground font-medium active:bg-accent'
+              )}
+            >
+              {num}
+            </button>
+          ))}
         </div>
-
-        <div className="flex-1" />
-
-        <button
-          onClick={() => navigateTo(position + 1)}
-          disabled={!canNext}
-          className={`flex items-center justify-center w-7 h-7 shrink-0 rounded-full text-muted-foreground active:bg-background transition-colors ${
-            canNext ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-          aria-label="Next sub-post"
-          aria-hidden={!canNext}
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
+      )}
 
       <p className="text-[15px] leading-relaxed text-foreground">
         {content}
