@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { MessageCircle, MessageCirclePlus } from 'lucide-react'
+import { MessageCirclePlus } from 'lucide-react'
 
 interface SubPostItemProps {
   content: string
@@ -7,10 +7,9 @@ interface SubPostItemProps {
   total: number
   isLast: boolean
   postId?: string
-  conversationCount?: number
 }
 
-export function SubPostItem({ content, position, isLast, postId, conversationCount }: SubPostItemProps) {
+export function SubPostItem({ content, position, isLast, postId }: SubPostItemProps) {
   const inner = (
     <div
       className="relative scroll-mt-20"
@@ -29,19 +28,8 @@ export function SubPostItem({ content, position, isLast, postId, conversationCou
           </p>
           {postId && (
             <div className="flex items-center justify-end gap-1 pb-2">
-              {(conversationCount ?? 0) > 0 ? (
-                <>
-                  <MessageCircle className="w-3 h-3 text-muted-foreground" />
-                  <span className="text-[11px] text-muted-foreground">
-                    {conversationCount} {conversationCount === 1 ? 'conversation' : 'conversations'}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <MessageCirclePlus className="w-3 h-3 text-muted-foreground/60" />
-                  <span className="text-[11px] text-muted-foreground/60">Ask</span>
-                </>
-              )}
+              <MessageCirclePlus className="w-3 h-3 text-muted-foreground/60" />
+              <span className="text-[11px] text-muted-foreground/60">Ask</span>
             </div>
           )}
         </div>

@@ -76,7 +76,7 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
   const snipper = post.snippers
   const subPosts = [...post.sub_posts].sort((a, b) => a.position - b.position)
   const hookText = subPosts[0]?.content ?? ''
-  const hookConversationCount = subPosts[0]?.conversation_count ?? 0
+  const hookConversationCount = subPosts.reduce((sum, sp) => sum + (sp.conversation_count ?? 0), 0)
   const likeCount = Math.floor((post.quality_score ?? 0.8) * 50)
   const postCount = subPosts.length
   const isThread = post.type === 'thread' && postCount > 1
@@ -190,7 +190,6 @@ export function PostCard({ post, currentSnipperId, hideDigIn = false }: PostCard
                 total={postCount}
                 isLast={i === subPosts.length - 2}
                 postId={post.id}
-                conversationCount={sp.conversation_count ?? 0}
               />
             ))}
           </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { BackButton } from './back-button'
 import { SubPostCard } from './sub-post-card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -11,42 +10,42 @@ interface SubPostLite {
   content: string
 }
 
-interface SubPostNavShellProps {
+interface PostAskShellProps {
   postId: string
-  position: number
-  totalSubPosts: number
+  initialPosition: number
   snipperName: string
   allSubPosts: SubPostLite[]
   children: React.ReactNode
 }
 
-const SWIPE_COMMIT_RATIO = 0.15 // 15% of viewport width triggers a navigation
-const EDGE_RESISTANCE = 0.3 // How much of the drag to apply when at an edge
+const SWIPE_COMMIT_RATIO = 0.15
+const EDGE_RESISTANCE = 0.3
 const ANIMATION_MS = 250
 
-export function SubPostNavShell({
+export function PostAskShell({
   postId,
-  position,
-  totalSubPosts,
+  initialPosition,
   snipperName,
   allSubPosts,
   children,
-}: SubPostNavShellProps) {
-  const router = useRouter()
+}: PostAskShellProps) {
   const touchStart = useRef<{ x: number; y: number } | null>(null)
   const [dragDelta, setDragDelta] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [activePosition, setActivePosition] = useState(initialPosition)
 
-  const prev = allSubPosts.find((sp) => sp.position === position - 1)
-  const next = allSubPosts.find((sp) => sp.position === position + 1)
+  const totalSubPosts = allSubPosts.length
+  const activeSubPost = allSubPosts.find((sp) => sp.position === activePosition)
+  const prev = allSubPosts.find((sp) => sp.position === activePosition - 1)
+  const next = allSubPosts.find((sp) => sp.position === activePosition + 1)
 
-  function navigateTo(newPosition: number) {
+  function changePosition(newPosition: number) {
     if (newPosition < 1 || newPosition > totalSubPosts) return
-    if (newPosition === position) return
+    if (newPosition === activePosition) return
+    setActivePosition(newPosition)
     if (typeof window !== 'undefined') {
       sessionStorage.setItem(`sn-last-sub-${postId}`, String(newPosition))
     }
-    router.replace(`/post/${postId}/sub/${newPosition}`)
   }
 
   function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
@@ -62,10 +61,8 @@ export function SubPostNavShell({
     const dx = e.touches[0].clientX - touchStart.current.x
     const dy = e.touches[0].clientY - touchStart.current.y
 
-    // Only track horizontal gestures — let vertical scrolls pass through
     if (Math.abs(dy) > Math.abs(dx)) return
 
-    // Rubber-band at the edges
     if ((dx > 0 && !prev) || (dx < 0 && !next)) {
       setDragDelta(dx * EDGE_RESISTANCE)
       return
@@ -82,21 +79,22 @@ export function SubPostNavShell({
     const threshold = window.innerWidth * SWIPE_COMMIT_RATIO
 
     if (dx < -threshold && next) {
-      // Commit forward — animate content off-screen left, then navigate
       setIsAnimating(true)
       setDragDelta(-window.innerWidth)
       window.setTimeout(() => {
-        navigateTo(position + 1)
+        changePosition(activePosition + 1)
+        setDragDelta(0)
+        setIsAnimating(false)
       }, ANIMATION_MS)
     } else if (dx > threshold && prev) {
-      // Commit backward — animate content off-screen right, then navigate
       setIsAnimating(true)
       setDragDelta(window.innerWidth)
       window.setTimeout(() => {
-        navigateTo(position - 1)
+        changePosition(activePosition - 1)
+        setDragDelta(0)
+        setIsAnimating(false)
       }, ANIMATION_MS)
     } else {
-      // Snap back to the current sub-post
       setIsAnimating(true)
       setDragDelta(0)
       window.setTimeout(() => {
@@ -119,9 +117,6 @@ export function SubPostNavShell({
           <span className="text-sm font-medium text-muted-foreground truncate flex-1">
             {snipperName}
           </span>
-          <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-            {position} of {totalSubPosts}
-          </span>
         </div>
       </header>
 
@@ -135,18 +130,25 @@ export function SubPostNavShell({
           <div className="w-1/3 shrink-0">
             {prev ? (
               <SubPostPreview
-                postId={postId}
                 position={prev.position}
                 total={totalSubPosts}
                 content={prev.content}
               />
             ) : null}
           </div>
-          <div className="w-1/3 shrink-0">{children}</div>
+          <div className="w-1/3 shrink-0">
+            <div className="px-4 py-6">
+              <SubPostCard
+                content={activeSubPost?.content ?? ''}
+                position={activePosition}
+                total={totalSubPosts}
+                onPositionChange={changePosition}
+              />
+            </div>
+          </div>
           <div className="w-1/3 shrink-0">
             {next ? (
               <SubPostPreview
-                postId={postId}
                 position={next.position}
                 total={totalSubPosts}
                 content={next.content}
@@ -155,17 +157,17 @@ export function SubPostNavShell({
           </div>
         </div>
       </div>
+
+      {children}
     </div>
   )
 }
 
 function SubPostPreview({
-  postId,
   position,
   total,
   content,
 }: {
-  postId: string
   position: number
   total: number
   content: string
@@ -173,7 +175,6 @@ function SubPostPreview({
   return (
     <div className="px-4 py-6 space-y-6">
       <SubPostCard
-        postId={postId}
         position={position}
         total={total}
         content={content}

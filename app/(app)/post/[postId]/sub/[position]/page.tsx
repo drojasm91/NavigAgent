@@ -1,10 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import { fetchConversationSummaries } from '@/lib/supabase/queries'
-import { SubPostCard } from '@/components/ask/sub-post-card'
+import { fetchConversationSummariesByPost } from '@/lib/supabase/queries'
 import { ConversationSummaryList } from '@/components/ask/conversation-summary-list'
 import { AskInput } from '@/components/ask/ask-input'
-import { SubPostNavShell } from '@/components/ask/sub-post-nav-shell'
+import { PostAskShell } from '@/components/ask/post-ask-shell'
 
 interface SubPostPageProps {
   params: Promise<{ postId: string; position: string }>
@@ -39,38 +38,30 @@ export default async function SubPostPage({ params }: SubPostPageProps) {
   const targetSubPost = subPosts.find((sp: { position: number }) => sp.position === position)
   if (!targetSubPost) notFound()
 
-  // Fetch snipper and summaries in parallel
+  // Fetch snipper and post-level summaries in parallel
   const [{ data: snipperRow }, summaries] = await Promise.all([
     supabase
       .from('snippers')
       .select('id, name, type, depth, owner_id, is_public, topic_tags')
       .eq('id', post.snipper_id)
       .single(),
-    fetchConversationSummaries(supabase, targetSubPost.id),
+    fetchConversationSummariesByPost(supabase, postId),
   ])
 
   if (!snipperRow) notFound()
 
   return (
     <div className="max-w-lg mx-auto">
-      <SubPostNavShell
+      <PostAskShell
         postId={postId}
-        position={position}
-        totalSubPosts={subPosts.length}
+        initialPosition={position}
         snipperName={snipperRow.name}
         allSubPosts={subPosts.map((sp: { position: number; content: string }) => ({
           position: sp.position,
           content: sp.content,
         }))}
       >
-        <div className="px-4 py-6 space-y-6">
-          <SubPostCard
-            content={targetSubPost.content}
-            position={targetSubPost.position}
-            total={subPosts.length}
-            postId={postId}
-          />
-
+        <div className="px-4 pb-6 space-y-6">
           <ConversationSummaryList summaries={summaries} />
 
           <AskInput
@@ -78,7 +69,7 @@ export default async function SubPostPage({ params }: SubPostPageProps) {
             position={position}
           />
         </div>
-      </SubPostNavShell>
+      </PostAskShell>
     </div>
   )
 }

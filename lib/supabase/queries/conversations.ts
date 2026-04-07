@@ -21,6 +21,22 @@ export async function fetchConversationSummaries(
   return data ?? []
 }
 
+export async function fetchConversationSummariesByPost(
+  supabase: TypedClient,
+  postId: string,
+  limit = 10
+): Promise<ConversationSummaryPreview[]> {
+  const { data, error } = await supabase
+    .from('conversation_summaries')
+    .select('id, question, key_insights, created_at')
+    .eq('post_id', postId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) return []
+  return data ?? []
+}
+
 export async function saveConversationSummary(
   supabase: TypedClient,
   data: {

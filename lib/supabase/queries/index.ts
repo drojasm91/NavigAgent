@@ -8,5 +8,6 @@ export {
 
 export {
   fetchConversationSummaries,
+  fetchConversationSummariesByPost,
   saveConversationSummary,
 } from './conversations'
