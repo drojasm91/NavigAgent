@@ -70,8 +70,6 @@ export function PostConversations({
     }
   }, [mode])
 
-
-
   function handleStartChat() {
     setMode('chat')
   }
@@ -183,7 +181,7 @@ export function PostConversations({
         {savingState === 'skipped' && (
           <div className="w-full rounded-lg border border-destructive/20 bg-destructive/10 p-3 flex items-center justify-between gap-2">
             <p className="text-sm text-destructive">
-              This conversation won't be saved - nothing new to add.
+              This conversation won&apos;t be saved - nothing new to add.
             </p>
             <button
               onClick={() => setSavingState(null)}
