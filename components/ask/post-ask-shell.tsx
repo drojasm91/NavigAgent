@@ -137,7 +137,7 @@ export function PostAskShell({
             ) : null}
           </div>
           <div className="w-1/3 shrink-0">
-            <div className="px-4 py-6">
+            <div className="px-4 pt-6 pb-2">
               <SubPostCard
                 content={activeSubPost?.content ?? ''}
                 position={activePosition}
