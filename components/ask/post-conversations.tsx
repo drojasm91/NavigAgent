@@ -70,13 +70,7 @@ export function PostConversations({
     }
   }, [mode])
 
-  // Auto-dismiss "skipped" state after 2 seconds
-  useEffect(() => {
-    if (savingState === 'skipped') {
-      const timer = setTimeout(() => setSavingState(null), 2000)
-      return () => clearTimeout(timer)
-    }
-  }, [savingState])
+
 
   function handleStartChat() {
     setMode('chat')
@@ -187,10 +181,17 @@ export function PostConversations({
         )}
 
         {savingState === 'skipped' && (
-          <div className="w-full rounded-lg border border-dashed p-3 transition-opacity duration-500 opacity-60">
-            <p className="text-sm text-muted-foreground">
-              Nothing new to add.
+          <div className="w-full rounded-lg border border-destructive/20 bg-destructive/10 p-3 flex items-center justify-between gap-2">
+            <p className="text-sm text-destructive">
+              This conversation won't be saved — nothing new to add.
             </p>
+            <button
+              onClick={() => setSavingState(null)}
+              className="flex items-center justify-center w-6 h-6 shrink-0 rounded-full text-destructive/60 active:bg-destructive/10 transition-colors"
+              aria-label="Dismiss"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
 
