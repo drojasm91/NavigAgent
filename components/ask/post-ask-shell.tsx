@@ -3,7 +3,6 @@
 import { useRef, useState } from 'react'
 import { BackButton } from './back-button'
 import { SubPostCard } from './sub-post-card'
-import { Skeleton } from '@/components/ui/skeleton'
 
 interface SubPostLite {
   position: number
@@ -173,16 +172,12 @@ function SubPostPreview({
   content: string
 }) {
   return (
-    <div className="px-4 py-6 space-y-6">
+    <div className="px-4 pt-6 pb-2">
       <SubPostCard
         position={position}
         total={total}
         content={content}
       />
-      <div className="space-y-4">
-        <Skeleton className="h-4 w-48 mx-auto" />
-        <Skeleton className="h-11 w-full rounded-full" />
-      </div>
     </div>
   )
 }
