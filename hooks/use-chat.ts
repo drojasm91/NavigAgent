@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 
 export interface ChatMessage {
   role: 'user' | 'assistant'
@@ -29,11 +29,17 @@ export function useChat({ threadContext, snipperContext, postId, subPostId }: Us
   const [isSaving, setIsSaving] = useState(false)
   const [routedModel, setRoutedModel] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
+  const messagesRef = useRef(messages)
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
 
   const sendMessage = useCallback(
     async (content: string) => {
       const userMessage: ChatMessage = { role: 'user', content }
-      const updatedMessages = [...messages, userMessage]
+      const updatedMessages = [...messagesRef.current, userMessage]
       setMessages(updatedMessages)
       setIsStreaming(true)
       setRoutedModel(null)
@@ -111,11 +117,12 @@ export function useChat({ threadContext, snipperContext, postId, subPostId }: Us
         abortRef.current = null
       }
     },
-    [messages, threadContext, snipperContext]
+    [threadContext, snipperContext]
   )
 
   const endConversation = useCallback(async () => {
-    if (messages.length < 2) return null
+    const currentMessages = messagesRef.current
+    if (currentMessages.length < 2) return null
 
     setIsSaving(true)
     try {
@@ -123,7 +130,7 @@ export function useChat({ threadContext, snipperContext, postId, subPostId }: Us
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages,
+          messages: currentMessages,
           subPostId,
           postId,
           position: threadContext.targetPosition,
@@ -137,7 +144,16 @@ export function useChat({ threadContext, snipperContext, postId, subPostId }: Us
     } finally {
       setIsSaving(false)
     }
-  }, [messages, subPostId, postId, threadContext.targetPosition])
+  }, [subPostId, postId, threadContext.targetPosition])
+
+  const reset = useCallback(() => {
+    abortRef.current?.abort()
+    abortRef.current = null
+    setMessages([])
+    setIsStreaming(false)
+    setIsSaving(false)
+    setRoutedModel(null)
+  }, [])
 
   return {
     messages,
@@ -146,5 +162,6 @@ export function useChat({ threadContext, snipperContext, postId, subPostId }: Us
     routedModel,
     sendMessage,
     endConversation,
+    reset,
   }
 }

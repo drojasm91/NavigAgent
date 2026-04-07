@@ -40,6 +40,7 @@ export function PostConversations({
     isSaving,
     sendMessage,
     endConversation,
+    reset,
   } = useChat({
     threadContext: {
       subPosts: allSubPosts.map((sp) => ({ position: sp.position, content: sp.content })),
@@ -67,6 +68,7 @@ export function PostConversations({
   }
 
   function handleClose() {
+    reset()
     setMode('conversations')
   }
 
@@ -83,6 +85,7 @@ export function PostConversations({
         ...prev,
       ])
     }
+    reset()
     setMode('conversations')
   }
 
