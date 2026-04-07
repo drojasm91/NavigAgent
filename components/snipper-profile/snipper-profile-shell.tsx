@@ -17,9 +17,9 @@ interface SnipperProfileShellProps {
 }
 
 function getInitialTab(): 'info' | 'posts' {
-  if (typeof window === 'undefined') return 'info'
+  if (typeof window === 'undefined') return 'posts'
   const params = new URLSearchParams(window.location.search)
-  return params.get('tab') === 'posts' ? 'posts' : 'info'
+  return params.get('tab') === 'info' ? 'info' : 'posts'
 }
 
 export function SnipperProfileShell({ userId, snipper, posts, isGenerating }: SnipperProfileShellProps) {
