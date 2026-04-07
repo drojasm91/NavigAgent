@@ -61,7 +61,7 @@ export default async function SubPostPage({ params }: SubPostPageProps) {
           content: sp.content,
         }))}
       >
-        <div className="px-4 pb-6 space-y-6">
+        <div className="px-4 pt-4 pb-6 space-y-6">
           <ConversationSummaryList summaries={summaries} />
 
           <AskInput
