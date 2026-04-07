@@ -18,6 +18,8 @@ interface PostConversationsProps {
   summaries: ConversationSummaryPreview[]
 }
 
+type SavingState = null | 'saving' | 'skipped'
+
 export function PostConversations({
   postId,
   activePosition,
@@ -29,7 +31,9 @@ export function PostConversations({
 }: PostConversationsProps) {
   const [mode, setMode] = useState<'conversations' | 'chat'>('conversations')
   const [localSummaries, setLocalSummaries] = useState(summaries)
+  const [savingState, setSavingState] = useState<SavingState>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const endConversationRef = useRef<(() => Promise<unknown>) | null>(null)
 
   const activeSubPost = allSubPosts.find((sp) => sp.position === activePosition)
   const subPostId = activeSubPost?.id ?? ''
@@ -51,6 +55,9 @@ export function PostConversations({
     subPostId,
   })
 
+  // Keep ref to latest endConversation
+  endConversationRef.current = endConversation
+
   // Close chat when sub-post changes
   useEffect(() => {
     setMode('conversations')
@@ -63,6 +70,14 @@ export function PostConversations({
     }
   }, [mode])
 
+  // Auto-dismiss "skipped" state after 2 seconds
+  useEffect(() => {
+    if (savingState === 'skipped') {
+      const timer = setTimeout(() => setSavingState(null), 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [savingState])
+
   function handleStartChat() {
     setMode('chat')
   }
@@ -73,20 +88,35 @@ export function PostConversations({
   }
 
   async function handleDone() {
-    const result = await endConversation()
-    if (result?.question) {
-      setLocalSummaries((prev) => [
-        {
-          id: crypto.randomUUID(),
-          question: result.question,
-          key_insights: result.keyInsights,
-          created_at: new Date().toISOString(),
-        },
-        ...prev,
-      ])
-    }
+    // Capture endConversation before resetting
+    const doEnd = endConversationRef.current
     reset()
+    setSavingState('saving')
     setMode('conversations')
+
+    try {
+      const result = await doEnd?.()
+      const data = result as { skip?: boolean; question?: string; keyInsights?: string[] } | null
+
+      if (data?.skip) {
+        setSavingState('skipped')
+      } else if (data?.question) {
+        setLocalSummaries((prev) => [
+          {
+            id: crypto.randomUUID(),
+            question: data.question!,
+            key_insights: data.keyInsights ?? [],
+            created_at: new Date().toISOString(),
+          },
+          ...prev,
+        ])
+        setSavingState(null)
+      } else {
+        setSavingState(null)
+      }
+    } catch {
+      setSavingState(null)
+    }
   }
 
   if (mode === 'chat') {
@@ -147,19 +177,35 @@ export function PostConversations({
         </button>
       </div>
 
-      {localSummaries.length === 0 ? (
-        <div className="text-center py-4">
-          <p className="text-sm text-muted-foreground">
-            No conversations yet. Be the first to ask.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {localSummaries.map((summary) => (
+      <div className="space-y-2">
+        {savingState === 'saving' && (
+          <div className="w-full rounded-lg border p-3 animate-pulse">
+            <p className="text-sm font-medium text-muted-foreground">
+              Summarizing conversation...
+            </p>
+          </div>
+        )}
+
+        {savingState === 'skipped' && (
+          <div className="w-full rounded-lg border border-dashed p-3 transition-opacity duration-500 opacity-60">
+            <p className="text-sm text-muted-foreground">
+              Nothing new to add.
+            </p>
+          </div>
+        )}
+
+        {localSummaries.length === 0 && !savingState ? (
+          <div className="text-center py-4">
+            <p className="text-sm text-muted-foreground">
+              No conversations yet. Be the first to ask.
+            </p>
+          </div>
+        ) : (
+          localSummaries.map((summary) => (
             <ConversationSummaryCard key={summary.id} summary={summary} />
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   )
 }

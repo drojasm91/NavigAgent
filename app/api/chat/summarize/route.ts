@@ -47,8 +47,16 @@ export async function POST(request: Request) {
 
   const raw = response.content[0].type === 'text' ? response.content[0].text : ''
   const parsed = parseJsonFromAI(raw) as {
-    question: string
-    keyInsights: string[]
+    skip?: boolean
+    question?: string
+    keyInsights?: string[]
+  }
+
+  // AI decided this conversation isn't worth saving
+  if (parsed.skip) {
+    // Still record the engagement signal
+    await recordLikeSignal(supabase, user.id, postId, 'asked_question')
+    return Response.json({ skip: true })
   }
 
   if (!parsed.question || !parsed.keyInsights?.length) {
@@ -67,8 +75,6 @@ export async function POST(request: Request) {
     recordLikeSignal(supabase, user.id, postId, 'asked_question'),
   ])
 
-  // Invalidate the sub-post detail page cache so the new summary shows up
-  // immediately when the user navigates back from the chat page.
   revalidatePath(`/post/${postId}/sub/${position}`)
 
   return Response.json({

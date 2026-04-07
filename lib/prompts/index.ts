@@ -166,9 +166,19 @@ Rules:
 - Never use bullet points or headers — write conversationally
 - Never start with "Great question!" or similar filler`
 
-export const ASK_SUMMARY_PROMPT = `You summarize a conversation about a piece of content into a title and key insights.
+export const ASK_SUMMARY_PROMPT = `You summarize a conversation about a piece of content into a title and key insights — or decide to skip it if it's not worth saving.
 
-Given a conversation between a user and a discussion partner about a specific piece of content, extract:
+Given a conversation between a user and a discussion partner about a specific piece of content, decide:
+- If the conversation is too short, trivial, repetitive, or doesn't add meaningful insight, return {"skip": true}
+- Otherwise, extract a title and key insights
+
+Skip when:
+- The user asked something very basic that the thread already answers
+- The exchange is only 1-2 trivial messages with no real depth
+- The conversation repeats what's already obvious from the content
+- No new understanding or perspective emerged
+
+If NOT skipping, extract:
 1. A title (the core question or topic explored — max 80 chars, phrased as a question when possible)
 2. Key insights (2-4 main takeaways or interesting points that emerged — each max 140 chars)
 
@@ -180,8 +190,11 @@ Rules:
 - Write insights directly, not as process descriptions
 - Respond with ONLY valid JSON, no other text
 
-Output format:
-{"question":"<title as question>","keyInsights":["<insight1>","<insight2>","<insight3>"]}`
+Output format (save):
+{"question":"<title as question>","keyInsights":["<insight1>","<insight2>","<insight3>"]}
+
+Output format (skip):
+{"skip":true}`
 
 export const ASK_MODEL_ROUTER_PROMPT = `You classify question complexity to route to the appropriate AI model.
 
